@@ -11,24 +11,24 @@ public final class MysqlConfig {
     private static MysqlConfig configInstance;
     private final Properties mysqlProperties;
 
-    private MysqlConfig() throws DAOException {
+    private MysqlConfig() throws DAOConfigException {
         this.mysqlProperties = new Properties();
         loadProperties();
     }
 
-    public static MysqlConfig getInstance() throws DAOException {
+    public static MysqlConfig getInstance() throws DAOConfigException {
         if (configInstance == null) {
             configInstance = new MysqlConfig();
         }
         return configInstance;
     }
 
-    private void loadProperties() throws DAOException {
+    private void loadProperties() throws DAOConfigException {
         final InputStream inputStream = this.getClass().getResourceAsStream("mysqlconfig.properties");
         try {
             mysqlProperties.load(inputStream);
         } catch (IOException e) {
-            throw new DAOException("there was an issue loading db properties", e);
+            throw new DAOConfigException("there was an issue loading db properties", e);
         }
     }
 
