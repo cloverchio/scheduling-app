@@ -41,7 +41,7 @@ public class LoginController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        this.messageBundle = ResourceBundle.getBundle("resources/message", Locale.getDefault());
+        this.messageBundle = ResourceBundle.getBundle("message", Locale.getDefault());
         messageLabel.setText(messageBundle.getString("login.message"));
         usernameLabel.setText(messageBundle.getString("username"));
         passwordLabel.setText(messageBundle.getString("password"));
@@ -51,7 +51,7 @@ public class LoginController implements Initializable {
             final UserDAO userDAO = UserDAO.getInstance(MysqlConnection.getInstance(config));
             this.userService = UserService.getInstance(userDAO);
         } catch (DAOConfigException e) {
-            displayDatabaseErrorAlert();
+            showDatabaseAlert();
         }
     }
 
@@ -59,9 +59,9 @@ public class LoginController implements Initializable {
     public void login(ActionEvent actionEvent) throws IOException {
         final String username = usernameField.getText();
         final String password = passwordField.getText();
-        if (username == null) {
+        if (username == null || username.isEmpty()) {
             messageLabel.setText(messageBundle.getString("login.empty.username"));
-        } else if (password == null) {
+        } else if (password == null || password.isEmpty()) {
             messageLabel.setText(messageBundle.getString("login.empty.password"));
         } else {
             login(actionEvent, username, password);
@@ -80,7 +80,7 @@ public class LoginController implements Initializable {
         }
     }
 
-    private void displayDatabaseErrorAlert() {
+    private void showDatabaseAlert() {
         final Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(messageBundle.getString("db.error.title"));
         alert.setHeaderText(messageBundle.getString("db.error.header"));
@@ -91,7 +91,7 @@ public class LoginController implements Initializable {
     private void getMainView(ActionEvent actionEvent) throws IOException {
         ((Node) (actionEvent.getSource())).getScene().getWindow().hide();
         final Stage stage = new Stage();
-        final Parent root = FXMLLoader.load(getClass().getResource("Main.fxml"));
+        final Parent root = FXMLLoader.load(getClass().getResource("views/main.fxml"));
         final Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();

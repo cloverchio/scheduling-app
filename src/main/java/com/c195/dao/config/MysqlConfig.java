@@ -1,7 +1,5 @@
 package com.c195.dao.config;
 
-import com.c195.dao.DAOException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -24,7 +22,9 @@ public final class MysqlConfig {
     }
 
     private void loadProperties() throws DAOConfigException {
-        final InputStream inputStream = this.getClass().getResourceAsStream("mysqlconfig.properties");
+        final InputStream inputStream = this.getClass()
+                .getClassLoader()
+                .getResourceAsStream("mysql.properties");
         try {
             mysqlProperties.load(inputStream);
         } catch (IOException e) {
