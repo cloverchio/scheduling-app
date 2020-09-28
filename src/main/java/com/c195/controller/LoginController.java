@@ -18,9 +18,16 @@ import com.c195.service.UserService;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
+/**
+ * A. Create a log-in form that can determine the user’s location and translate log-in and error control messages
+ * (e.g., “The username and password did not match.”) into two languages.
+ */
 public class LoginController implements Initializable {
 
     @FXML
@@ -36,16 +43,17 @@ public class LoginController implements Initializable {
     @FXML
     private Button loginButton;
 
-    private ResourceBundle messageBundle;
+    private Map<String, String> encodedMessages;
     private UserService userService;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        this.messageBundle = ResourceBundle.getBundle("message", Locale.getDefault());
-        messageLabel.setText(messageBundle.getString("login.message"));
-        usernameLabel.setText(messageBundle.getString("username"));
-        passwordLabel.setText(messageBundle.getString("password"));
-        loginButton.setText(messageBundle.getString("login"));
+        final ResourceBundle messageBundle = ResourceBundle.getBundle("message", Locale.getDefault());
+        this.encodedMessages = getEncodedMessageBundle(messageBundle);
+        messageLabel.setText(encodedMessages.get("login.message"));
+        usernameLabel.setText(encodedMessages.get("username"));
+        passwordLabel.setText(encodedMessages.get("password"));
+        loginButton.setText(encodedMessages.get("login"));
         try {
             final MysqlConfig config = MysqlConfig.getInstance();
             final UserDAO userDAO = UserDAO.getInstance(MysqlConnection.getInstance(config));
@@ -60,9 +68,9 @@ public class LoginController implements Initializable {
         final String username = usernameField.getText();
         final String password = passwordField.getText();
         if (username == null || username.isEmpty()) {
-            messageLabel.setText(messageBundle.getString("login.empty.username"));
+            messageLabel.setText(encodedMessages.get("login.empty.username"));
         } else if (password == null || password.isEmpty()) {
-            messageLabel.setText(messageBundle.getString("login.empty.password"));
+            messageLabel.setText(encodedMessages.get("login.empty.password"));
         } else {
             login(actionEvent, username, password);
         }
@@ -73,18 +81,37 @@ public class LoginController implements Initializable {
             if (userService.verifyLogin(username, password)) {
                 getMainView(actionEvent);
             } else {
-                messageLabel.setText(messageBundle.getString("login.invalid"));
+                messageLabel.setText(encodedMessages.get("login.invalid"));
             }
         } catch (DAOException e) {
-            messageLabel.setText(messageBundle.getString("db.login.error"));
+            messageLabel.setText(encodedMessages.get("db.login.error"));
         }
+    }
+
+    /**
+     * G. Write two or more lambda expressions to make your program more efficient,
+     * justifying the use of each lambda expression with an in-line comment.
+     *
+     * @param resourceBundle in which to extract message bundle from
+     * @return map of message bundle keys to utf-8 equivalent
+     */
+    private static Map<String, String> getEncodedMessageBundle(ResourceBundle resourceBundle) {
+        // caches utf-8 version of locale specific messaging
+        // lambda expression facilitates the key mapping and value transformation
+        return resourceBundle.keySet()
+                .stream()
+                .collect(Collectors.toMap(k -> k, v -> toUTF8(resourceBundle.getString(v))));
+    }
+
+    private static String toUTF8(String message) {
+        return new String(message.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
     }
 
     private void showDatabaseAlert() {
         final Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(messageBundle.getString("db.error.title"));
-        alert.setHeaderText(messageBundle.getString("db.error.header"));
-        alert.setContentText(messageBundle.getString("db.error.content"));
+        alert.setTitle(encodedMessages.get("db.error.title"));
+        alert.setHeaderText(encodedMessages.get("db.error.header"));
+        alert.setContentText(encodedMessages.get("db.error.content"));
         alert.showAndWait();
     }
 
