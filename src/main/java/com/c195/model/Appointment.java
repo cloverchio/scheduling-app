@@ -1,6 +1,6 @@
 package com.c195.model;
 
-import java.sql.Timestamp;
+import java.time.Instant;
 
 public class Appointment {
 
@@ -13,8 +13,8 @@ public class Appointment {
     private final String contact;
     private final String type;
     private final String url;
-    private final Timestamp start;
-    private final Timestamp end;
+    private final Instant start;
+    private final Instant end;
     private final Metadata metadata;
 
     public int getId() {
@@ -53,11 +53,11 @@ public class Appointment {
         return url;
     }
 
-    public Timestamp getStart() {
+    public Instant getStart() {
         return start;
     }
 
-    public Timestamp getEnd() {
+    public Instant getEnd() {
         return end;
     }
 
@@ -91,8 +91,8 @@ public class Appointment {
         private String contact;
         private String type;
         private String url;
-        private Timestamp start;
-        private Timestamp end;
+        private Instant start;
+        private Instant end;
         private Metadata metadata;
 
         public Builder withId(int id) {
@@ -140,12 +140,12 @@ public class Appointment {
             return this;
         }
 
-        public Builder withStart(Timestamp start) {
+        public Builder withStart(Instant start) {
             this.start = start;
             return this;
         }
 
-        public Builder withEnd(Timestamp end) {
+        public Builder withEnd(Instant end) {
             this.end = end;
             return this;
         }

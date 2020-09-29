@@ -6,11 +6,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class AppointmentDAO {
+
+    private static final String TIME_ZONE = "UTC";
 
     private static final String APPOINTMENT_BY_ID_SQL = "" +
             "SELECT * " +
@@ -19,7 +22,7 @@ public class AppointmentDAO {
             "ON ap.customerId = ap.customerId " +
             "JOIN user us " +
             "ON ap.userId = us.userId " +
-            "WHERE addressId = ?";
+            "WHERE ap.appointmentId = ?";
 
     private static final String ALL_APPOINTMENTS_SQL = "" +
             "SELECT * " +
@@ -28,6 +31,16 @@ public class AppointmentDAO {
             "ON ap.customerId = ap.customerId " +
             "JOIN user us " +
             "ON ap.userId = us.userId";
+
+    private static final String APPOINTMENTS_BY_USER_BETWEEN_SQL = "" +
+            "SELECT * " +
+            "FROM appointment ap " +
+            "JOIN customer cu " +
+            "ON ap.customerId = ap.customerId " +
+            "JOIN user us " +
+            "ON ap.userId = us.userId " +
+            "WHERE ap.userId = ? " +
+            "AND ap.start BETWEEN ? AND ?";
 
     private static final String SAVE_APPOINTMENTS_SQL = "" +
             "INSERT INTO appointment " +
@@ -83,8 +96,24 @@ public class AppointmentDAO {
 
     public List<Appointment> getAllAppointments() throws DAOException {
         try (final PreparedStatement preparedStatement = connection.prepareStatement(ALL_APPOINTMENTS_SQL)) {
-            final ResultSet resultSet = preparedStatement.executeQuery();
             final List<Appointment> appointments = new ArrayList<>();
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                appointments.add(toAppointment(resultSet));
+            }
+            return appointments;
+        } catch (SQLException e) {
+            throw new DAOException("there was an issue retrieving appointments", e);
+        }
+    }
+
+    public List<Appointment> getAppointmentsByUserBetween(int userId, Instant start, Instant end) throws DAOException {
+        try (final PreparedStatement preparedStatement = connection.prepareStatement(APPOINTMENTS_BY_USER_BETWEEN_SQL)) {
+            preparedStatement.setInt(1, userId);
+            preparedStatement.setObject(2, start);
+            preparedStatement.setObject(3, end);
+            final List<Appointment> appointments = new ArrayList<>();
+            final ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 appointments.add(toAppointment(resultSet));
             }
@@ -105,9 +134,9 @@ public class AppointmentDAO {
             preparedStatement.setString(7, appointment.getContact());
             preparedStatement.setString(8, appointment.getType());
             preparedStatement.setString(9, appointment.getUrl());
-            preparedStatement.setTimestamp(10, appointment.getStart());
-            preparedStatement.setTimestamp(11, appointment.getEnd());
-            preparedStatement.setTimestamp(12, appointment.getMetadata().getCreatedDate());
+            preparedStatement.setObject(10, appointment.getStart());
+            preparedStatement.setObject(11, appointment.getEnd());
+            preparedStatement.setObject(12, appointment.getMetadata().getCreatedDate());
             preparedStatement.setString(13, appointment.getMetadata().getCreatedBy());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -125,9 +154,9 @@ public class AppointmentDAO {
             preparedStatement.setString(6, appointment.getContact());
             preparedStatement.setString(7, appointment.getType());
             preparedStatement.setString(8, appointment.getUrl());
-            preparedStatement.setTimestamp(9, appointment.getStart());
-            preparedStatement.setTimestamp(10, appointment.getEnd());
-            preparedStatement.setTimestamp(11, appointment.getMetadata().getUpdatedDate());
+            preparedStatement.setObject(9, appointment.getStart());
+            preparedStatement.setObject(10, appointment.getEnd());
+            preparedStatement.setObject(11, appointment.getMetadata().getUpdatedDate());
             preparedStatement.setString(12, appointment.getMetadata().getUpdatedBy());
             preparedStatement.setInt(13, appointment.getId());
             preparedStatement.executeUpdate();
@@ -155,8 +184,8 @@ public class AppointmentDAO {
                     .withContact(resultSet.getString("contact"))
                     .withType(resultSet.getString("type"))
                     .withUrl(resultSet.getString("url"))
-                    .withStart(resultSet.getTimestamp("start"))
-                    .withEnd(resultSet.getTimestamp("end"))
+                    .withStart(resultSet.getObject("start", Instant.class))
+                    .withEnd(resultSet.getObject("end", Instant.class))
                     .withCustomer(CustomerDAO.toCustomer(resultSet))
                     .withUser(UserDAO.toUser(resultSet))
                     .withMetadata(MetadataDAO.toMetadata(resultSet))

@@ -21,7 +21,7 @@ public class CustomerDAO {
             "ON a.cityId = ci.cityId " +
             "JOIN country co " +
             "on ci.countryId = co.countryId " +
-            "WHERE customerId = ?";
+            "WHERE cu.customerId = ?";
 
     private static final String ALL_CUSTOMERS_SQL = "" +
             "SELECT * " +
@@ -72,8 +72,8 @@ public class CustomerDAO {
 
     public List<Customer> getAllCustomers() throws DAOException {
         try (final PreparedStatement preparedStatement = connection.prepareStatement(ALL_CUSTOMERS_SQL)) {
-            final ResultSet resultSet = preparedStatement.executeQuery();
             final List<Customer> customers = new ArrayList<>();
+            final ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 customers.add(toCustomer(resultSet));
             }
@@ -89,7 +89,7 @@ public class CustomerDAO {
             preparedStatement.setString(2, customer.getName());
             preparedStatement.setInt(3, customer.getAddress().getId());
             preparedStatement.setBoolean(4, customer.isActive());
-            preparedStatement.setTimestamp(5, customer.getMetadata().getCreatedDate());
+            preparedStatement.setObject(5, customer.getMetadata().getCreatedDate());
             preparedStatement.setString(6, customer.getMetadata().getCreatedBy());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -102,7 +102,7 @@ public class CustomerDAO {
             preparedStatement.setString(1, customer.getName());
             preparedStatement.setInt(2, customer.getAddress().getId());
             preparedStatement.setBoolean(3, customer.isActive());
-            preparedStatement.setTimestamp(4, customer.getMetadata().getUpdatedDate());
+            preparedStatement.setObject(4, customer.getMetadata().getUpdatedDate());
             preparedStatement.setString(5, customer.getMetadata().getUpdatedBy());
             preparedStatement.setInt(6, customer.getId());
             preparedStatement.executeUpdate();

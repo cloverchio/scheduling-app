@@ -58,8 +58,8 @@ public class CountryDAO {
 
     public List<Country> getAllCountries() throws DAOException {
         try (final PreparedStatement preparedStatement = connection.prepareStatement(ALL_COUNTRIES_SQL)) {
-            final ResultSet resultSet = preparedStatement.executeQuery();
             final List<Country> countries = new ArrayList<>();
+            final ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 countries.add(toCountry(resultSet));
             }
@@ -73,7 +73,7 @@ public class CountryDAO {
         try (final PreparedStatement preparedStatement = connection.prepareStatement(SAVE_COUNTRY_SQL)) {
             preparedStatement.setInt(1, country.getId());
             preparedStatement.setString(2, country.getCountry());
-            preparedStatement.setTimestamp(3, country.getMetadata().getCreatedDate());
+            preparedStatement.setObject(3, country.getMetadata().getCreatedDate());
             preparedStatement.setString(4, country.getMetadata().getCreatedBy());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -84,7 +84,7 @@ public class CountryDAO {
     public void updateCountry(Country country) throws DAOException {
         try (final PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_COUNTRY_SQL)) {
             preparedStatement.setString(1, country.getCountry());
-            preparedStatement.setTimestamp(2, country.getMetadata().getUpdatedDate());
+            preparedStatement.setObject(2, country.getMetadata().getUpdatedDate());
             preparedStatement.setString(3, country.getMetadata().getUpdatedBy());
             preparedStatement.setInt(4, country.getId());
             preparedStatement.executeUpdate();

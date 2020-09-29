@@ -1,12 +1,12 @@
 package com.c195.model;
 
-import java.sql.Timestamp;
+import java.time.Instant;
 
 public class Metadata {
 
-    private final Timestamp createdDate;
+    private final Instant createdDate;
     private final String createdBy;
-    private final Timestamp updatedDate;
+    private final Instant updatedDate;
     private final String updatedBy;
 
     private Metadata(Builder builder) {
@@ -16,7 +16,7 @@ public class Metadata {
         this.updatedBy = builder.updatedBy;
     }
 
-    public Timestamp getCreatedDate() {
+    public Instant getCreatedDate() {
         return createdDate;
     }
 
@@ -24,7 +24,7 @@ public class Metadata {
         return createdBy;
     }
 
-    public Timestamp getUpdatedDate() {
+    public Instant getUpdatedDate() {
         return updatedDate;
     }
 
@@ -34,12 +34,12 @@ public class Metadata {
 
     public static class Builder {
 
-        private Timestamp createdDate;
+        private Instant createdDate;
         private String createdBy;
-        private Timestamp updatedDate;
+        private Instant updatedDate;
         private String updatedBy;
 
-        public Builder withCreatedDate(Timestamp createdDate) {
+        public Builder withCreatedDate(Instant createdDate) {
             this.createdDate = createdDate;
             return this;
         }
@@ -49,7 +49,7 @@ public class Metadata {
             return this;
         }
 
-        public Builder withUpdatedDate(Timestamp updatedDate) {
+        public Builder withUpdatedDate(Instant updatedDate) {
             this.updatedDate = updatedDate;
             return this;
         }

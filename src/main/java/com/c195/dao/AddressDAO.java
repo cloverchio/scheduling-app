@@ -70,8 +70,8 @@ public class AddressDAO {
 
     public List<Address> getAllAddresses() throws DAOException {
         try (final PreparedStatement preparedStatement = connection.prepareStatement(ALL_ADDRESSES_SQL)) {
-            final ResultSet resultSet = preparedStatement.executeQuery();
             final List<Address> addresses = new ArrayList<>();
+            final ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 addresses.add(toAddress(resultSet));
             }
@@ -89,7 +89,7 @@ public class AddressDAO {
             preparedStatement.setInt(4, address.getCity().getId());
             preparedStatement.setString(5, address.getPostalCode());
             preparedStatement.setString(6, address.getPhone());
-            preparedStatement.setTimestamp(7, address.getMetadata().getCreatedDate());
+            preparedStatement.setObject(7, address.getMetadata().getCreatedDate());
             preparedStatement.setString(8, address.getMetadata().getCreatedBy());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -104,7 +104,7 @@ public class AddressDAO {
             preparedStatement.setInt(3, address.getCity().getId());
             preparedStatement.setString(4, address.getPostalCode());
             preparedStatement.setString(5, address.getPhone());
-            preparedStatement.setTimestamp(6, address.getMetadata().getUpdatedDate());
+            preparedStatement.setObject(6, address.getMetadata().getUpdatedDate());
             preparedStatement.setString(7, address.getMetadata().getUpdatedBy());
             preparedStatement.setInt(8, address.getId());
             preparedStatement.executeUpdate();

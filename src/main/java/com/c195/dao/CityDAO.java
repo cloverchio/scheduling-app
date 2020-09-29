@@ -17,7 +17,7 @@ public class CityDAO {
             "FROM city ci " +
             "JOIN country co " +
             "on ci.countryId = co.countryId " +
-            "WHERE cityId = ?";
+            "WHERE ci.cityId = ?";
 
     private static final String ALL_CITIES_SQL = "" +
             "SELECT * " +
@@ -79,7 +79,7 @@ public class CityDAO {
             preparedStatement.setInt(1, city.getId());
             preparedStatement.setString(2, city.getCity());
             preparedStatement.setInt(3, city.getCountry().getId());
-            preparedStatement.setTimestamp(4, city.getMetadata().getCreatedDate());
+            preparedStatement.setObject(4, city.getMetadata().getCreatedDate());
             preparedStatement.setString(5, city.getMetadata().getCreatedBy());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -91,7 +91,7 @@ public class CityDAO {
         try (final PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CITY_SQL)) {
             preparedStatement.setString(1, city.getCity());
             preparedStatement.setInt(2, city.getCountry().getId());
-            preparedStatement.setTimestamp(4, city.getMetadata().getUpdatedDate());
+            preparedStatement.setObject(4, city.getMetadata().getUpdatedDate());
             preparedStatement.setString(5, city.getMetadata().getUpdatedBy());
             preparedStatement.setInt(6, city.getId());
             preparedStatement.executeUpdate();
