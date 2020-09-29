@@ -105,7 +105,7 @@ public class CityDAO {
             preparedStatement.setInt(1, id);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new DAOException("there was an issue removing an address", e);
+            throw new DAOException("there was an issue removing a city", e);
         }
     }
 
