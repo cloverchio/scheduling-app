@@ -7,6 +7,16 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+/**
+ * The message content is not utf-8 encoded when loaded directly from the resource bundle
+ * causing special characters to not be rendered correctly. This addresses that by encoding
+ * all of the messages up front and caching the encoded version in memory.
+ * <p>
+ * Addresses the following task requirements:
+ * <p>
+ * G. Write two or more lambda expressions to make your program more efficient, justifying
+ * the use of each lambda expression with an in-line comment.
+ */
 public class MessagingService {
 
     private static MessagingService serviceInstance;
@@ -18,6 +28,7 @@ public class MessagingService {
     }
 
     public static MessagingService getInstance() {
+        // lazy singleton initialization leveraging a lambda expression
         return Optional.ofNullable(serviceInstance)
                 .orElseGet(() -> {
                     serviceInstance = new MessagingService();
@@ -81,13 +92,18 @@ public class MessagingService {
         return messaging.get("unexpected.error.content");
     }
 
-    /**
-     * G. Write two or more lambda expressions to make your program more efficient,
-     * justifying the use of each lambda expression with an in-line comment.
-     *
-     * @param resourceBundle in which to extract message bundle from
-     * @return map of message bundle keys to utf-8 equivalent
-     */
+    public String getAppointmentReminderTitle() {
+        return messaging.get("appointment.reminder.title");
+    }
+
+    public String getAppointmentReminderHeader() {
+        return messaging.get("appointment.reminder.header");
+    }
+
+    public String getAppointmentReminderContent() {
+        return messaging.get("appointment.reminder.content");
+    }
+
     private static Map<String, String> getEncodedMessageBundle(ResourceBundle resourceBundle) {
         // caches utf-8 version of locale specific messaging
         // lambda expression facilitates the key mapping and value transformation

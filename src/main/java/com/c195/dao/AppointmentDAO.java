@@ -73,10 +73,11 @@ public class AppointmentDAO {
     }
 
     public static AppointmentDAO getInstance(Connection connection) {
-        if (daoInstance == null) {
-            daoInstance = new AppointmentDAO(connection);
-        }
-        return daoInstance;
+        return Optional.ofNullable(daoInstance)
+                .orElseGet(() -> {
+                    daoInstance = new AppointmentDAO(connection);
+                    return daoInstance;
+                });
     }
 
     public Optional<Appointment> getAppointmentById(int id) throws DAOException {

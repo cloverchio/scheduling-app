@@ -7,6 +7,7 @@ import com.c195.model.Appointment;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 public class AppointmentService {
 
@@ -18,15 +19,23 @@ public class AppointmentService {
     }
 
     public static AppointmentService getInstance(AppointmentDAO appointmentDAO) {
-        if (serviceInstance == null) {
-            serviceInstance = new AppointmentService(appointmentDAO);
-        }
-        return serviceInstance;
+        return Optional.ofNullable(serviceInstance)
+                .orElseGet(() -> {
+                    serviceInstance = new AppointmentService(appointmentDAO);
+                    return serviceInstance;
+                });
     }
 
+    /**
+     * Gets a list of appointments to occur within the next 15 minutes for
+     * a given user.
+     *
+     * @param userId in which to retrieve appointments for.
+     * @return list of appointments.
+     * @throws DAOException if there are issues retrieving appointments from the db.
+     */
     public List<Appointment> getReminderAppointmentsByUser(int userId) throws DAOException {
         final Instant start = Instant.now();
-        final Instant end = start.plus(15L, ChronoUnit.MINUTES);
-        return appointmentDAO.getAppointmentsByUserBetween(userId, start, end);
+        return appointmentDAO.getAppointmentsByUserBetween(userId, start, start.plus(15L, ChronoUnit.MINUTES));
     }
 }

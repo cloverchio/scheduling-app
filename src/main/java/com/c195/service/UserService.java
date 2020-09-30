@@ -18,22 +18,39 @@ public class UserService {
     }
 
     public static UserService getInstance(UserDAO userDAO) {
-        if (serviceInstance == null) {
-            serviceInstance = new UserService(userDAO);
-        }
-        return serviceInstance;
+        return Optional.ofNullable(serviceInstance)
+                .orElseGet(() -> {
+                    serviceInstance = new UserService(userDAO);
+                    return serviceInstance;
+                });
     }
 
+    /**
+     * Retrieves the current user if one is available.
+     *
+     * @return optional representing the current user.
+     */
     public Optional<User> getCurrentUser() {
         return Optional.ofNullable(currentUser);
     }
 
+    /**
+     * Validates the existence of a given username and password
+     * for login purposes.
+     *
+     * @param username in which to validate for login.
+     * @param password in which to validate for login.
+     * @return boolean representing the login status.
+     * @throws DAOException if there are issues retrieving users from the db.
+     */
     public boolean login(String username, String password) throws DAOException {
-        userDAO.getUserByUsernameAndPassword(username, password)
-                .ifPresent(user -> currentUser = user);
+        userDAO.getUserByUsernameAndPassword(username, password).ifPresent(user -> this.currentUser = user);
         return getCurrentUser().isPresent();
     }
 
+    /**
+     * Removes the current user in preparation for logout.
+     */
     public void logout() {
         getCurrentUser().ifPresent(currentUser -> this.currentUser = null);
     }

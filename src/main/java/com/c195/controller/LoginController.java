@@ -22,9 +22,14 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.Connection;
 import java.util.ResourceBundle;
 
 /**
+ * Facilitates the login interactions.
+ * <p>
+ * Addresses the following task requirements:
+ * <p>
  * A. Create a log-in form that can determine the user’s location and translate log-in and error control messages
  * (e.g., “The username and password did not match.”) into two languages.
  */
@@ -54,9 +59,8 @@ public class LoginController implements Initializable {
         passwordLabel.setText(messagingService.getPassword());
         loginButton.setText(messagingService.getLogin());
         try {
-            final MysqlConfig config = MysqlConfig.getInstance();
-            final UserDAO userDAO = UserDAO.getInstance(MysqlConnection.getInstance(config));
-            this.userService = UserService.getInstance(userDAO);
+            final Connection connection = MysqlConnection.getInstance(MysqlConfig.getInstance());
+            this.userService = UserService.getInstance(UserDAO.getInstance(connection));
         } catch (DAOConfigException e) {
             Controller.showDatabaseAlert(messagingService);
             e.printStackTrace();
