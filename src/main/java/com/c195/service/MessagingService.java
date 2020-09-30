@@ -92,18 +92,6 @@ public class MessagingService {
         return messaging.get("unexpected.error.content");
     }
 
-    public String getAppointmentReminderTitle() {
-        return messaging.get("appointment.reminder.title");
-    }
-
-    public String getAppointmentReminderHeader() {
-        return messaging.get("appointment.reminder.header");
-    }
-
-    public String getAppointmentReminderContent() {
-        return messaging.get("appointment.reminder.content");
-    }
-
     private static Map<String, String> getEncodedMessageBundle(ResourceBundle resourceBundle) {
         // caches utf-8 version of locale specific messaging
         // lambda expression facilitates the key mapping and value transformation
