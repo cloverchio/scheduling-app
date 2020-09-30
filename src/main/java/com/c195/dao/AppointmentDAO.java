@@ -2,10 +2,7 @@ package com.c195.dao;
 
 import com.c195.model.Appointment;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,8 +41,9 @@ public class AppointmentDAO {
 
     private static final String SAVE_APPOINTMENTS_SQL = "" +
             "INSERT INTO appointment " +
-            "(appointmentId, customerId, userId, title, description, location, contact, type, url, start, end, createDate, createdBy) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "(customerId, userId, title, description, location, " +
+            "contact, type, url, start, end, createDate, createdBy, lastUpdateBy) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE_APPOINTMENTS_SQL = "" +
             "UPDATE appointment " +
@@ -110,8 +108,8 @@ public class AppointmentDAO {
     public List<Appointment> getAppointmentsByUserBetween(int userId, Instant start, Instant end) throws DAOException {
         try (final PreparedStatement preparedStatement = connection.prepareStatement(APPOINTMENTS_BY_USER_BETWEEN_SQL)) {
             preparedStatement.setInt(1, userId);
-            preparedStatement.setObject(2, start);
-            preparedStatement.setObject(3, end);
+            preparedStatement.setTimestamp(2, Timestamp.from(start));
+            preparedStatement.setTimestamp(3, Timestamp.from(end));
             final List<Appointment> appointments = new ArrayList<>();
             final ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -125,19 +123,19 @@ public class AppointmentDAO {
 
     public void saveAppointment(Appointment appointment) throws DAOException {
         try (final PreparedStatement preparedStatement = connection.prepareStatement(SAVE_APPOINTMENTS_SQL)) {
-            preparedStatement.setInt(1, appointment.getId());
-            preparedStatement.setInt(2, appointment.getCustomer().getId());
-            preparedStatement.setInt(3, appointment.getUser().getId());
-            preparedStatement.setString(4, appointment.getTitle());
-            preparedStatement.setString(5, appointment.getDescription());
-            preparedStatement.setString(6, appointment.getLocation());
-            preparedStatement.setString(7, appointment.getContact());
-            preparedStatement.setString(8, appointment.getType());
-            preparedStatement.setString(9, appointment.getUrl());
-            preparedStatement.setObject(10, appointment.getStart());
-            preparedStatement.setObject(11, appointment.getEnd());
-            preparedStatement.setObject(12, appointment.getMetadata().getCreatedDate());
-            preparedStatement.setString(13, appointment.getMetadata().getCreatedBy());
+            preparedStatement.setInt(1, appointment.getCustomer().getId());
+            preparedStatement.setInt(2, appointment.getUser().getId());
+            preparedStatement.setString(3, appointment.getTitle());
+            preparedStatement.setString(4, appointment.getDescription());
+            preparedStatement.setString(5, appointment.getLocation());
+            preparedStatement.setString(6, appointment.getContact());
+            preparedStatement.setString(7, appointment.getType());
+            preparedStatement.setString(8, appointment.getUrl());
+            preparedStatement.setObject(9, appointment.getStart());
+            preparedStatement.setTimestamp(10, Timestamp.from(appointment.getEnd()));
+            preparedStatement.setTimestamp(11, Timestamp.from(appointment.getMetadata().getCreatedDate()));
+            preparedStatement.setString(12, appointment.getMetadata().getCreatedBy());
+            preparedStatement.setString(13, appointment.getMetadata().getUpdatedBy());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new DAOException("there was an issue saving an appointment", e);
@@ -154,9 +152,9 @@ public class AppointmentDAO {
             preparedStatement.setString(6, appointment.getContact());
             preparedStatement.setString(7, appointment.getType());
             preparedStatement.setString(8, appointment.getUrl());
-            preparedStatement.setObject(9, appointment.getStart());
-            preparedStatement.setObject(10, appointment.getEnd());
-            preparedStatement.setObject(11, appointment.getMetadata().getUpdatedDate());
+            preparedStatement.setTimestamp(9, Timestamp.from(appointment.getStart()));
+            preparedStatement.setTimestamp(10, Timestamp.from(appointment.getEnd()));
+            preparedStatement.setTimestamp(11, Timestamp.from(appointment.getMetadata().getUpdatedDate()));
             preparedStatement.setString(12, appointment.getMetadata().getUpdatedBy());
             preparedStatement.setInt(13, appointment.getId());
             preparedStatement.executeUpdate();
@@ -184,8 +182,8 @@ public class AppointmentDAO {
                     .withContact(resultSet.getString("contact"))
                     .withType(resultSet.getString("type"))
                     .withUrl(resultSet.getString("url"))
-                    .withStart(resultSet.getObject("start", Instant.class))
-                    .withEnd(resultSet.getObject("end", Instant.class))
+                    .withStart(resultSet.getTimestamp("start").toInstant())
+                    .withEnd(resultSet.getTimestamp("end").toInstant())
                     .withCustomer(CustomerDAO.toCustomer(resultSet))
                     .withUser(UserDAO.toUser(resultSet))
                     .withMetadata(MetadataDAO.toMetadata(resultSet))

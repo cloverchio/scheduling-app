@@ -2,10 +2,7 @@ package com.c195.dao;
 
 import com.c195.model.City;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +24,7 @@ public class CityDAO {
 
     private static final String SAVE_CITY_SQL = "" +
             "INSERT INTO city " +
-            "(cityId, city, countryId, createDate, createdBy) " +
+            "(city, countryId, createDate, createdBy, lastUpdateBy) " +
             "VALUES (?, ?, ?, ?, ?)";
 
     private static final String UPDATE_CITY_SQL = "" +
@@ -76,11 +73,11 @@ public class CityDAO {
 
     public void saveCity(City city) throws DAOException {
         try (final PreparedStatement preparedStatement = connection.prepareStatement(SAVE_CITY_SQL)) {
-            preparedStatement.setInt(1, city.getId());
-            preparedStatement.setString(2, city.getCity());
-            preparedStatement.setInt(3, city.getCountry().getId());
-            preparedStatement.setObject(4, city.getMetadata().getCreatedDate());
-            preparedStatement.setString(5, city.getMetadata().getCreatedBy());
+            preparedStatement.setString(1, city.getCity());
+            preparedStatement.setInt(2, city.getCountry().getId());
+            preparedStatement.setTimestamp(3, Timestamp.from(city.getMetadata().getCreatedDate()));
+            preparedStatement.setString(4, city.getMetadata().getCreatedBy());
+            preparedStatement.setString(5, city.getMetadata().getUpdatedBy());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new DAOException("there was an issue saving a city", e);
@@ -91,9 +88,9 @@ public class CityDAO {
         try (final PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CITY_SQL)) {
             preparedStatement.setString(1, city.getCity());
             preparedStatement.setInt(2, city.getCountry().getId());
-            preparedStatement.setObject(4, city.getMetadata().getUpdatedDate());
-            preparedStatement.setString(5, city.getMetadata().getUpdatedBy());
-            preparedStatement.setInt(6, city.getId());
+            preparedStatement.setTimestamp(3, Timestamp.from(city.getMetadata().getUpdatedDate()));
+            preparedStatement.setString(4, city.getMetadata().getUpdatedBy());
+            preparedStatement.setInt(5, city.getId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new DAOException("there was an issue updating a city", e);

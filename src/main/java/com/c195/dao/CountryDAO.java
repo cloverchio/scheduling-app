@@ -2,10 +2,7 @@ package com.c195.dao;
 
 import com.c195.model.Country;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +20,7 @@ public class CountryDAO {
 
     private static final String SAVE_COUNTRY_SQL = "" +
             "INSERT INTO country " +
-            "(countryId, country, createDate, createdBy) " +
+            "(country, createDate, createdBy, lastUpdateBy) " +
             "VALUES (?, ?, ?, ?)";
 
     private static final String UPDATE_COUNTRY_SQL = "" +
@@ -71,10 +68,10 @@ public class CountryDAO {
 
     public void saveCountry(Country country) throws DAOException {
         try (final PreparedStatement preparedStatement = connection.prepareStatement(SAVE_COUNTRY_SQL)) {
-            preparedStatement.setInt(1, country.getId());
-            preparedStatement.setString(2, country.getCountry());
-            preparedStatement.setObject(3, country.getMetadata().getCreatedDate());
-            preparedStatement.setString(4, country.getMetadata().getCreatedBy());
+            preparedStatement.setString(1, country.getCountry());
+            preparedStatement.setTimestamp(2, Timestamp.from(country.getMetadata().getCreatedDate()));
+            preparedStatement.setString(3, country.getMetadata().getCreatedBy());
+            preparedStatement.setString(4, country.getMetadata().getUpdatedBy());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new DAOException("there was an issue saving a country", e);
@@ -84,7 +81,7 @@ public class CountryDAO {
     public void updateCountry(Country country) throws DAOException {
         try (final PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_COUNTRY_SQL)) {
             preparedStatement.setString(1, country.getCountry());
-            preparedStatement.setObject(2, country.getMetadata().getUpdatedDate());
+            preparedStatement.setTimestamp(2, Timestamp.from(country.getMetadata().getUpdatedDate()));
             preparedStatement.setString(3, country.getMetadata().getUpdatedBy());
             preparedStatement.setInt(4, country.getId());
             preparedStatement.executeUpdate();

@@ -2,10 +2,7 @@ package com.c195.dao;
 
 import com.c195.model.Customer;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,8 +32,8 @@ public class CustomerDAO {
 
     private static final String SAVE_CUSTOMER_SQL = "" +
             "INSERT INTO customer " +
-            "(customerId, customerName, addressId, active, createDate, createdBy) " +
-            "VALUES (?, ?, ?, ?, ?, ?)";
+            "(customerId, customerName, addressId, active, createDate, createdBy, lastUpdateBy) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE_CUSTOMER_SQL = "" +
             "UPDATE customer " +
@@ -89,8 +86,9 @@ public class CustomerDAO {
             preparedStatement.setString(2, customer.getName());
             preparedStatement.setInt(3, customer.getAddress().getId());
             preparedStatement.setBoolean(4, customer.isActive());
-            preparedStatement.setObject(5, customer.getMetadata().getCreatedDate());
+            preparedStatement.setTimestamp(5, Timestamp.from(customer.getMetadata().getCreatedDate()));
             preparedStatement.setString(6, customer.getMetadata().getCreatedBy());
+            preparedStatement.setString(7, customer.getMetadata().getUpdatedBy());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new DAOException("there was an issue saving a customer", e);
@@ -102,7 +100,7 @@ public class CustomerDAO {
             preparedStatement.setString(1, customer.getName());
             preparedStatement.setInt(2, customer.getAddress().getId());
             preparedStatement.setBoolean(3, customer.isActive());
-            preparedStatement.setObject(4, customer.getMetadata().getUpdatedDate());
+            preparedStatement.setTimestamp(4, Timestamp.from(customer.getMetadata().getUpdatedDate()));
             preparedStatement.setString(5, customer.getMetadata().getUpdatedBy());
             preparedStatement.setInt(6, customer.getId());
             preparedStatement.executeUpdate();
