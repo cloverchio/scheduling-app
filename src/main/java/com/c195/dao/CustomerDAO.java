@@ -45,19 +45,35 @@ public class CustomerDAO {
             "WHERE customerId = ?";
 
     private static final String DELETE_CUSTOMER_BY_ID_SQL = "" +
-            "DELETE FROM customer " +
+            "DELETE cu, a, ci, co " +
+            "FROM customer cu " +
+            "JOIN address a " +
+            "ON cu.addressId = a.addressId " +
+            "JOIN city ci " +
+            "ON a.cityId = ci.cityId " +
+            "JOIN country co " +
+            "ON ci.countryId = co.countryId " +
             "WHERE customerId = ?";
 
+    private static CustomerDAO daoInstance;
     private final Connection connection;
 
-    public CustomerDAO(Connection connection) {
+    private CustomerDAO(Connection connection) {
         this.connection = connection;
     }
 
+    public static CustomerDAO getInstance(Connection connection) {
+        return Optional.ofNullable(daoInstance)
+                .orElseGet(() -> {
+                    daoInstance = new CustomerDAO(connection);
+                    return daoInstance;
+                });
+    }
+
     public Optional<Customer> getCustomerById(int id) throws DAOException {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(CUSTOMER_BY_ID_SQL)) {
-            preparedStatement.setInt(1, id);
-            final ResultSet resultSet = preparedStatement.executeQuery();
+        try (PreparedStatement statement = connection.prepareStatement(CUSTOMER_BY_ID_SQL)) {
+            statement.setInt(1, id);
+            final ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return Optional.of(toCustomer(resultSet));
             }
@@ -68,9 +84,9 @@ public class CustomerDAO {
     }
 
     public List<Customer> getAllCustomers() throws DAOException {
-        try (final PreparedStatement preparedStatement = connection.prepareStatement(ALL_CUSTOMERS_SQL)) {
+        try (final PreparedStatement statement = connection.prepareStatement(ALL_CUSTOMERS_SQL)) {
             final List<Customer> customers = new ArrayList<>();
-            final ResultSet resultSet = preparedStatement.executeQuery();
+            final ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 customers.add(toCustomer(resultSet));
             }
@@ -81,38 +97,42 @@ public class CustomerDAO {
     }
 
     public void saveCustomer(Customer customer) throws DAOException {
-        try (final PreparedStatement preparedStatement = connection.prepareStatement(SAVE_CUSTOMER_SQL)) {
-            preparedStatement.setInt(1, customer.getId());
-            preparedStatement.setString(2, customer.getName());
-            preparedStatement.setInt(3, customer.getAddress().getId());
-            preparedStatement.setBoolean(4, customer.isActive());
-            preparedStatement.setTimestamp(5, Timestamp.from(customer.getMetadata().getCreatedDate()));
-            preparedStatement.setString(6, customer.getMetadata().getCreatedBy());
-            preparedStatement.setString(7, customer.getMetadata().getUpdatedBy());
-            preparedStatement.executeUpdate();
+        try (final PreparedStatement statement = connection.prepareStatement(SAVE_CUSTOMER_SQL, Statement.RETURN_GENERATED_KEYS)) {
+            statement.setInt(1, customer.getId());
+            statement.setString(2, customer.getName().toLowerCase());
+            statement.setInt(3, customer.getAddress().getId());
+            statement.setBoolean(4, customer.isActive());
+            statement.setTimestamp(5, Timestamp.from(customer.getMetadata().getCreatedDate()));
+            statement.setString(6, customer.getMetadata().getCreatedBy().toLowerCase());
+            statement.setString(7, customer.getMetadata().getUpdatedBy().toLowerCase());
+            statement.executeUpdate();
+            final ResultSet generatedKeys = statement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                customer.setId(generatedKeys.getInt(1));
+            }
         } catch (SQLException e) {
             throw new DAOException("there was an issue saving a customer", e);
         }
     }
 
     public void updateCustomer(Customer customer) throws DAOException {
-        try (final PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CUSTOMER_SQL)) {
-            preparedStatement.setString(1, customer.getName());
-            preparedStatement.setInt(2, customer.getAddress().getId());
-            preparedStatement.setBoolean(3, customer.isActive());
-            preparedStatement.setTimestamp(4, Timestamp.from(customer.getMetadata().getUpdatedDate()));
-            preparedStatement.setString(5, customer.getMetadata().getUpdatedBy());
-            preparedStatement.setInt(6, customer.getId());
-            preparedStatement.executeUpdate();
+        try (final PreparedStatement statement = connection.prepareStatement(UPDATE_CUSTOMER_SQL)) {
+            statement.setString(1, customer.getName().toLowerCase());
+            statement.setInt(2, customer.getAddress().getId());
+            statement.setBoolean(3, customer.isActive());
+            statement.setTimestamp(4, Timestamp.from(customer.getMetadata().getUpdatedDate()));
+            statement.setString(5, customer.getMetadata().getUpdatedBy().toLowerCase());
+            statement.setInt(6, customer.getId());
+            statement.executeUpdate();
         } catch (SQLException e) {
             throw new DAOException("there was an issue updating a customer", e);
         }
     }
 
     public void deleteCustomerById(int id) throws DAOException {
-        try (final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_CUSTOMER_BY_ID_SQL)) {
-            preparedStatement.setInt(1, id);
-            preparedStatement.executeUpdate();
+        try (final PreparedStatement statement = connection.prepareStatement(DELETE_CUSTOMER_BY_ID_SQL)) {
+            statement.setInt(1, id);
+            statement.executeUpdate();
         } catch (SQLException e) {
             throw new DAOException("there was an issue removing a customer", e);
         }
@@ -120,13 +140,13 @@ public class CustomerDAO {
 
     public static Customer toCustomer(ResultSet resultSet) throws DAOException {
         try {
-            return new Customer.Builder()
-                    .withId(resultSet.getInt("customerId"))
-                    .withName(resultSet.getString("customerName"))
-                    .withActive(resultSet.getBoolean("active"))
-                    .withAddress(AddressDAO.toAddress(resultSet))
-                    .withMetadata(MetadataDAO.toMetadata(resultSet))
-                    .build();
+            final Customer customer = new Customer();
+            customer.setId(resultSet.getInt("customerId"));
+            customer.setName(resultSet.getString("customerName"));
+            customer.setActive(resultSet.getBoolean("active"));
+            customer.setAddress(AddressDAO.toAddress(resultSet));
+            customer.setMetadata(MetadataDAO.toMetadata(resultSet));
+            return customer;
         } catch (SQLException e) {
             throw new DAOException("there was an issue creating customer data", e);
         }

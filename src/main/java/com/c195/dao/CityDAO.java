@@ -9,12 +9,12 @@ import java.util.Optional;
 
 public class CityDAO {
 
-    private static final String CITY_BY_ID_SQL = "" +
+    private static final String CITY_BY_NAME_SQL = "" +
             "SELECT * " +
             "FROM city ci " +
             "JOIN country co " +
             "on ci.countryId = co.countryId " +
-            "WHERE ci.cityId = ?";
+            "WHERE ci.city = ?";
 
     private static final String ALL_CITIES_SQL = "" +
             "SELECT * " +
@@ -35,20 +35,25 @@ public class CityDAO {
             "lastUpdateBy = ? " +
             "WHERE cityId = ?";
 
-    private static final String DELETE_CITY_BY_ID_SQL = "" +
-            "DELETE FROM city " +
-            "WHERE cityId = ?";
-
+    private static CityDAO daoInstance;
     private final Connection connection;
 
-    public CityDAO(Connection connection) {
+    private CityDAO(Connection connection) {
         this.connection = connection;
     }
 
-    public Optional<City> getCityById(int id) throws DAOException {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(CITY_BY_ID_SQL)) {
-            preparedStatement.setInt(1, id);
-            final ResultSet resultSet = preparedStatement.executeQuery();
+    public static CityDAO getInstance(Connection connection) {
+        return Optional.ofNullable(daoInstance)
+                .orElseGet(() -> {
+                    daoInstance = new CityDAO(connection);
+                    return daoInstance;
+                });
+    }
+
+    public Optional<City> getCityByName(String cityName) throws DAOException {
+        try (PreparedStatement statement = connection.prepareStatement(CITY_BY_NAME_SQL)) {
+            statement.setString(1, cityName.toLowerCase());
+            final ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return Optional.of(toCity(resultSet));
             }
@@ -59,8 +64,8 @@ public class CityDAO {
     }
 
     public List<City> getAllCities() throws DAOException {
-        try (final PreparedStatement preparedStatement = connection.prepareStatement(ALL_CITIES_SQL)) {
-            final ResultSet resultSet = preparedStatement.executeQuery();
+        try (final PreparedStatement statement = connection.prepareStatement(ALL_CITIES_SQL)) {
+            final ResultSet resultSet = statement.executeQuery();
             final List<City> cities = new ArrayList<>();
             while (resultSet.next()) {
                 cities.add(toCity(resultSet));
@@ -72,48 +77,43 @@ public class CityDAO {
     }
 
     public void saveCity(City city) throws DAOException {
-        try (final PreparedStatement preparedStatement = connection.prepareStatement(SAVE_CITY_SQL)) {
-            preparedStatement.setString(1, city.getCity());
-            preparedStatement.setInt(2, city.getCountry().getId());
-            preparedStatement.setTimestamp(3, Timestamp.from(city.getMetadata().getCreatedDate()));
-            preparedStatement.setString(4, city.getMetadata().getCreatedBy());
-            preparedStatement.setString(5, city.getMetadata().getUpdatedBy());
-            preparedStatement.executeUpdate();
+        try (final PreparedStatement statement = connection.prepareStatement(SAVE_CITY_SQL, Statement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, city.getCity().toLowerCase());
+            statement.setInt(2, city.getCountry().getId());
+            statement.setTimestamp(3, Timestamp.from(city.getMetadata().getCreatedDate()));
+            statement.setString(4, city.getMetadata().getCreatedBy().toLowerCase());
+            statement.setString(5, city.getMetadata().getUpdatedBy().toLowerCase());
+            statement.executeUpdate();
+            final ResultSet generatedKeys = statement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                city.setId(generatedKeys.getInt(1));
+            }
         } catch (SQLException e) {
             throw new DAOException("there was an issue saving a city", e);
         }
     }
 
     public void updateCity(City city) throws DAOException {
-        try (final PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CITY_SQL)) {
-            preparedStatement.setString(1, city.getCity());
-            preparedStatement.setInt(2, city.getCountry().getId());
-            preparedStatement.setTimestamp(3, Timestamp.from(city.getMetadata().getUpdatedDate()));
-            preparedStatement.setString(4, city.getMetadata().getUpdatedBy());
-            preparedStatement.setInt(5, city.getId());
-            preparedStatement.executeUpdate();
+        try (final PreparedStatement statement = connection.prepareStatement(UPDATE_CITY_SQL)) {
+            statement.setString(1, city.getCity().toLowerCase());
+            statement.setInt(2, city.getCountry().getId());
+            statement.setTimestamp(3, Timestamp.from(city.getMetadata().getUpdatedDate()));
+            statement.setString(4, city.getMetadata().getUpdatedBy().toLowerCase());
+            statement.setInt(5, city.getId());
+            statement.executeUpdate();
         } catch (SQLException e) {
             throw new DAOException("there was an issue updating a city", e);
         }
     }
 
-    public void deleteCityById(int id) throws DAOException {
-        try (final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_CITY_BY_ID_SQL)) {
-            preparedStatement.setInt(1, id);
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new DAOException("there was an issue removing a city", e);
-        }
-    }
-
     public static City toCity(ResultSet resultSet) throws DAOException {
         try {
-            return new City.Builder()
-                    .withId(resultSet.getInt("cityId"))
-                    .withCity(resultSet.getString("city"))
-                    .withCountry(CountryDAO.toCountry(resultSet))
-                    .withMetadata(MetadataDAO.toMetadata(resultSet))
-                    .build();
+            final City city = new City();
+            city.setId(resultSet.getInt("cityId"));
+            city.setCity(resultSet.getString("city"));
+            city.setCountry(CountryDAO.toCountry(resultSet));
+            city.setMetadata(MetadataDAO.toMetadata(resultSet));
+            return city;
         } catch (SQLException e) {
             throw new DAOException("there was an issue creating city data", e);
         }

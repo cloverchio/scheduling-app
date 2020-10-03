@@ -1,7 +1,5 @@
 package com.c195.dao.config;
 
-import com.c195.dao.DAOException;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;

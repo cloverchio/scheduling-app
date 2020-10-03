@@ -32,10 +32,10 @@ public class UserDAO {
     }
 
     public Optional<User> getUserByUsernameAndPassword(String username, String password) throws DAOException {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(USER_BY_USERNAME_AND_PASSWORD_SQL)) {
-            preparedStatement.setString(1, username);
-            preparedStatement.setString(2, password);
-            final ResultSet resultSet = preparedStatement.executeQuery();
+        try (PreparedStatement statement = connection.prepareStatement(USER_BY_USERNAME_AND_PASSWORD_SQL)) {
+            statement.setString(1, username);
+            statement.setString(2, password);
+            final ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return Optional.of(toUser(resultSet));
             }
@@ -47,13 +47,13 @@ public class UserDAO {
 
     public static User toUser(ResultSet resultSet) throws DAOException {
         try {
-            return new User.Builder()
-                    .withId(resultSet.getInt("userId"))
-                    .withUsername(resultSet.getString("userName"))
-                    .withPassword(resultSet.getString("password"))
-                    .withActive(resultSet.getBoolean("active"))
-                    .withMetadata(MetadataDAO.toMetadata(resultSet))
-                    .build();
+            final User user = new User();
+            user.setId(resultSet.getInt("userId"));
+            user.setUsername(resultSet.getString("userName"));
+            user.setPassword(resultSet.getString("password"));
+            user.setActive(resultSet.getBoolean("active"));
+            user.setMetadata(MetadataDAO.toMetadata(resultSet));
+            return user;
         } catch (SQLException e) {
             throw new DAOException("there was an issue creating user data", e);
         }

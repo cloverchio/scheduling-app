@@ -9,10 +9,10 @@ import java.util.Optional;
 
 public class CountryDAO {
 
-    private static final String COUNTRY_BY_ID_SQL = "" +
+    private static final String COUNTRY_BY_NAME_SQL = "" +
             "SELECT * " +
             "FROM country " +
-            "WHERE countryId = ?";
+            "WHERE country = ?";
 
     private static final String ALL_COUNTRIES_SQL = "" +
             "SELECT * " +
@@ -30,20 +30,25 @@ public class CountryDAO {
             "lastUpdateBy = ? " +
             "WHERE countryId = ?";
 
-    private static final String DELETE_COUNTRY_BY_ID_SQL = "" +
-            "DELETE FROM country " +
-            "WHERE countryId = ?";
-
+    private static CountryDAO daoInstance;
     private final Connection connection;
 
-    public CountryDAO(Connection connection) {
+    private CountryDAO(Connection connection) {
         this.connection = connection;
     }
 
-    public Optional<Country> getCountryById(int id) throws DAOException {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(COUNTRY_BY_ID_SQL)) {
-            preparedStatement.setInt(1, id);
-            final ResultSet resultSet = preparedStatement.executeQuery();
+    public static CountryDAO getInstance(Connection connection) {
+        return Optional.ofNullable(daoInstance)
+                .orElseGet(() -> {
+                    daoInstance = new CountryDAO(connection);
+                    return daoInstance;
+                });
+    }
+
+    public Optional<Country> getCountryByName(String countryName) throws DAOException {
+        try (PreparedStatement statement = connection.prepareStatement(COUNTRY_BY_NAME_SQL)) {
+            statement.setString(1, countryName.toLowerCase());
+            final ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return Optional.of(toCountry(resultSet));
             }
@@ -54,9 +59,9 @@ public class CountryDAO {
     }
 
     public List<Country> getAllCountries() throws DAOException {
-        try (final PreparedStatement preparedStatement = connection.prepareStatement(ALL_COUNTRIES_SQL)) {
+        try (final PreparedStatement statement = connection.prepareStatement(ALL_COUNTRIES_SQL)) {
             final List<Country> countries = new ArrayList<>();
-            final ResultSet resultSet = preparedStatement.executeQuery();
+            final ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 countries.add(toCountry(resultSet));
             }
@@ -67,45 +72,40 @@ public class CountryDAO {
     }
 
     public void saveCountry(Country country) throws DAOException {
-        try (final PreparedStatement preparedStatement = connection.prepareStatement(SAVE_COUNTRY_SQL)) {
-            preparedStatement.setString(1, country.getCountry());
-            preparedStatement.setTimestamp(2, Timestamp.from(country.getMetadata().getCreatedDate()));
-            preparedStatement.setString(3, country.getMetadata().getCreatedBy());
-            preparedStatement.setString(4, country.getMetadata().getUpdatedBy());
-            preparedStatement.executeUpdate();
+        try (final PreparedStatement statement = connection.prepareStatement(SAVE_COUNTRY_SQL, Statement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, country.getCountry().toLowerCase());
+            statement.setTimestamp(2, Timestamp.from(country.getMetadata().getCreatedDate()));
+            statement.setString(3, country.getMetadata().getCreatedBy().toLowerCase());
+            statement.setString(4, country.getMetadata().getUpdatedBy().toLowerCase());
+            statement.executeUpdate();
+            final ResultSet generatedKeys = statement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                country.setId(generatedKeys.getInt(1));
+            }
         } catch (SQLException e) {
             throw new DAOException("there was an issue saving a country", e);
         }
     }
 
     public void updateCountry(Country country) throws DAOException {
-        try (final PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_COUNTRY_SQL)) {
-            preparedStatement.setString(1, country.getCountry());
-            preparedStatement.setTimestamp(2, Timestamp.from(country.getMetadata().getUpdatedDate()));
-            preparedStatement.setString(3, country.getMetadata().getUpdatedBy());
-            preparedStatement.setInt(4, country.getId());
-            preparedStatement.executeUpdate();
+        try (final PreparedStatement statement = connection.prepareStatement(UPDATE_COUNTRY_SQL)) {
+            statement.setString(1, country.getCountry().toLowerCase());
+            statement.setTimestamp(2, Timestamp.from(country.getMetadata().getUpdatedDate()));
+            statement.setString(3, country.getMetadata().getUpdatedBy().toLowerCase());
+            statement.setInt(4, country.getId());
+            statement.executeUpdate();
         } catch (SQLException e) {
             throw new DAOException("there was an issue updating a country", e);
         }
     }
 
-    public void deleteCountryById(int id) throws DAOException {
-        try (final PreparedStatement preparedStatement = connection.prepareStatement(DELETE_COUNTRY_BY_ID_SQL)) {
-            preparedStatement.setInt(1, id);
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new DAOException("there was an issue removing a country", e);
-        }
-    }
-
     public static Country toCountry(ResultSet resultSet) throws DAOException {
         try {
-            return new Country.Builder()
-                    .withId(resultSet.getInt("countryId"))
-                    .withCountry(resultSet.getString("country"))
-                    .withMetadata(MetadataDAO.toMetadata(resultSet))
-                    .build();
+            final Country country = new Country();
+            country.setId(resultSet.getInt("countryId"));
+            country.setCountry(resultSet.getString("country"));
+            country.setMetadata(MetadataDAO.toMetadata(resultSet));
+            return country;
         } catch (SQLException e) {
             throw new DAOException("there was an issue creating country data", e);
         }
