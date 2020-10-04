@@ -9,18 +9,12 @@ import com.c195.service.MessagingService;
 import com.c195.service.UserService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.util.ResourceBundle;
@@ -81,27 +75,15 @@ public class LoginController implements Initializable {
     }
 
     private void login(ActionEvent actionEvent, String username, String password) {
-        try {
-            if (userService.login(username, password)) {
-                getMainView(actionEvent);
-            } else {
-                messageLabel.setText(messagingService.getInvalidLogin());
-            }
-        } catch (DAOException e) {
-            messageLabel.setText(messagingService.getDatabaseLoginError());
-            e.printStackTrace();
-        } catch (IOException e) {
-            Controller.showUnexpectedAlert(messagingService);
-            e.printStackTrace();
-        }
+        Controller.performDatabaseAction(() -> userService.login(username, password), messagingService)
+                .ifPresent(validLogin -> handleLoginStatus(actionEvent, validLogin));
     }
 
-    private void getMainView(ActionEvent actionEvent) throws IOException {
-        ((Node) (actionEvent.getSource())).getScene().getWindow().hide();
-        final Parent root = FXMLLoader.load(getClass().getResource("../view/main.fxml"));
-        final Scene scene = new Scene(root);
-        final Stage stage = new Stage();
-        stage.setScene(scene);
-        stage.show();
+    private void handleLoginStatus(ActionEvent actionEvent, boolean validLogin) {
+        if (validLogin) {
+            Controller.showView(actionEvent, getClass(), "../view/main.fxml", messagingService);
+        } else {
+            messageLabel.setText(messagingService.getInvalidLogin());
+        }
     }
 }

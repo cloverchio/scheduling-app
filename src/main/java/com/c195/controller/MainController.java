@@ -12,21 +12,15 @@ import com.c195.service.MessagingService;
 import com.c195.service.UserService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.util.ResourceBundle;
 
 /**
- * Landing page and follow up interactions after login.
+ * Initial functionality and follow up interactions after login.
  * <p>
  * Addresses the following task requirements:
  * <p>
@@ -53,14 +47,14 @@ public class MainController implements Initializable {
     }
 
     @FXML
+    public void manageCustomers(ActionEvent actionEvent) {
+        Controller.showView(actionEvent, getClass(), "../view/customer/customer.fxml", messagingService);
+    }
+
+    @FXML
     public void logout(ActionEvent actionEvent) {
-        try {
-            userService.logout();
-            getLoginView(actionEvent);
-        } catch (IOException e) {
-            Controller.showUnexpectedAlert(messagingService);
-            e.printStackTrace();
-        }
+        userService.logout();
+        Controller.showView(actionEvent, getClass(), "../view/login.fxml", messagingService);
     }
 
     private void getUpcomingAppointmentReminder() {
@@ -70,30 +64,16 @@ public class MainController implements Initializable {
     }
 
     private void showAppointmentReminder(int userId) {
-        try {
-            if (!appointmentService.getReminderAppointmentsByUser(userId).isEmpty()) {
-                showAppointmentReminderAlert();
-            }
-        } catch (DAOException e) {
-            Controller.showDatabaseAlert(messagingService);
-            e.printStackTrace();
-        }
+        Controller.performDatabaseAction(() -> appointmentService.getReminderAppointmentsByUser(userId), messagingService)
+                .filter(appointments -> !appointments.isEmpty())
+                .ifPresent(appointments -> showAppointmentReminderAlert());
     }
 
-    private void showAppointmentReminderAlert() {
+    private static void showAppointmentReminderAlert() {
         final Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Appointment reminder");
         alert.setHeaderText("You have an upcoming appointment");
         alert.setContentText("You have an appointment scheduled within the next 15 minutes");
         alert.showAndWait();
-    }
-
-    private void getLoginView(ActionEvent actionEvent) throws IOException {
-        ((Node) (actionEvent.getSource())).getScene().getWindow().hide();
-        final Parent root = FXMLLoader.load(getClass().getResource("../view/login.fxml"));
-        final Scene scene = new Scene(root);
-        final Stage stage = new Stage();
-        stage.setScene(scene);
-        stage.show();
     }
 }
