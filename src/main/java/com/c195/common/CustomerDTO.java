@@ -2,14 +2,20 @@ package com.c195.common;
 
 public class CustomerDTO {
 
+    private final int id;
     private final String name;
     private final boolean isActive;
     private final AddressDTO addressDTO;
 
     private CustomerDTO(Builder builder) {
+        this.id = builder.id;
         this.name = builder.name;
         this.isActive = builder.isActive;
         this.addressDTO = builder.addressDTO;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getName() {
@@ -26,9 +32,15 @@ public class CustomerDTO {
 
     public static class Builder {
 
+        private int id;
         private String name;
         private boolean isActive;
         private AddressDTO addressDTO;
+
+        public Builder withId(int id) {
+            this.id = id;
+            return this;
+        }
 
         public Builder withName(String name) {
             this.name = name;
