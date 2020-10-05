@@ -1,10 +1,6 @@
 package com.c195.controller;
 
-import com.c195.dao.DAOException;
 import com.c195.dao.UserDAO;
-import com.c195.dao.config.DAOConfigException;
-import com.c195.dao.config.MysqlConfig;
-import com.c195.dao.config.MysqlConnection;
 import com.c195.service.MessagingService;
 import com.c195.service.UserService;
 import javafx.event.ActionEvent;
@@ -16,7 +12,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
-import java.sql.Connection;
 import java.util.ResourceBundle;
 
 /**
@@ -48,17 +43,9 @@ public class LoginController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.messagingService = MessagingService.getInstance();
-        messageLabel.setText(messagingService.getNewLogin());
-        usernameLabel.setText(messagingService.getUsername());
-        passwordLabel.setText(messagingService.getPassword());
-        loginButton.setText(messagingService.getLogin());
-        try {
-            final Connection connection = MysqlConnection.getInstance(MysqlConfig.getInstance());
-            this.userService = UserService.getInstance(UserDAO.getInstance(connection));
-        } catch (DAOConfigException e) {
-            Controller.showDatabaseAlert(messagingService);
-            e.printStackTrace();
-        }
+        initializeLabelText(messagingService);
+        Controller.getDatabaseConnection(messagingService)
+                .ifPresent(connection -> this.userService = UserService.getInstance(UserDAO.getInstance(connection)));
     }
 
     @FXML
@@ -85,5 +72,12 @@ public class LoginController implements Initializable {
         } else {
             messageLabel.setText(messagingService.getInvalidLogin());
         }
+    }
+
+    private void initializeLabelText(MessagingService messagingService) {
+        messageLabel.setText(messagingService.getNewLogin());
+        usernameLabel.setText(messagingService.getUsername());
+        passwordLabel.setText(messagingService.getPassword());
+        loginButton.setText(messagingService.getLogin());
     }
 }

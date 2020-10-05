@@ -1,11 +1,7 @@
 package com.c195.controller;
 
 import com.c195.dao.AppointmentDAO;
-import com.c195.dao.DAOException;
 import com.c195.dao.UserDAO;
-import com.c195.dao.config.DAOConfigException;
-import com.c195.dao.config.MysqlConfig;
-import com.c195.dao.config.MysqlConnection;
 import com.c195.model.User;
 import com.c195.service.AppointmentService;
 import com.c195.service.MessagingService;
@@ -16,7 +12,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 
 import java.net.URL;
-import java.sql.Connection;
 import java.util.ResourceBundle;
 
 /**
@@ -35,15 +30,12 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.messagingService = MessagingService.getInstance();
-        try {
-            final Connection connection = MysqlConnection.getInstance(MysqlConfig.getInstance());
-            this.userService = UserService.getInstance(UserDAO.getInstance(connection));
-            this.appointmentService = AppointmentService.getInstance(AppointmentDAO.getInstance(connection));
-            getUpcomingAppointmentReminder();
-        } catch (DAOConfigException e) {
-            Controller.showDatabaseAlert(messagingService);
-            e.printStackTrace();
-        }
+        Controller.getDatabaseConnection(messagingService)
+                .ifPresent(connection -> {
+                    this.userService = UserService.getInstance(UserDAO.getInstance(connection));
+                    this.appointmentService = AppointmentService.getInstance(AppointmentDAO.getInstance(connection));
+                    getUpcomingAppointmentReminder();
+                });
     }
 
     @FXML

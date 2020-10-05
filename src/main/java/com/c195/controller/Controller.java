@@ -2,6 +2,9 @@ package com.c195.controller;
 
 import com.c195.common.CheckedSupplier;
 import com.c195.dao.DAOException;
+import com.c195.dao.config.DAOConfigException;
+import com.c195.dao.config.MysqlConfig;
+import com.c195.dao.config.MysqlConnection;
 import com.c195.service.MessagingService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -12,6 +15,7 @@ import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.util.Optional;
 
 /**
@@ -62,6 +66,23 @@ public class Controller {
             showUnexpectedAlert(messagingService);
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Provides the database connection instance. Will prompt an alert in the event
+     * that an exception is thrown while trying to establish the connection.
+     *
+     * @param messagingService for error messaging.
+     * @return optional instance of the database connection.
+     */
+    public static Optional<Connection> getDatabaseConnection(MessagingService messagingService) {
+        try {
+            return Optional.ofNullable(MysqlConnection.getInstance(MysqlConfig.getInstance()));
+        } catch (DAOConfigException e) {
+            Controller.showDatabaseAlert(messagingService);
+            e.printStackTrace();
+        }
+        return Optional.empty();
     }
 
     public static void showView(ActionEvent actionEvent, Class<?> clazz, String viewPath) throws IOException {
