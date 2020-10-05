@@ -12,6 +12,8 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
@@ -37,6 +39,7 @@ public class LoginController implements Initializable {
     @FXML
     private Button loginButton;
 
+    private Map<Label, TextField> formFields;
     private MessagingService messagingService;
     private UserService userService;
 
@@ -44,20 +47,18 @@ public class LoginController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.messagingService = MessagingService.getInstance();
         initializeLabelText(messagingService);
+        this.formFields = getFormFields();
         Controller.getDatabaseConnection(messagingService)
                 .ifPresent(connection -> this.userService = UserService.getInstance(UserDAO.getInstance(connection)));
     }
 
     @FXML
     public void login(ActionEvent actionEvent) {
-        final String username = usernameField.getText();
-        final String password = passwordField.getText();
-        if (username == null || username.isEmpty()) {
-            messageLabel.setText(messagingService.getEmptyUsername());
-        } else if (password == null || password.isEmpty()) {
-            messageLabel.setText(messagingService.getEmptyPassword());
+        final Map<Label, TextField> invalidFields = Controller.getInvalidTextFields(formFields);
+        if (!invalidFields.isEmpty()) {
+            Controller.showRequiredFieldMessage(messageLabel, invalidFields.keySet(), messagingService);
         } else {
-            login(actionEvent, username, password);
+            login(actionEvent, usernameField.getText(), passwordField.getText());
         }
     }
 
@@ -79,5 +80,13 @@ public class LoginController implements Initializable {
         usernameLabel.setText(messagingService.getUsername());
         passwordLabel.setText(messagingService.getPassword());
         loginButton.setText(messagingService.getLogin());
+    }
+
+    // theres probably a JavaFX way of doing this sort of thing...
+    private Map<Label, TextField> getFormFields() {
+        final Map<Label, TextField> formFields = new HashMap<>();
+        formFields.put(usernameLabel, usernameField);
+        formFields.put(passwordLabel, passwordField);
+        return formFields;
     }
 }

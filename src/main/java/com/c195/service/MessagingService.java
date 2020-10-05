@@ -56,12 +56,8 @@ public class MessagingService {
         return messaging.get("login.invalid");
     }
 
-    public String getEmptyUsername() {
-        return messaging.get("login.empty.username");
-    }
-
-    public String getEmptyPassword() {
-        return messaging.get("login.empty.password");
+    public String getRequiredFields() {
+        return messaging.get("required.input.field");
     }
 
     public String getDatabaseErrorTitle() {
@@ -74,10 +70,6 @@ public class MessagingService {
 
     public String getDatabaseErrorContent() {
         return messaging.get("db.error.content");
-    }
-
-    public String getDatabaseLoginError() {
-        return messaging.get("db.login.error");
     }
 
     public String getUnexpectedErrorTitle() {

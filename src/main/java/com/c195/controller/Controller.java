@@ -12,11 +12,18 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
+import javafx.scene.control.Labeled;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Making the assumption that inheritance with JavaFX controllers is probably
@@ -27,6 +34,23 @@ import java.util.Optional;
 public class Controller {
 
     public static final String TITLE = "C195 Scheduling App";
+
+    /**
+     * Provides the database connection instance. Will prompt an alert in the event
+     * that an exception is thrown while trying to establish the connection.
+     *
+     * @param messagingService for error messaging.
+     * @return optional instance of the database connection.
+     */
+    public static Optional<Connection> getDatabaseConnection(MessagingService messagingService) {
+        try {
+            return Optional.ofNullable(MysqlConnection.getInstance(MysqlConfig.getInstance()));
+        } catch (DAOConfigException e) {
+            Controller.showDatabaseAlert(messagingService);
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
 
     /**
      * Since we will most likely want to prompt the same alert for any database/query specific issues
@@ -69,20 +93,31 @@ public class Controller {
     }
 
     /**
-     * Provides the database connection instance. Will prompt an alert in the event
-     * that an exception is thrown while trying to establish the connection.
+     * Sets a given label to the invalid field message with the offended fields listed.
      *
-     * @param messagingService for error messaging.
-     * @return optional instance of the database connection.
+     * @param messageLabel     to set the message to.
+     * @param invalidLabels    labels that were not provided input.
+     * @param messagingService for the messaging to display.
      */
-    public static Optional<Connection> getDatabaseConnection(MessagingService messagingService) {
-        try {
-            return Optional.ofNullable(MysqlConnection.getInstance(MysqlConfig.getInstance()));
-        } catch (DAOConfigException e) {
-            Controller.showDatabaseAlert(messagingService);
-            e.printStackTrace();
-        }
-        return Optional.empty();
+    public static void showRequiredFieldMessage(Label messageLabel, Set<Label> invalidLabels, MessagingService messagingService) {
+        final String requiredFields = invalidLabels.stream()
+                .map(Labeled::getText)
+                .collect(Collectors.joining(", "));
+        messageLabel.setText(messagingService.getRequiredFields() + ": " + requiredFields);
+        messageLabel.setStyle("-fx-text-fill: #FF0000;");
+    }
+
+    /**
+     * Given a map of a labels to their corresponding text fields, this will identify
+     * ones that were not provided valid input (empty or null).
+     *
+     * @param textFieldMap map of labels to text fields.
+     * @return map of labels and text fields that were not provided valid input by the user.
+     */
+    public static Map<Label, TextField> getInvalidTextFields(Map<Label, TextField> textFieldMap) {
+        return textFieldMap.entrySet().stream()
+                .filter(entry -> validTextInput().negate().test(entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public static void showView(ActionEvent actionEvent, Class<?> clazz, String viewPath) throws IOException {
@@ -111,6 +146,13 @@ public class Controller {
                 messagingService.getUnexpectedErrorHeader(),
                 messagingService.getUnexpectedErrorContent())
                 .showAndWait();
+    }
+
+    private static Predicate<TextField> validTextInput() {
+        return textField -> {
+            final String text = textField.getText();
+            return text != null && !text.isEmpty();
+        };
     }
 
     private static Alert errorAlert(String title, String header, String content) {
