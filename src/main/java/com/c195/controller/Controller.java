@@ -56,7 +56,7 @@ public class Controller implements Initializable {
         try {
             return Optional.ofNullable(MysqlConnection.getInstance(MysqlConfig.getInstance()));
         } catch (DAOConfigException e) {
-            Controller.showDatabaseAlert(messagingService);
+            showDatabaseAlert();
             e.printStackTrace();
         }
         return Optional.empty();
@@ -76,7 +76,7 @@ public class Controller implements Initializable {
         try {
             return Optional.ofNullable(checkedSupplier.getWithIO());
         } catch (DAOException e) {
-            showDatabaseAlert(messagingService);
+            showDatabaseAlert();
             e.printStackTrace();
         }
         return Optional.empty();
@@ -94,7 +94,7 @@ public class Controller implements Initializable {
         try {
             showEventView(actionEvent, clazz, viewPath);
         } catch (IOException e) {
-            showUnexpectedAlert(messagingService);
+            showUnexpectedAlert();
             e.printStackTrace();
         }
     }
@@ -139,20 +139,29 @@ public class Controller implements Initializable {
         stage.setTitle(TITLE);
         stage.setScene(scene);
         stage.show();
+        stage.setOnCloseRequest(windowEvent -> closeDatabaseConnection());
+    }
+
+    public static void closeDatabaseConnection() throws RuntimeException {
+        try {
+            MysqlConnection.close();
+        } catch (DAOConfigException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void displayAsRed(Label label) {
         label.setStyle("-fx-text-fill: #FF0000;");
     }
 
-    private static void showDatabaseAlert(MessagingService messagingService) {
+    private void showDatabaseAlert() {
         errorAlert(messagingService.getDatabaseErrorTitle(),
                 messagingService.getDatabaseErrorHeader(),
                 messagingService.getDatabaseErrorContent())
                 .showAndWait();
     }
 
-    private static void showUnexpectedAlert(MessagingService messagingService) {
+    private void showUnexpectedAlert() {
         errorAlert(messagingService.getUnexpectedErrorTitle(),
                 messagingService.getUnexpectedErrorHeader(),
                 messagingService.getUnexpectedErrorContent())
