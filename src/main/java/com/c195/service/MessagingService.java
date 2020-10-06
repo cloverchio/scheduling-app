@@ -10,12 +10,7 @@ import java.util.stream.Collectors;
 /**
  * The message content is not utf-8 encoded when loaded directly from the resource bundle
  * causing special characters to not be rendered correctly. This addresses that by encoding
- * all of the messages up front and caching the encoded version in memory.
- * <p>
- * Addresses the following task requirements:
- * <p>
- * G. Write two or more lambda expressions to make your program more efficient, justifying
- * the use of each lambda expression with an in-line comment.
+ * all of the messages up front and caching the encoded versions in memory.
  */
 public class MessagingService {
 
@@ -28,12 +23,20 @@ public class MessagingService {
     }
 
     public static MessagingService getInstance() {
-        // lazy singleton initialization leveraging a lambda expression
         return Optional.ofNullable(serviceInstance)
                 .orElseGet(() -> {
                     serviceInstance = new MessagingService();
                     return serviceInstance;
                 });
+    }
+
+    private static Map<String, String> getEncodedMessageBundle(ResourceBundle resourceBundle) {
+        return resourceBundle.keySet().stream()
+                .collect(Collectors.toMap(key -> key, value -> toUTF8(resourceBundle.getString(value))));
+    }
+
+    private static String toUTF8(String message) {
+        return new String(message.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
     }
 
     public String getUsername() {
@@ -82,16 +85,5 @@ public class MessagingService {
 
     public String getUnexpectedErrorContent() {
         return messaging.get("unexpected.error.content");
-    }
-
-    private static Map<String, String> getEncodedMessageBundle(ResourceBundle resourceBundle) {
-        // caches utf-8 version of locale specific messaging
-        // lambda expression facilitates the key mapping and value transformation
-        return resourceBundle.keySet().stream()
-                .collect(Collectors.toMap(k -> k, v -> toUTF8(resourceBundle.getString(v))));
-    }
-
-    private static String toUTF8(String message) {
-        return new String(message.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
     }
 }

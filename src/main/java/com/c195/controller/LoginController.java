@@ -1,7 +1,6 @@
 package com.c195.controller;
 
 import com.c195.dao.UserDAO;
-import com.c195.service.MessagingService;
 import com.c195.service.UserService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -17,14 +16,17 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
- * Facilitates the login interactions.
+ * Login functionality.
  * <p>
  * Addresses the following task requirements:
  * <p>
  * A. Create a log-in form that can determine the user’s location and translate log-in and error control messages
  * (e.g., “The username and password did not match.”) into two languages.
+ * <p>
+ * G. Write two or more lambda expressions to make your program more efficient, justifying
+ * the use of each lambda expression with an in-line comment.
  */
-public class LoginController implements Initializable {
+public class LoginController extends Controller implements Initializable {
 
     @FXML
     private Label usernameLabel;
@@ -40,53 +42,42 @@ public class LoginController implements Initializable {
     private Button loginButton;
 
     private Map<Label, TextField> formFields;
-    private MessagingService messagingService;
     private UserService userService;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        this.messagingService = MessagingService.getInstance();
-        initializeLabelText(messagingService);
-        this.formFields = getFormFields();
-        Controller.getDatabaseConnection(messagingService)
+        super.initialize(url, resourceBundle);
+        this.messageLabel.setText(getMessagingService().getNewLogin());
+        this.usernameLabel.setText(getMessagingService().getUsername());
+        this.passwordLabel.setText(getMessagingService().getPassword());
+        this.loginButton.setText(getMessagingService().getLogin());
+        this.formFields = new HashMap<>();
+        formFields.put(usernameLabel, usernameField);
+        formFields.put(passwordLabel, passwordField);
+        // leveraging a lambda expression to initialize the user service if the connection available
+        getDatabaseConnection()
                 .ifPresent(connection -> this.userService = UserService.getInstance(UserDAO.getInstance(connection)));
     }
 
     @FXML
     public void login(ActionEvent actionEvent) {
-        final Map<Label, TextField> invalidFields = Controller.getInvalidTextFields(formFields);
+        final Map<Label, TextField> invalidFields = getInvalidTextFields(formFields);
         if (!invalidFields.isEmpty()) {
-            Controller.showRequiredFieldMessage(messageLabel, invalidFields.keySet(), messagingService);
+            showRequiredFieldMessage(messageLabel, invalidFields.keySet());
         } else {
-            login(actionEvent, usernameField.getText(), passwordField.getText());
+            // passing the user service login functionality as a supplier to the database action method
+            // which in this case will just perform some common database exception handling for controllers
+            performDatabaseAction(() -> userService.login(usernameField.getText(), passwordField.getText()))
+                    .ifPresent(validLogin -> handleLoginStatus(actionEvent, validLogin));
         }
-    }
-
-    private void login(ActionEvent actionEvent, String username, String password) {
-        Controller.performDatabaseAction(() -> userService.login(username, password), messagingService)
-                .ifPresent(validLogin -> handleLoginStatus(actionEvent, validLogin));
     }
 
     private void handleLoginStatus(ActionEvent actionEvent, boolean validLogin) {
         if (validLogin) {
-            Controller.showView(actionEvent, getClass(), "../view/main.fxml", messagingService);
+            showView(actionEvent, getClass(), "../view/main.fxml");
         } else {
-            messageLabel.setText(messagingService.getInvalidLogin());
+            this.messageLabel.setText(getMessagingService().getInvalidLogin());
+            displayAsRed(messageLabel);
         }
-    }
-
-    private void initializeLabelText(MessagingService messagingService) {
-        messageLabel.setText(messagingService.getNewLogin());
-        usernameLabel.setText(messagingService.getUsername());
-        passwordLabel.setText(messagingService.getPassword());
-        loginButton.setText(messagingService.getLogin());
-    }
-
-    // theres probably a JavaFX way of doing this sort of thing...
-    private Map<Label, TextField> getFormFields() {
-        final Map<Label, TextField> formFields = new HashMap<>();
-        formFields.put(usernameLabel, usernameField);
-        formFields.put(passwordLabel, passwordField);
-        return formFields;
     }
 }

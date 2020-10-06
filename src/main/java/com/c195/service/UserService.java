@@ -38,8 +38,8 @@ public class UserService {
      * Validates the existence of a given username and password
      * for login purposes.
      *
-     * @param username in which to validate for login.
-     * @param password in which to validate for login.
+     * @param username in which to validate for the login attempt.
+     * @param password in which to validate for the login attempt.
      * @return boolean representing the login status.
      * @throws DAOException if there are issues retrieving users from the db.
      */

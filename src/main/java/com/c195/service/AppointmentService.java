@@ -29,11 +29,11 @@ public class AppointmentService {
     }
 
     /**
-     * Gets a list of appointments to occur within the next 15 minutes for
+     * Gets a list of appointments that will occur within the next 15 minutes for
      * a given user.
      *
-     * @param userId in which to retrieve appointments for.
-     * @return list of appointments.
+     * @param userId in which to retrieve upcoming appointments for.
+     * @return list of appointments that are quickly approaching...
      * @throws DAOException if there are issues retrieving appointments from the db.
      */
     public List<AppointmentDTO> getReminderAppointmentsByUser(int userId) throws DAOException {

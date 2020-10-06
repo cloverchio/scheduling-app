@@ -1,7 +1,6 @@
 package com.c195.controller.customer;
 
 import com.c195.controller.Controller;
-import com.c195.service.MessagingService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -17,22 +16,20 @@ import java.util.ResourceBundle;
  * B. Provide the ability to add, update, and delete customer records in the database,
  * including name, address, and phone number.
  */
-public class CustomerController implements Initializable {
-
-    private MessagingService messagingService;
+public class CustomerController extends Controller implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        this.messagingService = MessagingService.getInstance();
+        super.initialize(url, resourceBundle);
     }
 
     @FXML
     public void create(ActionEvent actionEvent) {
-        Controller.showView(actionEvent, getClass(), "../../view/customer/create.fxml", messagingService);
+        showView(actionEvent, getClass(), "../../view/customer/create.fxml");
     }
 
     @FXML
-    public void cancel(ActionEvent actionEvent)  {
-        Controller.showView(actionEvent, getClass(), "../../view/main.fxml", messagingService);
+    public void cancel(ActionEvent actionEvent) {
+        showView(actionEvent, getClass(), "../../view/main.fxml");
     }
 }

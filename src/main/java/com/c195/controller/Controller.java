@@ -8,6 +8,7 @@ import com.c195.dao.config.MysqlConnection;
 import com.c195.service.MessagingService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -18,31 +19,40 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
 import java.sql.Connection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * Making the assumption that inheritance with JavaFX controllers is probably
- * more of a pain than I want to deal with right now. That being said, this
- * class represents what perhaps a base controller class would look like in my case
- * by including some common functionality.
+ * Common functionality.
  */
-public class Controller {
+public class Controller implements Initializable {
 
     public static final String TITLE = "C195 Scheduling App";
+
+    private MessagingService messagingService;
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        this.messagingService = MessagingService.getInstance();
+    }
+
+    public MessagingService getMessagingService() {
+        return messagingService;
+    }
 
     /**
      * Provides the database connection instance. Will prompt an alert in the event
      * that an exception is thrown while trying to establish the connection.
      *
-     * @param messagingService for error messaging.
      * @return optional instance of the database connection.
      */
-    public static Optional<Connection> getDatabaseConnection(MessagingService messagingService) {
+    public Optional<Connection> getDatabaseConnection() {
         try {
             return Optional.ofNullable(MysqlConnection.getInstance(MysqlConfig.getInstance()));
         } catch (DAOConfigException e) {
@@ -58,12 +68,11 @@ public class Controller {
      * Should also check off the lambda usage requirements for the project as all callers of this function
      * can provide the database action using the functional interface.
      *
-     * @param checkedSupplier  the database operation to be performed as a supplier.
-     * @param messagingService for the alert messaging.
-     * @param <T>              the return type expected from the database operation.
+     * @param checkedSupplier the database operation to be performed as a supplier.
+     * @param <T>             the return type expected from the database operation.
      * @return optional of the database operation's expected return type.
      */
-    public static <T> Optional<T> performDatabaseAction(CheckedSupplier<T> checkedSupplier, MessagingService messagingService) {
+    public <T> Optional<T> performDatabaseAction(CheckedSupplier<T> checkedSupplier) {
         try {
             return Optional.ofNullable(checkedSupplier.getWithIO());
         } catch (DAOException e) {
@@ -77,15 +86,13 @@ public class Controller {
      * Wraps the view transitioning functionality. Which is expected to remain the same across
      * all sections of the app. With the exception of maybe the main entry point {@link com.c195.App}.
      *
-     * @param actionEvent      event that corresponds with the transition.
-     * @param clazz            controller class.
-     * @param viewPath         path of the view to transition to.
-     * @param messagingService for error messaging.
+     * @param actionEvent event that corresponds with the transition.
+     * @param clazz       controller class.
+     * @param viewPath    path of the view to transition to.
      */
-    public static void showView(ActionEvent actionEvent, Class<?> clazz,
-                                String viewPath, MessagingService messagingService) {
+    public void showView(ActionEvent actionEvent, Class<?> clazz, String viewPath) {
         try {
-            showView(actionEvent, clazz, viewPath);
+            showEventView(actionEvent, clazz, viewPath);
         } catch (IOException e) {
             showUnexpectedAlert(messagingService);
             e.printStackTrace();
@@ -93,26 +100,26 @@ public class Controller {
     }
 
     /**
-     * Sets a given label to the invalid field message with the offended fields listed.
+     * Sets a given label to the invalid field message with the labels
+     * of the offending text fields appended.
      *
-     * @param messageLabel     to set the message to.
-     * @param invalidLabels    labels that were not provided input.
-     * @param messagingService for the messaging to display.
+     * @param messageLabel  to set the invalid field message to.
+     * @param invalidLabels labels that correspond to the invalid text fields.
      */
-    public static void showRequiredFieldMessage(Label messageLabel, Set<Label> invalidLabels, MessagingService messagingService) {
+    public void showRequiredFieldMessage(Label messageLabel, Set<Label> invalidLabels) {
         final String requiredFields = invalidLabels.stream()
                 .map(Labeled::getText)
                 .collect(Collectors.joining(", "));
         messageLabel.setText(messagingService.getRequiredFields() + ": " + requiredFields);
-        messageLabel.setStyle("-fx-text-fill: #FF0000;");
+        displayAsRed(messageLabel);
     }
 
     /**
      * Given a map of a labels to their corresponding text fields, this will identify
-     * ones that were not provided valid input (empty or null).
+     * ones that did not provided valid input (empty or null).
      *
      * @param textFieldMap map of labels to text fields.
-     * @return map of labels and text fields that were not provided valid input by the user.
+     * @return map of labels and text fields that did not provide valid input.
      */
     public static Map<Label, TextField> getInvalidTextFields(Map<Label, TextField> textFieldMap) {
         return textFieldMap.entrySet().stream()
@@ -120,7 +127,7 @@ public class Controller {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public static void showView(ActionEvent actionEvent, Class<?> clazz, String viewPath) throws IOException {
+    public static void showEventView(ActionEvent actionEvent, Class<?> clazz, String viewPath) throws IOException {
         ((Node) (actionEvent.getSource())).getScene().getWindow().hide();
         showView(clazz, viewPath);
     }
@@ -134,14 +141,18 @@ public class Controller {
         stage.show();
     }
 
-    public static void showDatabaseAlert(MessagingService messagingService) {
+    public static void displayAsRed(Label label) {
+        label.setStyle("-fx-text-fill: #FF0000;");
+    }
+
+    private static void showDatabaseAlert(MessagingService messagingService) {
         errorAlert(messagingService.getDatabaseErrorTitle(),
                 messagingService.getDatabaseErrorHeader(),
                 messagingService.getDatabaseErrorContent())
                 .showAndWait();
     }
 
-    public static void showUnexpectedAlert(MessagingService messagingService) {
+    private static void showUnexpectedAlert(MessagingService messagingService) {
         errorAlert(messagingService.getUnexpectedErrorTitle(),
                 messagingService.getUnexpectedErrorHeader(),
                 messagingService.getUnexpectedErrorContent())
