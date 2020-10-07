@@ -1,8 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.AnchorPane?>
-<AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.c195.controller.customer.CustomerEditController" prefHeight="400.0" prefWidth="600.0">
-    <Button onAction="#saveCustomer" layoutX="310.0" layoutY="330.0" mnemonicParsing="false" prefHeight="48.0" prefWidth="122.0" text="Save"/>
-    <Button layoutX="465.0" layoutY="330.0" mnemonicParsing="false" prefHeight="48.0" prefWidth="122.0" text="Cancel"/>
+<?import javafx.scene.text.Font?>
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.c195.controller.customer.CustomerCreateController">
+    <Label contentDisplay="CENTER" layoutX="84.0" layoutY="8.0" prefHeight="55.0" prefWidth="499.0" text="Create New Customer">
+        <font>
+            <Font size="24.0" />
+        </font>
+    </Label>
+    <Label layoutX="66.0" layoutY="63.0" prefHeight="37.0" prefWidth="499.0" />
+   <Label fx:id="nameLabel" layoutX="84.0" layoutY="108.0" prefHeight="26.0" prefWidth="51.0" text="Name" />
+    <TextField fx:id="nameField" layoutX="148.0" layoutY="108.0" prefHeight="26.0" prefWidth="176.0" />
+    <Label layoutX="344.0" layoutY="113.0" text="Active" />
+    <CheckBox fx:id="active" layoutX="415.0" layoutY="112.0" mnemonicParsing="false" />
+   <Label fx:id="addressLabel" layoutX="84.0" layoutY="155.0" prefHeight="26.0" prefWidth="57.0" text="Address" />
+   <TextField fx:id="addressField" layoutX="148.0" layoutY="155.0" prefHeight="26.0" prefWidth="176.0" />
+   <Label fx:id="aptLabel" layoutX="344.0" layoutY="160.0" text="Apt" />
+   <TextField fx:id="aptField" layoutX="415.0" layoutY="160.0" prefHeight="26.0" prefWidth="57.0" />
+   <Label fx:id="cityLabel" layoutX="84.0" layoutY="200.0" prefHeight="26.0" prefWidth="57.0" text="City" />
+   <TextField fx:id="cityField" layoutX="148.0" layoutY="200.0" prefHeight="26.0" prefWidth="176.0" />
+   <Label fx:id="countryLabel" layoutX="344.0" layoutY="200.0" prefHeight="26.0" prefWidth="57.0" text="Country" />
+   <TextField fx:id="countryField" layoutX="415.0" layoutY="200.0" prefHeight="26.0" prefWidth="100.0" />
+   <Label fx:id="phoneLabel" layoutX="84.0" layoutY="250.0" prefHeight="26.0" prefWidth="57.0" text="Phone" />
+   <TextField fx:id="phoneField" layoutX="148.0" layoutY="250.0" prefHeight="26.0" prefWidth="176.0" />
+    <Label fx:id="postalCodeLabel" layoutX="344.0" layoutY="250.0" prefHeight="26.0" prefWidth="57.0" text="Zip" />
+   <TextField fx:id="postalCodeField" layoutX="415.0" layoutY="250.0" prefHeight="26.0" prefWidth="100.0" />
+    <Button layoutX="84.0" layoutY="318.0" mnemonicParsing="false" onAction="#cancel" prefHeight="48.0" prefWidth="122.0" text="Cancel" />
+    <Button layoutX="222.0" layoutY="318.0" mnemonicParsing="false" onAction="#saveCustomer" prefHeight="48.0" prefWidth="122.0" text="Save" />
 </AnchorPane>

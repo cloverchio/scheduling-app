@@ -8,6 +8,7 @@ import com.c195.dao.*;
 import com.c195.service.AddressService;
 import com.c195.service.CustomerService;
 import com.c195.service.UserService;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
@@ -19,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-public class CustomerEditController extends Controller implements Initializable {
+public class CustomerManagementController extends Controller implements Initializable {
 
     @FXML
     private Label messageLabel;
@@ -80,6 +81,12 @@ public class CustomerEditController extends Controller implements Initializable 
                 });
     }
 
+    @FXML
+    public void cancel(ActionEvent actionEvent) {
+        showView(actionEvent, getClass(), "../../view/customer/customer.fxml");
+    }
+
+    @FXML
     public void saveCustomer() {
         userService.getCurrentUser()
                 .map(UserDTO::getUsername)
