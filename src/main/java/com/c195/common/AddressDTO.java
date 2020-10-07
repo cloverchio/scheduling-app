@@ -2,7 +2,7 @@ package com.c195.common;
 
 public class AddressDTO {
 
-    private final int id;
+    private final Integer id;
     private final String address;
     private final String address2;
     private final String city;
@@ -20,7 +20,7 @@ public class AddressDTO {
         this.phone = builder.phone;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -50,7 +50,7 @@ public class AddressDTO {
 
     public static class Builder {
 
-        private int id;
+        private Integer id;
         private String address;
         private String address2;
         private String city;
@@ -58,7 +58,7 @@ public class AddressDTO {
         private String postalCode;
         private String phone;
 
-        public Builder withId(int id) {
+        public Builder withId(Integer id) {
             this.id = id;
             return this;
         }

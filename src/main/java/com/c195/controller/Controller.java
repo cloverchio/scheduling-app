@@ -47,19 +47,25 @@ public class Controller implements Initializable {
     }
 
     /**
-     * Provides the database connection instance. Will prompt an alert in the event
-     * that an exception is thrown while trying to establish the connection.
+     * This is probably crossing the line but the result of an idea I had to reuse the form field
+     * validation in conjunction with a database operation. Which are things we will most likely
+     * want to do on every form submission across the project.
      *
-     * @return optional instance of the database connection.
+     * @param messageLabel       label in which the validation message will be set to.
+     * @param formFields         fields to perform validation on.
+     * @param formDatabaseAction database action to be performed if no invalid fields.
+     * @param <T>                the return type expected from the database operation.
+     * @return optional of the database operation's expected return type.
      */
-    public Optional<Connection> getDatabaseConnection() {
-        try {
-            return Optional.ofNullable(MysqlConnection.getInstance(MysqlConfig.getInstance()));
-        } catch (DAOConfigException e) {
-            showDatabaseAlert();
-            e.printStackTrace();
+    public <T> Optional<T> formFieldSubmitAction(Label messageLabel, Map<Label, TextField> formFields,
+                                                 CheckedSupplier<T> formDatabaseAction) {
+        final Map<Label, TextField> invalidFields = getInvalidTextFields(formFields);
+        if (!invalidFields.isEmpty()) {
+            showRequiredFieldMessage(messageLabel, invalidFields.keySet());
+            return Optional.empty();
+        } else {
+            return performDatabaseAction(formDatabaseAction);
         }
-        return Optional.empty();
     }
 
     /**
@@ -76,6 +82,22 @@ public class Controller implements Initializable {
         try {
             return Optional.ofNullable(checkedSupplier.getWithIO());
         } catch (DAOException e) {
+            showDatabaseAlert();
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Provides the database connection instance. Will prompt an alert in the event
+     * that an exception is thrown while trying to establish the connection.
+     *
+     * @return optional instance of the database connection.
+     */
+    public Optional<Connection> getDatabaseConnection() {
+        try {
+            return Optional.ofNullable(MysqlConnection.getInstance(MysqlConfig.getInstance()));
+        } catch (DAOConfigException e) {
             showDatabaseAlert();
             e.printStackTrace();
         }

@@ -1,5 +1,6 @@
 package com.c195.service;
 
+import com.c195.common.UserDTO;
 import com.c195.dao.DAOException;
 import com.c195.dao.UserDAO;
 import com.c195.model.User;
@@ -30,8 +31,9 @@ public class UserService {
      *
      * @return optional representing the current user.
      */
-    public Optional<User> getCurrentUser() {
-        return Optional.ofNullable(currentUser);
+    public Optional<UserDTO> getCurrentUser() {
+        return Optional.ofNullable(currentUser)
+                .map(UserService::toUserDTO);
     }
 
     /**
@@ -53,5 +55,13 @@ public class UserService {
      */
     public void logout() {
         getCurrentUser().ifPresent(currentUser -> this.currentUser = null);
+    }
+
+    private static UserDTO toUserDTO(User user) {
+        return new UserDTO.Builder()
+                .withId(user.getId())
+                .withUsername(user.getUsername())
+                .withActive(user.isActive())
+                .build();
     }
 }

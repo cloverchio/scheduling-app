@@ -2,7 +2,7 @@ package com.c195.common;
 
 public class CustomerDTO {
 
-    private final int id;
+    private final Integer id;
     private final String name;
     private final boolean isActive;
     private final AddressDTO addressDTO;
@@ -14,7 +14,7 @@ public class CustomerDTO {
         this.addressDTO = builder.addressDTO;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -32,12 +32,12 @@ public class CustomerDTO {
 
     public static class Builder {
 
-        private int id;
+        private Integer id;
         private String name;
         private boolean isActive;
         private AddressDTO addressDTO;
 
-        public Builder withId(int id) {
+        public Builder withId(Integer id) {
             this.id = id;
             return this;
         }

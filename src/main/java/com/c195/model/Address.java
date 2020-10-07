@@ -2,7 +2,7 @@ package com.c195.model;
 
 public class Address {
 
-    private int id;
+    private Integer id;
     private String address;
     private String address2;
     private City city;
@@ -10,11 +10,11 @@ public class Address {
     private String phone;
     private Metadata metadata;
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

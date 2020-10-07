@@ -2,17 +2,17 @@ package com.c195.model;
 
 public class Customer {
 
-    private int id;
+    private Integer id;
     private String name;
     private Address address;
     private boolean isActive;
     private Metadata metadata;
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

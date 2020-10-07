@@ -29,13 +29,13 @@ import java.util.ResourceBundle;
 public class LoginController extends Controller implements Initializable {
 
     @FXML
-    private Label usernameLabel;
-    @FXML
-    private Label passwordLabel;
-    @FXML
     private Label messageLabel;
     @FXML
+    private Label usernameLabel;
+    @FXML
     private TextField usernameField;
+    @FXML
+    private Label passwordLabel;
     @FXML
     private PasswordField passwordField;
     @FXML
@@ -61,15 +61,11 @@ public class LoginController extends Controller implements Initializable {
 
     @FXML
     public void login(ActionEvent actionEvent) {
-        final Map<Label, TextField> invalidFields = getInvalidTextFields(formFields);
-        if (!invalidFields.isEmpty()) {
-            showRequiredFieldMessage(messageLabel, invalidFields.keySet());
-        } else {
-            // passing the user service login functionality as a supplier to the database action method
-            // which in this case will just perform some common database exception handling for controllers
-            performDatabaseAction(() -> userService.login(usernameField.getText(), passwordField.getText()))
-                    .ifPresent(validLogin -> handleLoginStatus(actionEvent, validLogin));
-        }
+        // passing the user service login functionality as a supplier to the form action method
+        // which in this case will perform some validation and exception handling under the hood
+        formFieldSubmitAction(messageLabel, formFields,
+                () -> userService.login(usernameField.getText(), passwordField.getText()))
+                .ifPresent(validLogin -> handleLoginStatus(actionEvent, validLogin));
     }
 
     private void handleLoginStatus(ActionEvent actionEvent, boolean validLogin) {

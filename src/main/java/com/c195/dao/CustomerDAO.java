@@ -45,14 +45,10 @@ public class CustomerDAO {
             "WHERE customerId = ?";
 
     private static final String DELETE_CUSTOMER_BY_ID_SQL = "" +
-            "DELETE cu, a, ci, co " +
+            "DELETE cu, a " +
             "FROM customer cu " +
             "JOIN address a " +
             "ON cu.addressId = a.addressId " +
-            "JOIN city ci " +
-            "ON a.cityId = ci.cityId " +
-            "JOIN country co " +
-            "ON ci.countryId = co.countryId " +
             "WHERE customerId = ?";
 
     private static CustomerDAO daoInstance;

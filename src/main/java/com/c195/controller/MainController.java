@@ -1,8 +1,8 @@
 package com.c195.controller;
 
+import com.c195.common.UserDTO;
 import com.c195.dao.AppointmentDAO;
 import com.c195.dao.UserDAO;
-import com.c195.model.User;
 import com.c195.service.AppointmentService;
 import com.c195.service.UserService;
 import javafx.event.ActionEvent;
@@ -53,7 +53,7 @@ public class MainController extends Controller implements Initializable {
 
     private void getUpcomingAppointmentReminder() {
         userService.getCurrentUser()
-                .map(User::getId)
+                .map(UserDTO::getId)
                 .ifPresent(this::showAppointmentReminder);
     }
 
