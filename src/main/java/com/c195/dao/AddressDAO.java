@@ -18,6 +18,15 @@ public class AddressDAO {
             "on ci.countryId = co.countryId " +
             "WHERE addressId = ?";
 
+    private static final String ADDRESS_SQL = "" +
+            "SELECT * " +
+            "FROM address a " +
+            "JOIN city ci " +
+            "ON a.cityId = ci.cityId " +
+            "JOIN country co " +
+            "on ci.countryId = co.countryId " +
+            "WHERE address = ?";
+
     private static final String ALL_ADDRESSES_SQL = "" +
             "SELECT * " +
             "FROM address a" +
@@ -69,6 +78,19 @@ public class AddressDAO {
     public Optional<Address> getAddressById(int id) throws DAOException {
         try (PreparedStatement statement = connection.prepareStatement(ADDRESS_BY_ID_SQL)) {
             statement.setInt(1, id);
+            final ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return Optional.of(toAddress(resultSet));
+            }
+            return Optional.empty();
+        } catch (SQLException e) {
+            throw new DAOException("there was an issue retrieving an address", e);
+        }
+    }
+
+    public Optional<Address> getAddress(String address) throws DAOException {
+        try (PreparedStatement statement = connection.prepareStatement(ADDRESS_SQL)) {
+            statement.setString(1, address);
             final ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return Optional.of(toAddress(resultSet));

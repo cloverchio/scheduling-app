@@ -1,12 +1,16 @@
 package com.c195.service;
 
+import com.c195.common.AddressDTO;
 import com.c195.common.CustomerDTO;
 import com.c195.dao.CustomerDAO;
 import com.c195.dao.DAOException;
 import com.c195.dao.MetadataDAO;
+import com.c195.model.Address;
 import com.c195.model.Customer;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class CustomerService {
 
@@ -28,31 +32,47 @@ public class CustomerService {
     }
 
     /**
-     * Saves the customer and associated address data.
+     * Retrieves the information for all existing customers.
      *
-     * @param customerDTO customer information in which to save.
-     * @param currentUser the user initiating the save.
-     * @throws DAOException if there are issues saving the customer to the db.
+     * @return list of {@link CustomerDTO}.
+     * @throws DAOException if there are issues retrieving customers from the db.
      */
-    public void saveCustomer(CustomerDTO customerDTO, String currentUser) throws DAOException {
-        addressService.saveAddress(customerDTO.getAddressDTO(), currentUser);
-        final Customer customer = toCustomer(customerDTO);
-        customer.setMetadata(MetadataDAO.getSaveMetadata(currentUser));
-        customerDAO.saveCustomer(customer);
+    public List<CustomerDTO> getAllCustomers() throws DAOException {
+        return customerDAO.getAllCustomers().stream()
+                .map(CustomerService::toCustomerDTO)
+                .collect(Collectors.toList());
     }
 
     /**
-     * Updates the customer and associated address data.
+     * Saves the customer and its associated address data.
+     *
+     * @param customerDTO customer information in which to save.
+     * @param currentUser the user initiating the save.
+     * @return the id of the saved customer.
+     * @throws DAOException if there are issues saving the customer to the db.
+     */
+    public Integer saveCustomer(CustomerDTO customerDTO, String currentUser) throws DAOException {
+        final Customer customer = toCustomer(customerDTO);
+        setAddress(customer, customerDTO.getAddressDTO(), currentUser);
+        customer.setMetadata(MetadataDAO.getSaveMetadata(currentUser));
+        customerDAO.saveCustomer(customer);
+        return customer.getId();
+    }
+
+    /**
+     * Updates the customer and its associated address data.
      *
      * @param customerDTO customer information in which to update.
      * @param currentUser the user initiating the update.
+     * @return the id of the updated customer.
      * @throws DAOException if there are issues updating the customer in the db.
      */
-    public void updateCustomer(CustomerDTO customerDTO, String currentUser) throws DAOException {
+    public Integer updateCustomer(CustomerDTO customerDTO, String currentUser) throws DAOException {
         addressService.updateAddress(customerDTO.getAddressDTO(), currentUser);
         final Customer customer = toCustomer(customerDTO);
         customer.setMetadata(MetadataDAO.getUpdateMetadata(currentUser));
         customerDAO.updateCustomer(customer);
+        return customer.getId();
     }
 
     /**
@@ -66,6 +86,27 @@ public class CustomerService {
      */
     public void deleteCustomer(int customerId) throws DAOException {
         customerDAO.deleteCustomerById(customerId);
+    }
+
+    /**
+     * Performing the same existence check that {@link AddressService} is doing for its dependencies.
+     * Also to save the sanctity of my service classes (not allowing database classes outside of them) the
+     * original AddressDTO unfortunately needs to be passed here as well.
+     *
+     * @param customer customer information in which to save.
+     * @param addressDTO address information associated with the customer.
+     * @param currentUser user initiating the save.
+     * @throws DAOException if there are issues saving address in the db.
+     */
+    private void setAddress(Customer customer, AddressDTO addressDTO, String currentUser) throws DAOException {
+        final Optional<Address> existingAddress = addressService.getAddress(addressDTO.getAddress())
+                .map(AddressService::toAddress);
+        if (existingAddress.isPresent()) {
+            customer.setAddress(existingAddress.get());
+        } else {
+            final int addressId = addressService.saveAddress(addressDTO, currentUser);
+            customer.getAddress().setId(addressId);
+        }
     }
 
     public static Customer toCustomer(CustomerDTO customerDTO) {

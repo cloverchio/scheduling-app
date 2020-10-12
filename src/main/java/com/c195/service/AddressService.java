@@ -30,34 +30,47 @@ public class AddressService {
     }
 
     /**
+     * Retrieves address information by the associated address field.
+     *
+     * @param address in which to retrieve information for.
+     * @return address data associated with the given address.
+     * @throws DAOException if there are issues retrieving the address from the db.
+     */
+    public Optional<AddressDTO> getAddress(String address) throws DAOException {
+        return addressDAO.getAddress(address)
+                .map(AddressService::toAddressDTO);
+    }
+
+    /**
      * Saves address data.
      * <p>
-     * This ended up being uglier than I would of liked...
      * Country has a one to many relationship with City and City has a one to many relationship
      * with Address, which makes things a little tricky. Under normal circumstances
      * where I'm in control of the table I could opt for unique keys on the country and city name
-     * columns allowing me to perform a INSERT/UPDATE IF EXISTS query in cases where country or city
-     * already exist. Unfortunately the underlying tables for this project only have auto-incrementing id keys,
-     * which means the country/city/address tables can have as many duplicates as they want. They'll just get
-     * new ids...
+     * columns, allowing me to perform a INSERT/UPDATE IF EXISTS query in cases where values for those columns
+     * already exist. Unfortunately the underlying tables for this project only use auto-incrementing id keys,
+     * which means that the country/city/address tables can have as many duplicate values as they want because they
+     * will just get assigned new ids. For example this allows you to have several USA's in the country table,
+     * or several Phoenixs in the city table.
      * <p>
-     * To work around this, I guess I have to perform a series of checks. When saving the address
-     * I first take a look at the city and see if that already exists by name. If so I set the city id
-     * in the address to that and move on. In the event that the city doesn't already exist, a similar
-     * check for country is performed. If the country does not exist, we'll manually cascade. Saving country,
-     * followed by the city and then the address.
+     * I'll attempt to avoid that by performing a couple of simple but ugly checks. When saving the address I'll
+     * first query the city name to see if it already exists. If it already exists, I can set the city id within the
+     * address to that and move on. In the event that the city doesn't already exist, then I'll do the same exact
+     * thing for country. If the country doesn't already exist, the country will be saved, followed by the city.
      * <p>
-     * This at the very least should help avoid duplicates.
+     * This avoids having duplicate values in the table, despite the rows having unique keys.
      *
      * @param addressDTO  address information in which to be saved.
      * @param currentUser the user initiating the save.
+     * @return the id of the saved address.
      * @throws DAOException if there are issues saving the address to the db.
      */
-    public void saveAddress(AddressDTO addressDTO, String currentUser) throws DAOException {
+    public Integer saveAddress(AddressDTO addressDTO, String currentUser) throws DAOException {
         final Address address = toAddress(addressDTO);
         address.setMetadata(MetadataDAO.getSaveMetadata(currentUser));
         setCity(address, currentUser);
         addressDAO.saveAddress(address);
+        return address.getId();
     }
 
     /**
@@ -69,22 +82,25 @@ public class AddressService {
      *
      * @param addressDTO  address information in which to be updated.
      * @param currentUser the user initiating the update.
+     * @return the id of the updated address.
      * @throws DAOException if there are issues updating the address in the db.
      */
-    public void updateAddress(AddressDTO addressDTO, String currentUser) throws DAOException {
+    public Integer updateAddress(AddressDTO addressDTO, String currentUser) throws DAOException {
         final Address address = toAddress(addressDTO);
         address.setMetadata(MetadataDAO.getUpdateMetadata(currentUser));
         setCity(address, currentUser);
         addressDAO.updateAddress(address);
+        return address.getId();
     }
 
     private void setCity(Address address, String currentUser) throws DAOException {
         final City city = address.getCity();
         final Optional<City> existingCity = cityDAO.getCityByName(city.getCity());
         if (existingCity.isPresent()) {
-            address.getCity().setId(existingCity.get().getId());
+            address.setCity(existingCity.get());
         } else {
             setCountry(city, currentUser);
+            city.setMetadata(MetadataDAO.getSaveMetadata(currentUser));
             cityDAO.saveCity(city);
         }
     }
@@ -92,7 +108,7 @@ public class AddressService {
     private void setCountry(City city, String currentUser) throws DAOException {
         final Optional<Country> existingCountry = countryDAO.getCountryByName(city.getCountry().getCountry());
         if (existingCountry.isPresent()) {
-            city.setId(existingCountry.get().getId());
+            city.setCountry(existingCountry.get());
         } else {
             final Country country = city.getCountry();
             country.setMetadata(MetadataDAO.getSaveMetadata(currentUser));

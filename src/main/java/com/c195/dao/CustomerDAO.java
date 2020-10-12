@@ -32,8 +32,8 @@ public class CustomerDAO {
 
     private static final String SAVE_CUSTOMER_SQL = "" +
             "INSERT INTO customer " +
-            "(customerId, customerName, addressId, active, createDate, createdBy, lastUpdateBy) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?)";
+            "(customerName, addressId, active, createDate, createdBy, lastUpdateBy) " +
+            "VALUES (?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE_CUSTOMER_SQL = "" +
             "UPDATE customer " +
@@ -94,13 +94,12 @@ public class CustomerDAO {
 
     public void saveCustomer(Customer customer) throws DAOException {
         try (final PreparedStatement statement = connection.prepareStatement(SAVE_CUSTOMER_SQL, Statement.RETURN_GENERATED_KEYS)) {
-            statement.setInt(1, customer.getId());
-            statement.setString(2, customer.getName().toLowerCase());
-            statement.setInt(3, customer.getAddress().getId());
-            statement.setBoolean(4, customer.isActive());
-            statement.setTimestamp(5, Timestamp.from(customer.getMetadata().getCreatedDate()));
-            statement.setString(6, customer.getMetadata().getCreatedBy().toLowerCase());
-            statement.setString(7, customer.getMetadata().getUpdatedBy().toLowerCase());
+            statement.setString(1, customer.getName().toLowerCase());
+            statement.setInt(2, customer.getAddress().getId());
+            statement.setBoolean(3, customer.isActive());
+            statement.setTimestamp(4, Timestamp.from(customer.getMetadata().getCreatedDate()));
+            statement.setString(5, customer.getMetadata().getCreatedBy().toLowerCase());
+            statement.setString(6, customer.getMetadata().getUpdatedBy().toLowerCase());
             statement.executeUpdate();
             final ResultSet generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next()) {

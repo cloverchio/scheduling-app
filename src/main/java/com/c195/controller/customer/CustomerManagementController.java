@@ -1,6 +1,7 @@
 package com.c195.controller.customer;
 
 import com.c195.common.AddressDTO;
+import com.c195.common.CheckedSupplier;
 import com.c195.common.CustomerDTO;
 import com.c195.common.UserDTO;
 import com.c195.controller.Controller;
@@ -88,37 +89,42 @@ public class CustomerManagementController extends Controller implements Initiali
 
     @FXML
     public void saveCustomer() {
+        // gets the username of the current user
+        // maps that username to a saved customer id (implicitly saves the customer)
+        // displays messaging to the user if a customer id was returned
         userService.getCurrentUser()
                 .map(UserDTO::getUsername)
-                .ifPresent(this::saveCustomer);
+                .map(this::saveCustomer)
+                .ifPresent(savedCustomerId -> messageLabel.setText("Customer has been saved!"));
     }
 
+    @FXML
     public void updateCustomer(int customerId, int addressId) {
+        // gets the username of the current user
+        // maps that username to an updated customer id (implicitly updates the customer)
+        // displays messaging to the user if a customer id was returned
         userService.getCurrentUser()
                 .map(UserDTO::getUsername)
-                .ifPresent(username -> updateCustomer(customerId, addressId, username));
+                .map(username -> updateCustomer(customerId, addressId, username))
+                .ifPresent(updatedCustomerId -> messageLabel.setText("Customer has been updated!"));
     }
 
-    private void saveCustomer(String currentUser) {
-        formFieldSubmitAction(messageLabel, formFields, () -> {
-            final AddressDTO addressDTO = getAddressDTO().build();
-            final CustomerDTO customerDTO = getCustomerDTO(addressDTO).build();
-            customerService.saveCustomer(customerDTO, currentUser);
-            return null;
-        });
+    private Integer saveCustomer(String currentUser) {
+        final AddressDTO addressDTO = getAddressDTO().build();
+        final CustomerDTO customerDTO = getCustomerDTO(addressDTO).build();
+        final CheckedSupplier<Integer> databaseAction = () -> customerService.saveCustomer(customerDTO, currentUser);
+        return formFieldSubmitAction(messageLabel, formFields, databaseAction).orElse(null);
     }
 
-    private void updateCustomer(int customerId, int addressId, String currentUser) {
-        formFieldSubmitAction(messageLabel, formFields, () -> {
-            final AddressDTO addressDTO = getAddressDTO()
-                    .withId(addressId)
-                    .build();
-            final CustomerDTO customerDTO = getCustomerDTO(addressDTO)
-                    .withId(customerId)
-                    .build();
-            customerService.updateCustomer(customerDTO, currentUser);
-            return null;
-        });
+    private Integer updateCustomer(int customerId, int addressId, String currentUser) {
+        final AddressDTO addressDTO = getAddressDTO()
+                .withId(addressId)
+                .build();
+        final CustomerDTO customerDTO = getCustomerDTO(addressDTO)
+                .withId(customerId)
+                .build();
+        final CheckedSupplier<Integer> databaseAction = () -> customerService.updateCustomer(customerDTO, currentUser);
+        return formFieldSubmitAction(messageLabel, formFields, databaseAction).orElse(null);
     }
 
     private CustomerDTO.Builder getCustomerDTO(AddressDTO addressDTO) {
