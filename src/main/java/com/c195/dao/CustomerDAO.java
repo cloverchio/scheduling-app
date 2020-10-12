@@ -22,7 +22,7 @@ public class CustomerDAO {
 
     private static final String ALL_CUSTOMERS_SQL = "" +
             "SELECT * " +
-            "FROM customer cu" +
+            "FROM customer cu " +
             "JOIN address a " +
             "ON cu.addressId = a.addressId " +
             "JOIN city ci " +
@@ -80,9 +80,9 @@ public class CustomerDAO {
     }
 
     public List<Customer> getAllCustomers() throws DAOException {
-        try (final PreparedStatement statement = connection.prepareStatement(ALL_CUSTOMERS_SQL)) {
+        try (final Statement statement = connection.createStatement()) {
             final List<Customer> customers = new ArrayList<>();
-            final ResultSet resultSet = statement.executeQuery();
+            final ResultSet resultSet = statement.executeQuery(ALL_CUSTOMERS_SQL);
             while (resultSet.next()) {
                 customers.add(toCustomer(resultSet));
             }

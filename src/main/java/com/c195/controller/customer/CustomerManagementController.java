@@ -9,6 +9,8 @@ import com.c195.dao.*;
 import com.c195.service.AddressService;
 import com.c195.service.CustomerService;
 import com.c195.service.UserService;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -83,7 +85,7 @@ public class CustomerManagementController extends Controller implements Initiali
     }
 
     @FXML
-    public void cancel(ActionEvent actionEvent) {
+    public void cancelCustomerManagement(ActionEvent actionEvent) {
         showView(actionEvent, getClass(), "../../view/customer/customer.fxml");
     }
 
@@ -98,7 +100,6 @@ public class CustomerManagementController extends Controller implements Initiali
                 .ifPresent(savedCustomerId -> messageLabel.setText("Customer has been saved!"));
     }
 
-    @FXML
     public void updateCustomer(int customerId, int addressId) {
         // gets the username of the current user
         // maps that username to an updated customer id (implicitly updates the customer)
@@ -107,6 +108,19 @@ public class CustomerManagementController extends Controller implements Initiali
                 .map(UserDTO::getUsername)
                 .map(username -> updateCustomer(customerId, addressId, username))
                 .ifPresent(updatedCustomerId -> messageLabel.setText("Customer has been updated!"));
+    }
+
+    public void deleteCustomer(int customerId) {
+        performDatabaseAction(() -> {
+            customerService.deleteCustomer(customerId);
+            return null;
+        });
+    }
+
+    public ObservableList<CustomerDTO> getAllCustomers() {
+        return performDatabaseAction(() -> customerService.getAllCustomers())
+                .map(FXCollections::observableList)
+                .orElse(FXCollections.emptyObservableList());
     }
 
     private Integer saveCustomer(String currentUser) {
