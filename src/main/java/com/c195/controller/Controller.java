@@ -9,9 +9,7 @@ import com.c195.service.MessagingService;
 import com.c195.util.ControllerUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
-import javafx.scene.control.Labeled;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
 import java.io.IOException;
 import java.net.URL;
@@ -36,6 +34,22 @@ public class Controller implements Initializable {
 
     public MessagingService getMessagingService() {
         return messagingService;
+    }
+
+    /**
+     * Displays a confirmation dialogue to the user for specific actions
+     * such as deletions. Will only perform the desired action if the user clicks
+     * the ok button.
+     *
+     * @param confirmedDatabaseAction action to be performed upon confirmation.
+     * @param <T>                     the return type expected from the database operation.
+     */
+    public <T> void showConfirmation(CheckedSupplier<T> confirmedDatabaseAction) {
+        showConfirmationAlert().ifPresent((response -> {
+            if (response == ButtonType.OK) {
+                performDatabaseAction(confirmedDatabaseAction);
+            }
+        }));
     }
 
     /**
@@ -128,15 +142,22 @@ public class Controller implements Initializable {
         ControllerUtils.displayAsRed(messageLabel);
     }
 
-    private void showDatabaseAlert() {
-        ControllerUtils.errorAlert(messagingService.getDatabaseErrorTitle(),
+    private Optional<ButtonType> showConfirmationAlert() {
+        return ControllerUtils.infoAlert(messagingService.getConfirmationTitle(),
+                messagingService.getConfirmationHeader(),
+                messagingService.getConfirmationContent())
+                .showAndWait();
+    }
+
+    private Optional<ButtonType> showDatabaseAlert() {
+        return ControllerUtils.errorAlert(messagingService.getDatabaseErrorTitle(),
                 messagingService.getDatabaseErrorHeader(),
                 messagingService.getDatabaseErrorContent())
                 .showAndWait();
     }
 
-    private void showUnexpectedAlert() {
-        ControllerUtils.errorAlert(messagingService.getUnexpectedErrorTitle(),
+    private Optional<ButtonType> showUnexpectedAlert() {
+        return ControllerUtils.errorAlert(messagingService.getUnexpectedErrorTitle(),
                 messagingService.getUnexpectedErrorHeader(),
                 messagingService.getUnexpectedErrorContent())
                 .showAndWait();

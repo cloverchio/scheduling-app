@@ -86,4 +86,16 @@ public class MessagingService {
     public String getUnexpectedErrorContent() {
         return messaging.get("unexpected.error.content");
     }
+
+    public String getConfirmationTitle() {
+        return messaging.get("confirmation.title");
+    }
+
+    public String getConfirmationHeader() {
+        return messaging.get("confirmation.header");
+    }
+
+    public String getConfirmationContent() {
+        return messaging.get("confirmation.content");
+    }
 }

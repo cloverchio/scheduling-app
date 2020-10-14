@@ -5,10 +5,10 @@ import com.c195.dao.AppointmentDAO;
 import com.c195.dao.UserDAO;
 import com.c195.service.AppointmentService;
 import com.c195.service.UserService;
+import com.c195.util.ControllerUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -67,10 +67,10 @@ public class MainController extends Controller implements Initializable {
     }
 
     private static void showAppointmentReminderAlert() {
-        final Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Appointment reminder");
-        alert.setHeaderText("You have an upcoming appointment");
-        alert.setContentText("You have an appointment scheduled within the next 15 minutes");
-        alert.showAndWait();
+        ControllerUtils.infoAlert(
+                "Appointment reminder",
+                "You have an upcoming appointment",
+                "You have an appointment scheduled within the next 15 minutes")
+                .showAndWait();
     }
 }

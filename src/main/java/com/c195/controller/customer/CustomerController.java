@@ -86,6 +86,17 @@ public class CustomerController extends Controller implements Initializable {
                 });
     }
 
+    @FXML
+    public void delete() {
+        Optional.ofNullable(customerTable.getSelectionModel().getSelectedItem())
+                .map(CustomerDTO::getId)
+                .ifPresent(selectedCustomerId -> showConfirmation(() -> {
+                    customerService.deleteCustomer(selectedCustomerId);
+                    createCustomerTable();
+                    return null;
+                }));
+    }
+
     private void createCustomerTable() {
         customerTable.setItems(getAllCustomers());
         customerNameColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getName()));

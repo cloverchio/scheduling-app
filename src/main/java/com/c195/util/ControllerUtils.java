@@ -50,7 +50,27 @@ public final class ControllerUtils {
         stage.setOnCloseRequest(windowEvent -> closeDatabaseConnection());
     }
 
-    public static void closeDatabaseConnection() throws RuntimeException {
+    public static void displayAsRed(Label label) {
+        label.setStyle("-fx-text-fill: #FF0000;");
+    }
+
+    public static Alert infoAlert(String title, String header, String content) {
+        return alert(title, header, content, Alert.AlertType.INFORMATION);
+    }
+
+    public static Alert errorAlert(String title, String header, String content) {
+        return alert(title, header, content, Alert.AlertType.ERROR);
+    }
+
+    public static Alert alert(String title, String header, String content, Alert.AlertType alertType) {
+        final Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        return alert;
+    }
+
+    private static void closeDatabaseConnection() throws RuntimeException {
         try {
             MysqlConnection.close();
         } catch (DAOConfigException e) {
@@ -58,22 +78,10 @@ public final class ControllerUtils {
         }
     }
 
-    public static void displayAsRed(Label label) {
-        label.setStyle("-fx-text-fill: #FF0000;");
-    }
-
-    public static Predicate<TextField> validTextInput() {
+    private static Predicate<TextField> validTextInput() {
         return textField -> {
             final String text = textField.getText();
             return text != null && !text.isEmpty();
         };
-    }
-
-    public static Alert errorAlert(String title, String header, String content) {
-        final Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
-        return alert;
     }
 }
