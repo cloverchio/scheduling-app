@@ -76,7 +76,7 @@ public class CustomerService {
     }
 
     /**
-     * Deletes customer information.
+     * Deletes the customer.
      * <p>
      * Performs a cascading delete within the query itself so there's
      * no need to invoke the address service beforehand.
@@ -93,8 +93,8 @@ public class CustomerService {
      * Also to save the sanctity of my service classes (not allowing database classes outside of them) the
      * original AddressDTO unfortunately needs to be passed here as well.
      *
-     * @param customer customer information in which to save.
-     * @param addressDTO address information associated with the customer.
+     * @param customer    customer information in which to save.
+     * @param addressDTO  address information associated with the customer.
      * @param currentUser user initiating the save.
      * @throws DAOException if there are issues saving address in the db.
      */

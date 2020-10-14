@@ -6,7 +6,7 @@ public class AppointmentDTO {
 
     private final int id;
     private final CustomerDTO customerDTO;
-    private final int userId;
+    private final UserDTO userDTO;
     private final String title;
     private final String description;
     private final String location;
@@ -19,7 +19,7 @@ public class AppointmentDTO {
     private AppointmentDTO(Builder builder) {
         this.id = builder.id;
         this.customerDTO = builder.customerDTO;
-        this.userId = builder.userId;
+        this.userDTO = builder.userDTO;
         this.title = builder.title;
         this.description = builder.description;
         this.location = builder.location;
@@ -38,8 +38,8 @@ public class AppointmentDTO {
         return customerDTO;
     }
 
-    public int getUserId() {
-        return userId;
+    public UserDTO getUserDTO() {
+        return userDTO;
     }
 
     public String getTitle() {
@@ -78,7 +78,7 @@ public class AppointmentDTO {
 
         private int id;
         private CustomerDTO customerDTO;
-        private int userId;
+        private UserDTO userDTO;
         private String title;
         private String description;
         private String location;
@@ -98,8 +98,8 @@ public class AppointmentDTO {
             return this;
         }
 
-        public Builder withUserId(int userId) {
-            this.userId = userId;
+        public Builder withUserDTO(UserDTO userDTO) {
+            this.userDTO = userDTO;
             return this;
         }
 

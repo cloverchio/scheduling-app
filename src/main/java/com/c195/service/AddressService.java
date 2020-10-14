@@ -42,7 +42,7 @@ public class AddressService {
     }
 
     /**
-     * Saves address data.
+     * Saves the address.
      * <p>
      * Country has a one to many relationship with City and City has a one to many relationship
      * with Address, which makes things a little tricky. Under normal circumstances
@@ -74,7 +74,7 @@ public class AddressService {
     }
 
     /**
-     * Updates address data.
+     * Updates the address.
      * <p>
      * Faces the same duplication issue as {@link #saveAddress(AddressDTO, String)}
      * in cases where the user may want to update the city or country of
@@ -85,6 +85,7 @@ public class AddressService {
      * @return the id of the updated address.
      * @throws DAOException if there are issues updating the address in the db.
      */
+    @SuppressWarnings("UnusedReturnValue")
     public Integer updateAddress(AddressDTO addressDTO, String currentUser) throws DAOException {
         final Address address = toAddress(addressDTO);
         address.setMetadata(MetadataDAO.getUpdateMetadata(currentUser));

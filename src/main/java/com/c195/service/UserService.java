@@ -57,7 +57,15 @@ public class UserService {
         getCurrentUser().ifPresent(currentUser -> this.currentUser = null);
     }
 
-    private static UserDTO toUserDTO(User user) {
+    public static User toUser(UserDTO userDTO) {
+        final User user = new User();
+        user.setId(userDTO.getId());
+        user.setUsername(userDTO.getUsername());
+        user.setActive(userDTO.isActive());
+        return user;
+    }
+
+    public static UserDTO toUserDTO(User user) {
         return new UserDTO.Builder()
                 .withId(user.getId())
                 .withUsername(user.getUsername())

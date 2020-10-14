@@ -37,6 +37,16 @@ public class AppointmentDAO {
             "WHERE ap.userId = ? " +
             "AND ap.start BETWEEN ? AND ?";
 
+    private static final String APPOINTMENTS_BY_USER_AFTER_SQL = "" +
+            "SELECT * " +
+            "FROM appointment ap " +
+            "JOIN customer cu " +
+            "ON ap.customerId = ap.customerId " +
+            "JOIN user us " +
+            "ON ap.userId = us.userId " +
+            "WHERE ap.userId = ? " +
+            "AND ap.start >= ?";
+
     private static final String SAVE_APPOINTMENTS_SQL = "" +
             "INSERT INTO appointment " +
             "(customerId, userId, title, description, location, " +
@@ -109,6 +119,21 @@ public class AppointmentDAO {
             statement.setInt(1, userId);
             statement.setTimestamp(2, Timestamp.from(start));
             statement.setTimestamp(3, Timestamp.from(end));
+            final List<Appointment> appointments = new ArrayList<>();
+            final ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                appointments.add(toAppointment(resultSet));
+            }
+            return appointments;
+        } catch (SQLException e) {
+            throw new DAOException("there was an issue retrieving appointments", e);
+        }
+    }
+
+    public List<Appointment> getAppointmentsByUserAfter(int userId, Instant start) throws DAOException {
+        try (final PreparedStatement statement = connection.prepareStatement(APPOINTMENTS_BY_USER_AFTER_SQL)) {
+            statement.setInt(1, userId);
+            statement.setTimestamp(2, Timestamp.from(start));
             final List<Appointment> appointments = new ArrayList<>();
             final ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
