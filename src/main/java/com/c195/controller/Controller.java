@@ -6,17 +6,12 @@ import com.c195.dao.config.DAOConfigException;
 import com.c195.dao.config.MysqlConfig;
 import com.c195.dao.config.MysqlConnection;
 import com.c195.service.MessagingService;
+import com.c195.util.ControllerUtils;
 import javafx.event.ActionEvent;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
@@ -25,15 +20,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
  * Common functionality.
  */
 public class Controller implements Initializable {
-
-    public static final String TITLE = "C195 Scheduling App";
 
     private MessagingService messagingService;
 
@@ -59,7 +51,7 @@ public class Controller implements Initializable {
      */
     public <T> Optional<T> formFieldSubmitAction(Label messageLabel, Map<Label, TextField> formFields,
                                                  CheckedSupplier<T> formDatabaseAction) {
-        final Map<Label, TextField> invalidFields = getInvalidTextFields(formFields);
+        final Map<Label, TextField> invalidFields = ControllerUtils.getInvalidTextFields(formFields);
         if (!invalidFields.isEmpty()) {
             showRequiredFieldMessage(messageLabel, invalidFields.keySet());
             return Optional.empty();
@@ -114,7 +106,7 @@ public class Controller implements Initializable {
      */
     public void showView(ActionEvent actionEvent, Class<?> clazz, String viewPath) {
         try {
-            showEventView(actionEvent, clazz, viewPath);
+            ControllerUtils.showEventView(actionEvent, clazz, viewPath);
         } catch (IOException e) {
             showUnexpectedAlert();
             e.printStackTrace();
@@ -133,75 +125,20 @@ public class Controller implements Initializable {
                 .map(Labeled::getText)
                 .collect(Collectors.joining(", "));
         messageLabel.setText(messagingService.getRequiredFields() + ": " + requiredFields);
-        displayAsRed(messageLabel);
-    }
-
-    /**
-     * Given a map of a labels to their corresponding text fields, this will identify
-     * ones that did not provided valid input (empty or null).
-     *
-     * @param textFieldMap map of labels to text fields.
-     * @return map of labels and text fields that did not provide valid input.
-     */
-    public static Map<Label, TextField> getInvalidTextFields(Map<Label, TextField> textFieldMap) {
-        return textFieldMap.entrySet().stream()
-                .filter(entry -> validTextInput().negate().test(entry.getValue()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    public static void showEventView(ActionEvent actionEvent, Class<?> clazz, String viewPath) throws IOException {
-        ((Node) (actionEvent.getSource())).getScene().getWindow().hide();
-        showView(clazz, viewPath);
-    }
-
-    public static void showView(Class<?> clazz, String viewPath) throws IOException {
-        final Parent root = FXMLLoader.load(clazz.getResource(viewPath));
-        final Scene scene = new Scene(root);
-        final Stage stage = new Stage();
-        stage.setTitle(TITLE);
-        stage.setScene(scene);
-        stage.show();
-        stage.setOnCloseRequest(windowEvent -> closeDatabaseConnection());
-    }
-
-    public static void closeDatabaseConnection() throws RuntimeException {
-        try {
-            MysqlConnection.close();
-        } catch (DAOConfigException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void displayAsRed(Label label) {
-        label.setStyle("-fx-text-fill: #FF0000;");
+        ControllerUtils.displayAsRed(messageLabel);
     }
 
     private void showDatabaseAlert() {
-        errorAlert(messagingService.getDatabaseErrorTitle(),
+        ControllerUtils.errorAlert(messagingService.getDatabaseErrorTitle(),
                 messagingService.getDatabaseErrorHeader(),
                 messagingService.getDatabaseErrorContent())
                 .showAndWait();
     }
 
     private void showUnexpectedAlert() {
-        errorAlert(messagingService.getUnexpectedErrorTitle(),
+        ControllerUtils.errorAlert(messagingService.getUnexpectedErrorTitle(),
                 messagingService.getUnexpectedErrorHeader(),
                 messagingService.getUnexpectedErrorContent())
                 .showAndWait();
-    }
-
-    private static Predicate<TextField> validTextInput() {
-        return textField -> {
-            final String text = textField.getText();
-            return text != null && !text.isEmpty();
-        };
-    }
-
-    private static Alert errorAlert(String title, String header, String content) {
-        final Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
-        return alert;
     }
 }

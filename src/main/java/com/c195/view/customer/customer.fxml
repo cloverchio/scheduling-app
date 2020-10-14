@@ -14,7 +14,7 @@
       </columns>
     </TableView>
     <Button onAction="#create" layoutX="10.0" layoutY="330.0" mnemonicParsing="false" prefHeight="48.0" prefWidth="122.0" text="Add"/>
-    <Button layoutX="160.0" layoutY="330.0" mnemonicParsing="false" prefHeight="48.0" prefWidth="122.0" text="Modify"/>
+    <Button onAction="#update" layoutX="160.0" layoutY="330.0" mnemonicParsing="false" prefHeight="48.0" prefWidth="122.0" text="Modify"/>
     <Button layoutX="310.0" layoutY="330.0" mnemonicParsing="false" prefHeight="48.0" prefWidth="122.0" text="Delete"/>
     <Button onAction="#cancel" layoutX="465.0" layoutY="330.0" mnemonicParsing="false" prefHeight="48.0" prefWidth="122.0" text="Cancel"/>
 </AnchorPane>

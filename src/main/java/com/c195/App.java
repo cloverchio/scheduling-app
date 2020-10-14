@@ -1,6 +1,6 @@
 package com.c195;
 
-import com.c195.controller.Controller;
+import com.c195.util.ControllerUtils;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -8,7 +8,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Controller.showView(getClass(), "view/login.fxml");
+        ControllerUtils.showView(getClass(), "view/login.fxml");
     }
 
     public static void main(String[] args) {

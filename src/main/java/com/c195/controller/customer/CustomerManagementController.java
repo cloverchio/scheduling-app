@@ -1,17 +1,12 @@
 package com.c195.controller.customer;
 
 import com.c195.common.AddressDTO;
-import com.c195.common.CheckedSupplier;
 import com.c195.common.CustomerDTO;
-import com.c195.common.UserDTO;
 import com.c195.controller.Controller;
 import com.c195.dao.*;
 import com.c195.service.AddressService;
 import com.c195.service.CustomerService;
 import com.c195.service.UserService;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
@@ -58,21 +53,14 @@ public class CustomerManagementController extends Controller implements Initiali
     @FXML
     private CheckBox active;
 
-    private Map<Label, TextField> formFields;
     private UserService userService;
     private CustomerService customerService;
+    private Map<Label, TextField> formFields;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         super.initialize(url, resourceBundle);
-        this.formFields = new HashMap<>();
-        formFields.put(nameLabel, nameField);
-        formFields.put(addressLabel, addressField);
-        formFields.put(aptLabel, aptField);
-        formFields.put(cityLabel, cityField);
-        formFields.put(countryLabel, countryField);
-        formFields.put(postalCodeLabel, postalCodeField);
-        formFields.put(phoneLabel, phoneField);
+        this.formFields = createFormFieldMapping();
         getDatabaseConnection()
                 .ifPresent(connection -> {
                     final AddressDAO addressDAO = AddressDAO.getInstance(connection);
@@ -84,71 +72,30 @@ public class CustomerManagementController extends Controller implements Initiali
                 });
     }
 
-    @FXML
-    public void cancelCustomerManagement(ActionEvent actionEvent) {
-        showView(actionEvent, getClass(), "../../view/customer/customer.fxml");
+    public UserService getUserService() {
+        return userService;
     }
 
-    @FXML
-    public void saveCustomer() {
-        // gets the username of the current user
-        // maps that username to a saved customer id (implicitly saves the customer)
-        // displays messaging to the user if a customer id was returned
-        userService.getCurrentUser()
-                .map(UserDTO::getUsername)
-                .map(this::saveCustomer)
-                .ifPresent(savedCustomerId -> messageLabel.setText("Customer has been saved!"));
+    public CustomerService getCustomerService() {
+        return customerService;
     }
 
-    public void updateCustomer(int customerId, int addressId) {
-        // gets the username of the current user
-        // maps that username to an updated customer id (implicitly updates the customer)
-        // displays messaging to the user if a customer id was returned
-        userService.getCurrentUser()
-                .map(UserDTO::getUsername)
-                .map(username -> updateCustomer(customerId, addressId, username))
-                .ifPresent(updatedCustomerId -> messageLabel.setText("Customer has been updated!"));
+    public Map<Label, TextField> getFormFields() {
+        return formFields;
     }
 
-    public void deleteCustomer(int customerId) {
-        performDatabaseAction(() -> {
-            customerService.deleteCustomer(customerId);
-            return null;
-        });
+    public Label getMessageLabel() {
+        return messageLabel;
     }
 
-    public ObservableList<CustomerDTO> getAllCustomers() {
-        return performDatabaseAction(() -> customerService.getAllCustomers())
-                .map(FXCollections::observableList)
-                .orElse(FXCollections.emptyObservableList());
-    }
-
-    private Integer saveCustomer(String currentUser) {
-        final AddressDTO addressDTO = getAddressDTO().build();
-        final CustomerDTO customerDTO = getCustomerDTO(addressDTO).build();
-        final CheckedSupplier<Integer> databaseAction = () -> customerService.saveCustomer(customerDTO, currentUser);
-        return formFieldSubmitAction(messageLabel, formFields, databaseAction).orElse(null);
-    }
-
-    private Integer updateCustomer(int customerId, int addressId, String currentUser) {
-        final AddressDTO addressDTO = getAddressDTO()
-                .withId(addressId)
-                .build();
-        final CustomerDTO customerDTO = getCustomerDTO(addressDTO)
-                .withId(customerId)
-                .build();
-        final CheckedSupplier<Integer> databaseAction = () -> customerService.updateCustomer(customerDTO, currentUser);
-        return formFieldSubmitAction(messageLabel, formFields, databaseAction).orElse(null);
-    }
-
-    private CustomerDTO.Builder getCustomerDTO(AddressDTO addressDTO) {
+    public CustomerDTO.Builder getCustomerDTO(AddressDTO addressDTO) {
         return new CustomerDTO.Builder()
                 .withName(nameField.getText())
                 .withActive(active.isSelected())
                 .withAddressDTO(addressDTO);
     }
 
-    private AddressDTO.Builder getAddressDTO() {
+    public AddressDTO.Builder getAddressDTO() {
         return new AddressDTO.Builder()
                 .withAddress(addressField.getText())
                 .withAddress2(aptField.getText())
@@ -156,5 +103,29 @@ public class CustomerManagementController extends Controller implements Initiali
                 .withCountry(countryField.getText())
                 .withPostalCode(postalCodeField.getText())
                 .withPhone(phoneField.getText());
+    }
+
+    public void setTextFields(CustomerDTO customerDTO) {
+        final AddressDTO addressDTO = customerDTO.getAddressDTO();
+        nameField.setText(customerDTO.getName());
+        addressField.setText(addressDTO.getAddress());
+        aptField.setText(addressDTO.getAddress2());
+        cityField.setText(addressDTO.getCity());
+        countryField.setText(addressDTO.getCountry());
+        postalCodeField.setText(addressDTO.getPostalCode());
+        phoneField.setText(addressDTO.getPhone());
+        active.setSelected(customerDTO.isActive());
+    }
+
+    private Map<Label, TextField> createFormFieldMapping() {
+        final Map<Label, TextField> formFields = new HashMap<>();
+        formFields.put(nameLabel, nameField);
+        formFields.put(addressLabel, addressField);
+        formFields.put(aptLabel, aptField);
+        formFields.put(cityLabel, cityField);
+        formFields.put(countryLabel, countryField);
+        formFields.put(postalCodeLabel, postalCodeField);
+        formFields.put(phoneLabel, phoneField);
+        return formFields;
     }
 }

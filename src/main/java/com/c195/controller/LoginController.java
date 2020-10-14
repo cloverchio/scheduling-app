@@ -2,6 +2,7 @@ package com.c195.controller;
 
 import com.c195.dao.UserDAO;
 import com.c195.service.UserService;
+import com.c195.util.ControllerUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -73,7 +74,7 @@ public class LoginController extends Controller implements Initializable {
             showView(actionEvent, getClass(), "../view/main.fxml");
         } else {
             this.messageLabel.setText(getMessagingService().getInvalidLogin());
-            displayAsRed(messageLabel);
+            ControllerUtils.displayAsRed(messageLabel);
         }
     }
 }
