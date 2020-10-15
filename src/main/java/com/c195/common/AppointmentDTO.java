@@ -11,7 +11,7 @@ public class AppointmentDTO {
     private final String description;
     private final String location;
     private final String contact;
-    private final String type;
+    private final AppointmentType type;
     private final String url;
     private final Instant start;
     private final Instant end;
@@ -58,7 +58,7 @@ public class AppointmentDTO {
         return contact;
     }
 
-    public String getType() {
+    public AppointmentType getType() {
         return type;
     }
 
@@ -83,7 +83,7 @@ public class AppointmentDTO {
         private String description;
         private String location;
         private String contact;
-        private String type;
+        private AppointmentType type;
         private String url;
         private Instant start;
         private Instant end;
@@ -123,7 +123,7 @@ public class AppointmentDTO {
             return this;
         }
 
-        public Builder withType(String type) {
+        public Builder withType(AppointmentType type) {
             this.type = type;
             return this;
         }
