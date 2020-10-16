@@ -2,26 +2,26 @@ package com.c195.controller.customer;
 
 import com.c195.common.AddressDTO;
 import com.c195.common.CustomerDTO;
-import com.c195.controller.Controller;
-import com.c195.dao.*;
+import com.c195.controller.FormController;
+import com.c195.dao.AddressDAO;
+import com.c195.dao.CityDAO;
+import com.c195.dao.CountryDAO;
+import com.c195.dao.CustomerDAO;
 import com.c195.service.AddressService;
 import com.c195.service.CustomerService;
-import com.c195.service.UserService;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-public class CustomerManagementController extends Controller implements Initializable {
+public class CustomerFormController extends FormController {
 
-    @FXML
-    private Label messageLabel;
     @FXML
     private Label nameLabel;
     @FXML
@@ -53,7 +53,6 @@ public class CustomerManagementController extends Controller implements Initiali
     @FXML
     private CheckBox active;
 
-    private UserService userService;
     private CustomerService customerService;
     private Map<Label, TextField> formFields;
 
@@ -61,41 +60,35 @@ public class CustomerManagementController extends Controller implements Initiali
     public void initialize(URL url, ResourceBundle resourceBundle) {
         super.initialize(url, resourceBundle);
         this.formFields = createFormFieldMapping();
-        getDatabaseConnection()
-                .ifPresent(connection -> {
-                    final AddressDAO addressDAO = AddressDAO.getInstance(connection);
-                    final CityDAO cityDAO = CityDAO.getInstance(connection);
-                    final CountryDAO countryDAO = CountryDAO.getInstance(connection);
-                    final AddressService addressService = AddressService.getInstance(addressDAO, cityDAO, countryDAO);
-                    this.userService = UserService.getInstance(UserDAO.getInstance(connection));
-                    this.customerService = CustomerService.getInstance(CustomerDAO.getInstance(connection), addressService);
-                });
+        getDatabaseConnection().ifPresent(this::initializeServices);
     }
 
-    public UserService getUserService() {
-        return userService;
+    @Override
+    public void initializeServices(Connection connection) {
+        super.initializeServices(connection);
+        final AddressDAO addressDAO = AddressDAO.getInstance(connection);
+        final CityDAO cityDAO = CityDAO.getInstance(connection);
+        final CountryDAO countryDAO = CountryDAO.getInstance(connection);
+        final AddressService addressService = AddressService.getInstance(addressDAO, cityDAO, countryDAO);
+        customerService = CustomerService.getInstance(CustomerDAO.getInstance(connection), addressService);
     }
 
-    public CustomerService getCustomerService() {
-        return customerService;
-    }
-
-    public Map<Label, TextField> getFormFields() {
+    protected Map<Label, TextField> getFormFields() {
         return formFields;
     }
 
-    public Label getMessageLabel() {
-        return messageLabel;
+    protected CustomerService getCustomerService() {
+        return customerService;
     }
 
-    public CustomerDTO.Builder getCustomerDTO(AddressDTO addressDTO) {
+    protected CustomerDTO.Builder getCustomerDTO(AddressDTO addressDTO) {
         return new CustomerDTO.Builder()
                 .withName(nameField.getText())
                 .withActive(active.isSelected())
                 .withAddressDTO(addressDTO);
     }
 
-    public AddressDTO.Builder getAddressDTO() {
+    protected AddressDTO.Builder getAddressDTO() {
         return new AddressDTO.Builder()
                 .withAddress(addressField.getText())
                 .withAddress2(aptField.getText())
@@ -105,7 +98,7 @@ public class CustomerManagementController extends Controller implements Initiali
                 .withPhone(phoneField.getText());
     }
 
-    public void setTextFields(CustomerDTO customerDTO) {
+    protected void setTextFields(CustomerDTO customerDTO) {
         final AddressDTO addressDTO = customerDTO.getAddressDTO();
         nameField.setText(customerDTO.getName());
         addressField.setText(addressDTO.getAddress());

@@ -1,17 +1,15 @@
 package com.c195.controller;
 
-import com.c195.dao.UserDAO;
-import com.c195.service.UserService;
 import com.c195.util.ControllerUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -27,10 +25,8 @@ import java.util.ResourceBundle;
  * G. Write two or more lambda expressions to make your program more efficient, justifying
  * the use of each lambda expression with an in-line comment.
  */
-public class LoginController extends Controller implements Initializable {
+public class LoginController extends FormController {
 
-    @FXML
-    private Label messageLabel;
     @FXML
     private Label usernameLabel;
     @FXML
@@ -43,29 +39,27 @@ public class LoginController extends Controller implements Initializable {
     private Button loginButton;
 
     private Map<Label, TextField> formFields;
-    private UserService userService;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         super.initialize(url, resourceBundle);
-        this.messageLabel.setText(getMessagingService().getNewLogin());
         this.usernameLabel.setText(getMessagingService().getUsername());
         this.passwordLabel.setText(getMessagingService().getPassword());
         this.loginButton.setText(getMessagingService().getLogin());
-        this.formFields = new HashMap<>();
-        formFields.put(usernameLabel, usernameField);
-        formFields.put(passwordLabel, passwordField);
-        // leveraging a lambda expression to initialize the user service if the connection available
-        getDatabaseConnection()
-                .ifPresent(connection -> this.userService = UserService.getInstance(UserDAO.getInstance(connection)));
+        this.formFields = createFormFieldMapping();
+        setMessagingField(getMessagingService().getNewLogin());
+    }
+
+    @Override
+    public void initializeServices(Connection connection) {
+        super.initializeServices(connection);
     }
 
     @FXML
     public void login(ActionEvent actionEvent) {
         // passing the user service login functionality as a supplier to the form action method
         // which in this case will perform some validation and exception handling under the hood
-        formFieldSubmitAction(messageLabel, formFields,
-                () -> userService.login(usernameField.getText(), passwordField.getText()))
+        formFieldSubmitAction(formFields, () -> getUserService().login(usernameField.getText(), passwordField.getText()))
                 .ifPresent(validLogin -> handleLoginStatus(actionEvent, validLogin));
     }
 
@@ -73,8 +67,15 @@ public class LoginController extends Controller implements Initializable {
         if (validLogin) {
             showView(actionEvent, getClass(), "../view/main.fxml");
         } else {
-            this.messageLabel.setText(getMessagingService().getInvalidLogin());
-            ControllerUtils.displayAsRed(messageLabel);
+            setMessagingField(getMessagingService().getInvalidLogin());
+            ControllerUtils.displayAsRed(getMessagingField());
         }
+    }
+
+    private Map<Label, TextField> createFormFieldMapping() {
+        final Map<Label, TextField> formFields = new HashMap<>();
+        formFields.put(usernameLabel, usernameField);
+        formFields.put(passwordLabel, passwordField);
+        return formFields;
     }
 }

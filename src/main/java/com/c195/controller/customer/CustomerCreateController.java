@@ -6,12 +6,11 @@ import com.c195.common.CustomerDTO;
 import com.c195.common.UserDTO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class CustomerCreateController extends CustomerManagementController implements Initializable {
+public class CustomerCreateController extends CustomerFormController {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -31,13 +30,13 @@ public class CustomerCreateController extends CustomerManagementController imple
         getUserService().getCurrentUser()
                 .map(UserDTO::getUsername)
                 .map(this::saveCustomer)
-                .ifPresent(savedCustomerId -> getMessageLabel().setText("Customer has been saved!"));
+                .ifPresent(savedCustomerId -> getMessagingField().setText("Customer has been saved!"));
     }
 
     private Integer saveCustomer(String currentUser) {
         final AddressDTO addressDTO = getAddressDTO().build();
         final CustomerDTO customerDTO = getCustomerDTO(addressDTO).build();
         final CheckedSupplier<Integer> databaseAction = () -> getCustomerService().saveCustomer(customerDTO, currentUser);
-        return formFieldSubmitAction(getMessageLabel(), getFormFields(), databaseAction).orElse(null);
+        return formFieldSubmitAction(getFormFields(), databaseAction).orElse(null);
     }
 }

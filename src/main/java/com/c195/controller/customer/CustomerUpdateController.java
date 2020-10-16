@@ -6,12 +6,11 @@ import com.c195.common.CustomerDTO;
 import com.c195.common.UserDTO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class CustomerUpdateController extends CustomerManagementController implements Initializable {
+public class CustomerUpdateController extends CustomerFormController {
 
     private CustomerDTO customerDTO;
 
@@ -37,7 +36,7 @@ public class CustomerUpdateController extends CustomerManagementController imple
         getUserService().getCurrentUser()
                 .map(UserDTO::getUsername)
                 .map(username -> updateCustomer(customerDTO.getId(), customerDTO.getAddressDTO().getId(), username))
-                .ifPresent(updatedCustomerId -> getMessageLabel().setText("Customer has been updated!"));
+                .ifPresent(updatedCustomerId -> getMessagingField().setText("Customer has been updated!"));
     }
 
     private Integer updateCustomer(int customerId, int addressId, String currentUser) {
@@ -48,6 +47,6 @@ public class CustomerUpdateController extends CustomerManagementController imple
                 .withId(customerId)
                 .build();
         final CheckedSupplier<Integer> databaseAction = () -> getCustomerService().updateCustomer(customerDTO, currentUser);
-        return formFieldSubmitAction(getMessageLabel(), getFormFields(), databaseAction).orElse(null);
+        return formFieldSubmitAction(getFormFields(), databaseAction).orElse(null);
     }
 }

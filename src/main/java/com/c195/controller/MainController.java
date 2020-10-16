@@ -1,5 +1,6 @@
 package com.c195.controller;
 
+import com.c195.common.AppointmentDTO;
 import com.c195.common.UserDTO;
 import com.c195.dao.AppointmentDAO;
 import com.c195.dao.UserDAO;
@@ -8,10 +9,11 @@ import com.c195.service.UserService;
 import com.c195.util.ControllerUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 
 import java.net.URL;
+import java.sql.Connection;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 /**
  * Initial functionality.
@@ -23,7 +25,7 @@ import java.util.ResourceBundle;
  * G. Write two or more lambda expressions to make your program more efficient, justifying
  * the use of each lambda expression with an in-line comment.
  */
-public class MainController extends Controller implements Initializable {
+public class MainController extends Controller implements ServiceInitializable {
 
     private UserService userService;
     private AppointmentService appointmentService;
@@ -34,10 +36,15 @@ public class MainController extends Controller implements Initializable {
         // initializing multiple service layer classes using lambda expressions
         getDatabaseConnection()
                 .ifPresent(connection -> {
-                    this.userService = UserService.getInstance(UserDAO.getInstance(connection));
-                    this.appointmentService = AppointmentService.getInstance(AppointmentDAO.getInstance(connection));
+                    initializeServices(connection);
                     getUpcomingAppointmentReminder();
                 });
+    }
+
+    @Override
+    public void initializeServices(Connection connection) {
+        userService = UserService.getInstance(UserDAO.getInstance(connection));
+        appointmentService = AppointmentService.getInstance(AppointmentDAO.getInstance(connection));
     }
 
     @FXML
@@ -60,17 +67,22 @@ public class MainController extends Controller implements Initializable {
     private void showAppointmentReminder(int userId) {
         // passing the appointment service reminder functionality as a supplier to the database action method
         // checking if the returned appointments are empty
-        // if not we will display the reminder alert to the user
+        // if not we will map appointments to their corresponding title
+        // and prompt an alert to the user
         performDatabaseAction(() -> appointmentService.getReminderAppointmentsByUser(userId))
-                .filter(appointments -> !appointments.isEmpty())
-                .ifPresent(appointments -> showAppointmentReminderAlert());
+                .filter(appointmentDTOS -> !appointmentDTOS.isEmpty())
+                .map(appointmentDTOS -> appointmentDTOS
+                        .stream()
+                        .map(AppointmentDTO::getTitle)
+                        .collect(Collectors.joining("\n")))
+                .ifPresent(MainController::showAppointmentReminderAlert);
     }
 
-    private static void showAppointmentReminderAlert() {
+    private static void showAppointmentReminderAlert(String appointmentTitles) {
         ControllerUtils.infoAlert(
                 "Appointment reminder",
                 "You have an upcoming appointment",
-                "You have an appointment scheduled within the next 15 minutes")
+                "You have the following appointments scheduled within the next 15 minutes\n" + appointmentTitles)
                 .showAndWait();
     }
 }

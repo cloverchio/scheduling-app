@@ -50,6 +50,10 @@ public final class ControllerUtils {
         stage.setOnCloseRequest(windowEvent -> closeDatabaseConnection());
     }
 
+    public static void displayAsDefault(Label label) {
+        label.setStyle("-fx-text-fill: #000000;");
+    }
+
     public static void displayAsRed(Label label) {
         label.setStyle("-fx-text-fill: #FF0000;");
     }

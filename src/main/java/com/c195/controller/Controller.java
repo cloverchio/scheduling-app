@@ -9,16 +9,13 @@ import com.c195.service.MessagingService;
 import com.c195.util.ControllerUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonType;
 
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
-import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Common functionality.
@@ -50,28 +47,6 @@ public class Controller implements Initializable {
                 performDatabaseAction(confirmedDatabaseAction);
             }
         }));
-    }
-
-    /**
-     * This is probably crossing the line but the result of an idea I had to reuse the form field
-     * validation in conjunction with a database operation. Which are things we will most likely
-     * want to do on every form submission across the project.
-     *
-     * @param messageLabel       label in which the validation message will be set to.
-     * @param formFields         fields to perform validation on.
-     * @param formDatabaseAction database action to be performed if no invalid fields.
-     * @param <T>                the return type expected from the database operation.
-     * @return optional of the database operation's expected return type.
-     */
-    public <T> Optional<T> formFieldSubmitAction(Label messageLabel, Map<Label, TextField> formFields,
-                                                 CheckedSupplier<T> formDatabaseAction) {
-        final Map<Label, TextField> invalidFields = ControllerUtils.getInvalidTextFields(formFields);
-        if (!invalidFields.isEmpty()) {
-            showRequiredFieldMessage(messageLabel, invalidFields.keySet());
-            return Optional.empty();
-        } else {
-            return performDatabaseAction(formDatabaseAction);
-        }
     }
 
     /**
@@ -125,21 +100,6 @@ public class Controller implements Initializable {
             showUnexpectedAlert();
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Sets a given label to the invalid field message with the labels
-     * of the offending text fields appended.
-     *
-     * @param messageLabel  to set the invalid field message to.
-     * @param invalidLabels labels that correspond to the invalid text fields.
-     */
-    public void showRequiredFieldMessage(Label messageLabel, Set<Label> invalidLabels) {
-        final String requiredFields = invalidLabels.stream()
-                .map(Labeled::getText)
-                .collect(Collectors.joining(", "));
-        messageLabel.setText(messagingService.getRequiredFields() + ": " + requiredFields);
-        ControllerUtils.displayAsRed(messageLabel);
     }
 
     private Optional<ButtonType> showConfirmationAlert() {
