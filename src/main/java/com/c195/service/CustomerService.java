@@ -32,7 +32,19 @@ public class CustomerService {
     }
 
     /**
-     * Retrieves the information for all existing customers.
+     * Retrieves a customer by its corresponding id.
+     *
+     * @param id in which to retrieve the customer for.
+     * @return the customer corresponding to the given id.
+     * @throws DAOException if there are issues retrieving the customer from the db.
+     */
+    public Optional<CustomerDTO> getCustomerById(int id) throws DAOException {
+        return customerDAO.getCustomerById(id)
+                .map(CustomerService::toCustomerDTO);
+    }
+
+    /**
+     * Retrieves all existing customers.
      *
      * @return list of {@link CustomerDTO}.
      * @throws DAOException if there are issues retrieving customers from the db.

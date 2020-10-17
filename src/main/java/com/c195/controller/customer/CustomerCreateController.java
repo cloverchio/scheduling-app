@@ -1,7 +1,6 @@
 package com.c195.controller.customer;
 
 import com.c195.common.AddressDTO;
-import com.c195.common.CheckedSupplier;
 import com.c195.common.CustomerDTO;
 import com.c195.common.UserDTO;
 import javafx.event.ActionEvent;
@@ -30,13 +29,14 @@ public class CustomerCreateController extends CustomerFormController {
         getUserService().getCurrentUser()
                 .map(UserDTO::getUsername)
                 .map(this::saveCustomer)
-                .ifPresent(savedCustomerId -> getMessagingField().setText("Customer has been saved!"));
+                .ifPresent(savedCustomerId -> setValidationField("Customer has been saved!"));
     }
 
     private Integer saveCustomer(String currentUser) {
         final AddressDTO addressDTO = getAddressDTO().build();
         final CustomerDTO customerDTO = getCustomerDTO(addressDTO).build();
-        final CheckedSupplier<Integer> databaseAction = () -> getCustomerService().saveCustomer(customerDTO, currentUser);
-        return formFieldSubmitAction(getFormFields(), databaseAction).orElse(null);
+        return formFieldSubmitAction(getFormFields(), () ->
+                getCustomerService().saveCustomer(customerDTO, currentUser))
+                .orElse(null);
     }
 }

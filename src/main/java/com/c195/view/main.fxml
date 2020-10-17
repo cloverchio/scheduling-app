@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
-
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.c195.controller.MainController">
    <Label contentDisplay="CENTER" layoutX="33.0" layoutY="52.0" prefHeight="55.0" prefWidth="535.0" text="Welcome!">
       <font>
@@ -14,7 +12,7 @@
    </Label>
    <Line endX="342.0" layoutX="225.0" layoutY="123.0" startX="-193.0" />
    <Button onAction="#manageCustomers" layoutX="32.0" layoutY="140.0" mnemonicParsing="false" prefHeight="44.0" prefWidth="186.0" text="Manage Customers" />
-   <Button layoutX="33.0" layoutY="205.0" mnemonicParsing="false" prefHeight="44.0" prefWidth="186.0" text="Manage Appointments" />
+   <Button onAction="#manageAppointments" layoutX="33.0" layoutY="205.0" mnemonicParsing="false" prefHeight="44.0" prefWidth="186.0" text="Manage Appointments" />
    <Button layoutX="33.0" layoutY="270.0" mnemonicParsing="false" prefHeight="44.0" prefWidth="186.0" text="Manage Reports" />
    <Button onAction="#logout" layoutX="32.0" layoutY="335.0" mnemonicParsing="false" prefHeight="44.0" prefWidth="186.0" text="Logout" />
 </AnchorPane>

@@ -1,7 +1,6 @@
 package com.c195.controller.customer;
 
 import com.c195.common.AddressDTO;
-import com.c195.common.CheckedSupplier;
 import com.c195.common.CustomerDTO;
 import com.c195.common.UserDTO;
 import javafx.event.ActionEvent;
@@ -36,7 +35,7 @@ public class CustomerUpdateController extends CustomerFormController {
         getUserService().getCurrentUser()
                 .map(UserDTO::getUsername)
                 .map(username -> updateCustomer(customerDTO.getId(), customerDTO.getAddressDTO().getId(), username))
-                .ifPresent(updatedCustomerId -> getMessagingField().setText("Customer has been updated!"));
+                .ifPresent(updatedCustomerId -> setValidationField("Customer has been updated!"));
     }
 
     private Integer updateCustomer(int customerId, int addressId, String currentUser) {
@@ -46,7 +45,8 @@ public class CustomerUpdateController extends CustomerFormController {
         final CustomerDTO customerDTO = getCustomerDTO(addressDTO)
                 .withId(customerId)
                 .build();
-        final CheckedSupplier<Integer> databaseAction = () -> getCustomerService().updateCustomer(customerDTO, currentUser);
-        return formFieldSubmitAction(getFormFields(), databaseAction).orElse(null);
+        return formFieldSubmitAction(getFormFields(), () ->
+                getCustomerService().updateCustomer(customerDTO, currentUser)).
+                orElse(null);
     }
 }

@@ -15,7 +15,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
-import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -59,18 +58,22 @@ public class CustomerFormController extends FormController {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         super.initialize(url, resourceBundle);
-        this.formFields = createFormFieldMapping();
-        getDatabaseConnection().ifPresent(this::initializeServices);
-    }
-
-    @Override
-    public void initializeServices(Connection connection) {
-        super.initializeServices(connection);
-        final AddressDAO addressDAO = AddressDAO.getInstance(connection);
-        final CityDAO cityDAO = CityDAO.getInstance(connection);
-        final CountryDAO countryDAO = CountryDAO.getInstance(connection);
-        final AddressService addressService = AddressService.getInstance(addressDAO, cityDAO, countryDAO);
-        customerService = CustomerService.getInstance(CustomerDAO.getInstance(connection), addressService);
+        this.formFields = new HashMap<>();
+        this.formFields.put(nameLabel, nameField);
+        this.formFields.put(addressLabel, addressField);
+        this.formFields.put(aptLabel, aptField);
+        this.formFields.put(cityLabel, cityField);
+        this.formFields.put(countryLabel, countryField);
+        this.formFields.put(postalCodeLabel, postalCodeField);
+        this.formFields.put(phoneLabel, phoneField);
+        getDatabaseConnection()
+                .ifPresent(connection -> {
+                    final AddressDAO addressDAO = AddressDAO.getInstance(connection);
+                    final CityDAO cityDAO = CityDAO.getInstance(connection);
+                    final CountryDAO countryDAO = CountryDAO.getInstance(connection);
+                    final AddressService addressService = AddressService.getInstance(addressDAO, cityDAO, countryDAO);
+                    customerService = CustomerService.getInstance(CustomerDAO.getInstance(connection), addressService);
+                });
     }
 
     protected Map<Label, TextField> getFormFields() {
@@ -98,7 +101,7 @@ public class CustomerFormController extends FormController {
                 .withPhone(phoneField.getText());
     }
 
-    protected void setTextFields(CustomerDTO customerDTO) {
+    protected void setFields(CustomerDTO customerDTO) {
         final AddressDTO addressDTO = customerDTO.getAddressDTO();
         nameField.setText(customerDTO.getName());
         addressField.setText(addressDTO.getAddress());
@@ -108,17 +111,5 @@ public class CustomerFormController extends FormController {
         postalCodeField.setText(addressDTO.getPostalCode());
         phoneField.setText(addressDTO.getPhone());
         active.setSelected(customerDTO.isActive());
-    }
-
-    private Map<Label, TextField> createFormFieldMapping() {
-        final Map<Label, TextField> formFields = new HashMap<>();
-        formFields.put(nameLabel, nameField);
-        formFields.put(addressLabel, addressField);
-        formFields.put(aptLabel, aptField);
-        formFields.put(cityLabel, cityField);
-        formFields.put(countryLabel, countryField);
-        formFields.put(postalCodeLabel, postalCodeField);
-        formFields.put(phoneLabel, phoneField);
-        return formFields;
     }
 }

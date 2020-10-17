@@ -2,7 +2,6 @@ package com.c195.controller.customer;
 
 import com.c195.common.CustomerDTO;
 import com.c195.controller.Controller;
-import com.c195.controller.ServiceInitializable;
 import com.c195.dao.AddressDAO;
 import com.c195.dao.CityDAO;
 import com.c195.dao.CountryDAO;
@@ -17,13 +16,13 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -35,12 +34,14 @@ import java.util.ResourceBundle;
  * B. Provide the ability to add, update, and delete customer records in the database,
  * including name, address, and phone number.
  */
-public class CustomerController extends Controller implements ServiceInitializable {
+public class CustomerController extends Controller implements Initializable {
 
     @FXML
     private TableView<CustomerDTO> customerTable;
     @FXML
-    private TableColumn<CustomerDTO, String> customerNameColumn;
+    private TableColumn<CustomerDTO, String> idColumn;
+    @FXML
+    private TableColumn<CustomerDTO, String> nameColumn;
     @FXML
     private TableColumn<CustomerDTO, String> addressColumn;
     @FXML
@@ -55,18 +56,13 @@ public class CustomerController extends Controller implements ServiceInitializab
         super.initialize(url, resourceBundle);
         getDatabaseConnection()
                 .ifPresent(connection -> {
-                    initializeServices(connection);
+                    final AddressDAO addressDAO = AddressDAO.getInstance(connection);
+                    final CityDAO cityDAO = CityDAO.getInstance(connection);
+                    final CountryDAO countryDAO = CountryDAO.getInstance(connection);
+                    final AddressService addressService = AddressService.getInstance(addressDAO, cityDAO, countryDAO);
+                    customerService = CustomerService.getInstance(CustomerDAO.getInstance(connection), addressService);
                     createCustomerTable();
                 });
-    }
-
-    @Override
-    public void initializeServices(Connection connection) {
-        final AddressDAO addressDAO = AddressDAO.getInstance(connection);
-        final CityDAO cityDAO = CityDAO.getInstance(connection);
-        final CountryDAO countryDAO = CountryDAO.getInstance(connection);
-        final AddressService addressService = AddressService.getInstance(addressDAO, cityDAO, countryDAO);
-        customerService = CustomerService.getInstance(CustomerDAO.getInstance(connection), addressService);
     }
 
     @FXML
@@ -87,7 +83,7 @@ public class CustomerController extends Controller implements ServiceInitializab
                 .ifPresent(selectedCustomer -> {
                     final CustomerUpdateController customerUpdateController = fxmlLoader.getController();
                     customerUpdateController.setCustomerDTO(selectedCustomer);
-                    customerUpdateController.setTextFields(selectedCustomer);
+                    customerUpdateController.setFields(selectedCustomer);
                     ControllerUtils.setEventStage(actionEvent, parent);
                 });
     }
@@ -105,7 +101,8 @@ public class CustomerController extends Controller implements ServiceInitializab
 
     private void createCustomerTable() {
         customerTable.setItems(getAllCustomers());
-        customerNameColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getName()));
+        idColumn.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().getId())));
+        nameColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getName()));
         addressColumn.setCellValueFactory(c -> new SimpleStringProperty(CustomerUtils.toAddressLine(c.getValue().getAddressDTO())));
         phoneColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getAddressDTO().getPhone()));
         statusColumn.setCellValueFactory(c -> new SimpleStringProperty(CustomerUtils.toActiveLine(c.getValue().isActive())));

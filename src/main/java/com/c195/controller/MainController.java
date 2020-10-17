@@ -9,9 +9,9 @@ import com.c195.service.UserService;
 import com.c195.util.ControllerUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 
 import java.net.URL;
-import java.sql.Connection;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * G. Write two or more lambda expressions to make your program more efficient, justifying
  * the use of each lambda expression with an in-line comment.
  */
-public class MainController extends Controller implements ServiceInitializable {
+public class MainController extends Controller implements Initializable {
 
     private UserService userService;
     private AppointmentService appointmentService;
@@ -36,20 +36,20 @@ public class MainController extends Controller implements ServiceInitializable {
         // initializing multiple service layer classes using lambda expressions
         getDatabaseConnection()
                 .ifPresent(connection -> {
-                    initializeServices(connection);
+                    userService = UserService.getInstance(UserDAO.getInstance(connection));
+                    appointmentService = AppointmentService.getInstance(AppointmentDAO.getInstance(connection));
                     getUpcomingAppointmentReminder();
                 });
-    }
-
-    @Override
-    public void initializeServices(Connection connection) {
-        userService = UserService.getInstance(UserDAO.getInstance(connection));
-        appointmentService = AppointmentService.getInstance(AppointmentDAO.getInstance(connection));
     }
 
     @FXML
     public void manageCustomers(ActionEvent actionEvent) {
         showView(actionEvent, getClass(), "../view/customer/customer.fxml");
+    }
+
+    @FXML
+    public void manageAppointments(ActionEvent actionEvent) {
+        showView(actionEvent, getClass(), "../view/appointment/appointment.fxml");
     }
 
     @FXML

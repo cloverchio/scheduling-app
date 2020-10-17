@@ -9,7 +9,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
-import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -46,13 +45,10 @@ public class LoginController extends FormController {
         this.usernameLabel.setText(getMessagingService().getUsername());
         this.passwordLabel.setText(getMessagingService().getPassword());
         this.loginButton.setText(getMessagingService().getLogin());
-        this.formFields = createFormFieldMapping();
-        setMessagingField(getMessagingService().getNewLogin());
-    }
-
-    @Override
-    public void initializeServices(Connection connection) {
-        super.initializeServices(connection);
+        this.formFields = new HashMap<>();
+        this.formFields.put(usernameLabel, usernameField);
+        this.formFields.put(passwordLabel, passwordField);
+        setValidationField(getMessagingService().getNewLogin());
     }
 
     @FXML
@@ -67,15 +63,8 @@ public class LoginController extends FormController {
         if (validLogin) {
             showView(actionEvent, getClass(), "../view/main.fxml");
         } else {
-            setMessagingField(getMessagingService().getInvalidLogin());
-            ControllerUtils.displayAsRed(getMessagingField());
+            ControllerUtils.displayAsRed(getValidationField());
+            setValidationField(getMessagingService().getInvalidLogin());
         }
-    }
-
-    private Map<Label, TextField> createFormFieldMapping() {
-        final Map<Label, TextField> formFields = new HashMap<>();
-        formFields.put(usernameLabel, usernameField);
-        formFields.put(passwordLabel, passwordField);
-        return formFields;
     }
 }

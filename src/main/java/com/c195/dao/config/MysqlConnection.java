@@ -8,6 +8,13 @@ public final class MysqlConnection {
 
     private static Connection connection;
 
+    public static Connection getInstance(MysqlConfig mysqlConfig) throws DAOConfigException {
+        if (connection == null) {
+            connect(mysqlConfig);
+        }
+        return connection;
+    }
+
     private static void connect(MysqlConfig mysqlConfig) throws DAOConfigException {
         final String jdbcURL =
                 String.format("%s:%s/%s", mysqlConfig.getURL(), mysqlConfig.getPort(), mysqlConfig.getName());
@@ -17,13 +24,6 @@ public final class MysqlConnection {
         } catch (ClassNotFoundException | SQLException e) {
             throw new DAOConfigException("there was an issue connecting to the db", e);
         }
-    }
-
-    public static Connection getInstance(MysqlConfig mysqlConfig) throws DAOConfigException {
-        if (connection == null) {
-            connect(mysqlConfig);
-        }
-        return connection;
     }
 
     public static void close() throws DAOConfigException {
