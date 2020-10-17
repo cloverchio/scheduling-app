@@ -1,8 +1,8 @@
 package com.c195.service;
 
-public class AppointmentException extends Exception {
+public class AppointmentException extends RuntimeException {
 
-    public AppointmentException(String message, Throwable cause) {
-        super(message, cause);
+    public AppointmentException(String message) {
+        super(message);
     }
 }

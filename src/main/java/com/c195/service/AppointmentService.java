@@ -1,6 +1,7 @@
 package com.c195.service;
 
 import com.c195.common.AppointmentDTO;
+import com.c195.common.AppointmentTime;
 import com.c195.common.AppointmentType;
 import com.c195.dao.AppointmentDAO;
 import com.c195.dao.DAOException;
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 
 public class AppointmentService {
 
+    private static final ZoneId zoneId = ZoneId.of("UTC");
+
     private static AppointmentService serviceInstance;
     private final AppointmentDAO appointmentDAO;
 
@@ -34,31 +37,17 @@ public class AppointmentService {
     }
 
     /**
-     * Gets a list of all future appointments for a given user.
-     *
-     * @param userId in which to retrieve future appoints for.
-     * @return list of appointments that have a start date greater than now.
-     * @throws DAOException if there are issues retrieving appointments from the db.
-     */
-    public List<AppointmentDTO> getAllUpcomingAppointmentsByUser(int userId) throws DAOException {
-        return appointmentDAO.getAppointmentsByUserAfter(userId, Instant.now()).stream()
-                .map(AppointmentService::toAppointmentDTO)
-                .collect(Collectors.toList());
-    }
-
-    /**
      * Gets a list of appointments that will occur within the week for a given user.
      *
      * @param userId in which to retrieve weekly appointments for.
      * @return list of appointments within the week.
      * @throws DAOException if there are issues retrieving appointments from the db.
+     * @throws AppointmentException if there are issues with the appointment time.
      */
-    public List<AppointmentDTO> getWeeklyAppointmentsByUser(int userId) throws DAOException {
+    public List<AppointmentDTO> getWeeklyAppointmentsByUser(int userId) throws DAOException, AppointmentException {
         final Instant start = Instant.now();
-        final int dayOfTheWeek = start.atZone(ZoneId.systemDefault()).getDayOfWeek().getValue();
-        return appointmentDAO.getAppointmentsByUserBetween(userId, start, start.plus(7 - dayOfTheWeek, ChronoUnit.DAYS)).stream()
-                .map(AppointmentService::toAppointmentDTO)
-                .collect(Collectors.toList());
+        final int dayOfTheWeek = start.atZone(zoneId).getDayOfWeek().getValue();
+        return getAppointmentsByUserBetween(userId, start, start.plus(7 - dayOfTheWeek, ChronoUnit.DAYS));
     }
 
     /**
@@ -67,15 +56,14 @@ public class AppointmentService {
      * @param userId in which to retrieve monthly appointments for.
      * @return list of appointments within the month.
      * @throws DAOException if there are issues retrieving appointments from the db.
+     * @throws AppointmentException if there are issues with the appointment time.
      */
-    public List<AppointmentDTO> getMonthlyAppointmentsByUser(int userId) throws DAOException {
+    public List<AppointmentDTO> getMonthlyAppointmentsByUser(int userId) throws DAOException, AppointmentException {
         final Instant start = Instant.now();
-        final ZonedDateTime zonedStart = start.atZone(ZoneId.systemDefault());
+        final ZonedDateTime zonedStart = start.atZone(zoneId);
         final int dayOfTheMonth = zonedStart.getDayOfMonth();
         final int lengthOfMonth = Month.from(zonedStart).length(zonedStart.toLocalDate().isLeapYear());
-        return appointmentDAO.getAppointmentsByUserBetween(userId, start, start.plus(lengthOfMonth - dayOfTheMonth, ChronoUnit.DAYS)).stream()
-                .map(AppointmentService::toAppointmentDTO)
-                .collect(Collectors.toList());
+        return getAppointmentsByUserBetween(userId, start, start.plus(lengthOfMonth - dayOfTheMonth, ChronoUnit.DAYS));
     }
 
     /**
@@ -85,10 +73,39 @@ public class AppointmentService {
      * @param userId in which to retrieve upcoming appointments for.
      * @return list of appointments that are quickly approaching...
      * @throws DAOException if there are issues retrieving appointments from the db.
+     * @throws AppointmentException if there are issues with the appointment time.
      */
-    public List<AppointmentDTO> getReminderAppointmentsByUser(int userId) throws DAOException {
+    public List<AppointmentDTO> getReminderAppointmentsByUser(int userId) throws DAOException, AppointmentException {
         final Instant start = Instant.now();
-        return appointmentDAO.getAppointmentsByUserBetween(userId, start, start.plus(15L, ChronoUnit.MINUTES)).stream()
+        return getAppointmentsByUserBetween(userId, start, start.plus(15L, ChronoUnit.MINUTES));
+    }
+
+    /**
+     * Gets a list of all future appointments for a given user.
+     *
+     * @param userId in which to retrieve future appoints for.
+     * @return list of appointments that have a start date greater than now.
+     * @throws DAOException if there are issues retrieving appointments from the db.
+     * @throws AppointmentException if there are issues with the appointment time.
+     */
+    public List<AppointmentDTO> getUpcomingAppointmentsByUser(int userId) throws DAOException, AppointmentException {
+        return appointmentDAO.getAppointmentsByUserAfter(userId, Instant.now()).stream()
+                .map(AppointmentService::toAppointmentDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gets a list of appointments for a given user that will occur within the interval.
+     *
+     * @param userId in which to retrieve appointments for.
+     * @param start  the start of the interval.
+     * @param end    the end of the interval.
+     * @return a list of appointments between start and end for the given user.
+     * @throws DAOException if there are issues retrieving appointments from the db.
+     * @throws AppointmentException if there are issues with the appointment time.
+     */
+    public List<AppointmentDTO> getAppointmentsByUserBetween(int userId, Instant start, Instant end) throws DAOException, AppointmentException {
+        return appointmentDAO.getAppointmentsByUserBetween(userId, start, end).stream()
                 .map(AppointmentService::toAppointmentDTO)
                 .collect(Collectors.toList());
     }
@@ -134,33 +151,31 @@ public class AppointmentService {
     }
 
     public static Appointment toAppointment(AppointmentDTO appointmentDTO) {
+        final AppointmentTime appointmentTime = appointmentDTO.getTime();
         final Appointment appointment = new Appointment();
         appointment.setId(appointmentDTO.getId());
-        appointment.setStart(appointmentDTO.getStart());
-        appointment.setEnd(appointmentDTO.getEnd());
         appointment.setLocation(appointmentDTO.getLocation());
         appointment.setTitle(appointmentDTO.getTitle());
         appointment.setDescription(appointmentDTO.getDescription());
         appointment.setContact(appointmentDTO.getContact());
+        appointment.setStart(appointmentTime.getUtcStart());
+        appointment.setEnd(appointmentTime.getUtcEnd());
         appointment.setType(appointmentDTO.getType().toString());
         appointment.setCustomer(CustomerService.toCustomer(appointmentDTO.getCustomerDTO()));
-        appointment.setUser(UserService.toUser(appointmentDTO.getUserDTO()));
         return appointment;
     }
 
-    public static AppointmentDTO toAppointmentDTO(Appointment appointment) {
+    public static AppointmentDTO toAppointmentDTO(Appointment appointment) throws AppointmentException {
         return new AppointmentDTO.Builder()
                 .withId(appointment.getId())
                 .withDescription(appointment.getDescription())
                 .withLocation(appointment.getLocation())
                 .withTitle(appointment.getTitle())
-                .withType(AppointmentType.valueOf(appointment.getType()))
                 .withUrl(appointment.getUrl())
-                .withStart(appointment.getStart())
-                .withEnd(appointment.getEnd())
                 .withContact(appointment.getContact())
+                .withType(AppointmentType.valueOf(appointment.getType()))
+                .withTime(new AppointmentTime(appointment.getStart(), appointment.getEnd()))
                 .withCustomerDTO(CustomerService.toCustomerDTO(appointment.getCustomer()))
-                .withUserDTO(UserService.toUserDTO(appointment.getUser()))
                 .build();
     }
 }

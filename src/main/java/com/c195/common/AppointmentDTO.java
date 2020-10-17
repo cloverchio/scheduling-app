@@ -1,45 +1,31 @@
 package com.c195.common;
 
-import java.time.Instant;
-
 public class AppointmentDTO {
 
     private final int id;
-    private final CustomerDTO customerDTO;
-    private final UserDTO userDTO;
     private final String title;
     private final String description;
     private final String location;
     private final String contact;
-    private final AppointmentType type;
     private final String url;
-    private final Instant start;
-    private final Instant end;
+    private final AppointmentType type;
+    private final AppointmentTime time;
+    private final CustomerDTO customerDTO;
 
     private AppointmentDTO(Builder builder) {
         this.id = builder.id;
-        this.customerDTO = builder.customerDTO;
-        this.userDTO = builder.userDTO;
         this.title = builder.title;
         this.description = builder.description;
         this.location = builder.location;
         this.contact = builder.contact;
-        this.type = builder.type;
         this.url = builder.url;
-        this.start = builder.start;
-        this.end = builder.end;
+        this.type = builder.type;
+        this.time = builder.time;
+        this.customerDTO = builder.customerDTO;
     }
 
     public int getId() {
         return id;
-    }
-
-    public CustomerDTO getCustomerDTO() {
-        return customerDTO;
-    }
-
-    public UserDTO getUserDTO() {
-        return userDTO;
     }
 
     public String getTitle() {
@@ -58,48 +44,36 @@ public class AppointmentDTO {
         return contact;
     }
 
-    public AppointmentType getType() {
-        return type;
-    }
-
     public String getUrl() {
         return url;
     }
 
-    public Instant getStart() {
-        return start;
+    public AppointmentType getType() {
+        return type;
     }
 
-    public Instant getEnd() {
-        return end;
+    public AppointmentTime getTime() {
+        return time;
+    }
+
+    public CustomerDTO getCustomerDTO() {
+        return customerDTO;
     }
 
     public static class Builder {
 
         private int id;
-        private CustomerDTO customerDTO;
-        private UserDTO userDTO;
         private String title;
         private String description;
         private String location;
         private String contact;
-        private AppointmentType type;
         private String url;
-        private Instant start;
-        private Instant end;
+        private AppointmentType type;
+        private AppointmentTime time;
+        private CustomerDTO customerDTO;
 
         public Builder withId(int id) {
             this.id = id;
-            return this;
-        }
-
-        public Builder withCustomerDTO(CustomerDTO customerDTO) {
-            this.customerDTO = customerDTO;
-            return this;
-        }
-
-        public Builder withUserDTO(UserDTO userDTO) {
-            this.userDTO = userDTO;
             return this;
         }
 
@@ -123,23 +97,23 @@ public class AppointmentDTO {
             return this;
         }
 
-        public Builder withType(AppointmentType type) {
-            this.type = type;
-            return this;
-        }
-
         public Builder withUrl(String url) {
             this.url = url;
             return this;
         }
 
-        public Builder withStart(Instant start) {
-            this.start = start;
+        public Builder withType(AppointmentType type) {
+            this.type = type;
             return this;
         }
 
-        public Builder withEnd(Instant end) {
-            this.end = end;
+        public Builder withTime(AppointmentTime time) {
+            this.time = time;
+            return this;
+        }
+
+        public Builder withCustomerDTO(CustomerDTO customerDTO) {
+            this.customerDTO = customerDTO;
             return this;
         }
 
