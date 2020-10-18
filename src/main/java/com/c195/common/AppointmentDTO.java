@@ -5,10 +5,10 @@ public class AppointmentDTO {
     private final int id;
     private final String title;
     private final String description;
-    private final String location;
     private final String contact;
     private final String url;
     private final AppointmentType type;
+    private final AppointmentLocation location;
     private final AppointmentTime time;
     private final CustomerDTO customerDTO;
 
@@ -16,10 +16,10 @@ public class AppointmentDTO {
         this.id = builder.id;
         this.title = builder.title;
         this.description = builder.description;
-        this.location = builder.location;
         this.contact = builder.contact;
         this.url = builder.url;
         this.type = builder.type;
+        this.location = builder.location;
         this.time = builder.time;
         this.customerDTO = builder.customerDTO;
     }
@@ -36,10 +36,6 @@ public class AppointmentDTO {
         return description;
     }
 
-    public String getLocation() {
-        return location;
-    }
-
     public String getContact() {
         return contact;
     }
@@ -50,6 +46,10 @@ public class AppointmentDTO {
 
     public AppointmentType getType() {
         return type;
+    }
+
+    public AppointmentLocation getLocation() {
+        return location;
     }
 
     public AppointmentTime getTime() {
@@ -65,10 +65,10 @@ public class AppointmentDTO {
         private int id;
         private String title;
         private String description;
-        private String location;
         private String contact;
         private String url;
         private AppointmentType type;
+        private AppointmentLocation location;
         private AppointmentTime time;
         private CustomerDTO customerDTO;
 
@@ -87,11 +87,6 @@ public class AppointmentDTO {
             return this;
         }
 
-        public Builder withLocation(String location) {
-            this.location = location;
-            return this;
-        }
-
         public Builder withContact(String contact) {
             this.contact = contact;
             return this;
@@ -104,6 +99,11 @@ public class AppointmentDTO {
 
         public Builder withType(AppointmentType type) {
             this.type = type;
+            return this;
+        }
+
+        public Builder withLocation(AppointmentLocation location) {
+            this.location = location;
             return this;
         }
 

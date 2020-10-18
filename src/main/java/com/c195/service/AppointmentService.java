@@ -1,8 +1,6 @@
 package com.c195.service;
 
-import com.c195.common.AppointmentDTO;
-import com.c195.common.AppointmentTime;
-import com.c195.common.AppointmentType;
+import com.c195.common.*;
 import com.c195.dao.AppointmentDAO;
 import com.c195.dao.DAOException;
 import com.c195.dao.MetadataDAO;
@@ -154,7 +152,7 @@ public class AppointmentService {
         final AppointmentTime appointmentTime = appointmentDTO.getTime();
         final Appointment appointment = new Appointment();
         appointment.setId(appointmentDTO.getId());
-        appointment.setLocation(appointmentDTO.getLocation());
+        appointment.setLocation(appointmentDTO.getLocation().getName());
         appointment.setTitle(appointmentDTO.getTitle());
         appointment.setDescription(appointmentDTO.getDescription());
         appointment.setContact(appointmentDTO.getContact());
@@ -166,16 +164,20 @@ public class AppointmentService {
     }
 
     public static AppointmentDTO toAppointmentDTO(Appointment appointment) throws AppointmentException {
+        final AppointmentType type = AppointmentType.valueOf(appointment.getType());
+        final AppointmentLocation location = AppointmentLocation.valueOf(appointment.getLocation());
+        final AppointmentTime time = new AppointmentTime(appointment.getStart(), appointment.getEnd(), location.getZoneId());
+        final CustomerDTO customer = CustomerService.toCustomerDTO(appointment.getCustomer());
         return new AppointmentDTO.Builder()
                 .withId(appointment.getId())
                 .withDescription(appointment.getDescription())
-                .withLocation(appointment.getLocation())
                 .withTitle(appointment.getTitle())
                 .withUrl(appointment.getUrl())
                 .withContact(appointment.getContact())
-                .withType(AppointmentType.valueOf(appointment.getType()))
-                .withTime(new AppointmentTime(appointment.getStart(), appointment.getEnd()))
-                .withCustomerDTO(CustomerService.toCustomerDTO(appointment.getCustomer()))
+                .withType(type)
+                .withLocation(location)
+                .withTime(time)
+                .withCustomerDTO(customer)
                 .build();
     }
 }

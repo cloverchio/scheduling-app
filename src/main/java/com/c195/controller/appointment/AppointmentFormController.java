@@ -1,15 +1,13 @@
 package com.c195.controller.appointment;
 
-import com.c195.common.AppointmentDTO;
-import com.c195.common.AppointmentTime;
-import com.c195.common.AppointmentType;
+import com.c195.common.*;
 import com.c195.controller.FormController;
 import com.c195.dao.AppointmentDAO;
 import com.c195.service.AppointmentException;
 import com.c195.service.AppointmentService;
-import com.c195.util.AppointmentUtils;
 import com.c195.util.ControllerUtils;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
@@ -17,13 +15,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class AppointmentFormController extends FormController {
-
-    private static final String TIME_PATTERN = "([01]?[0-9]|2[0-3]):[0-5][0-9]";
 
     @FXML
     private Label titleLabel;
@@ -42,17 +38,17 @@ public class AppointmentFormController extends FormController {
     @FXML
     private TextField contactField;
     @FXML
-    private Label typeLabel;
-    @FXML
-    private ComboBox<AppointmentType> typeComboBox;
-    @FXML
     private Label urlLabel;
     @FXML
     private TextField urlField;
     @FXML
     private Label locationLabel;
     @FXML
-    private TextField locationField;
+    private ComboBox<String> locationComboBox;
+    @FXML
+    private Label typeLabel;
+    @FXML
+    private ComboBox<String> typeComboBox;
     @FXML
     private Label startDateLabel;
     @FXML
@@ -72,20 +68,18 @@ public class AppointmentFormController extends FormController {
 
     private AppointmentService appointmentService;
     private Map<Label, TextField> formFields;
-    private Pattern pattern;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         super.initialize(url, resourceBundle);
-        this.pattern = Pattern.compile(TIME_PATTERN);
-        this.typeComboBox.setItems(FXCollections.observableList(Arrays.asList(AppointmentType.values())));
+        this.typeComboBox.setItems(getAppointmentTypes());
+        this.locationComboBox.setItems(getAppointmentLocations());
         this.formFields = new HashMap<>();
         this.formFields.put(titleLabel, titleField);
         this.formFields.put(descriptionLabel, descriptionField);
         this.formFields.put(customerIdLabel, customerIdField);
         this.formFields.put(contactLabel, contactField);
         this.formFields.put(urlLabel, urlField);
-        this.formFields.put(locationLabel, locationField);
         this.formFields.put(startTimeLabel, startTimeField);
         this.formFields.put(endTimeLabel, endTimeField);
         getDatabaseConnection()
@@ -100,52 +94,73 @@ public class AppointmentFormController extends FormController {
         return appointmentService;
     }
 
-    protected AppointmentDTO.Builder getAppointmentDTO() {
-        return new AppointmentDTO.Builder()
-                .withTitle(titleField.getText())
-                .withDescription(descriptionField.getText())
-                .withUrl(urlField.getText())
-                .withLocation(locationField.getText())
-                .withContact(contactField.getText())
-                .withType(typeComboBox.getValue());
+    protected Optional<AppointmentDTO.Builder> getAppointmentDTO() {
+        return getAppointmentTime()
+                .map(time -> new AppointmentDTO.Builder()
+                        .withTitle(titleField.getText())
+                        .withDescription(descriptionField.getText())
+                        .withUrl(urlField.getText())
+                        .withContact(contactField.getText())
+                        .withLocation(AppointmentLocation.valueOf(locationComboBox.getValue()))
+                        .withType(AppointmentType.valueOf(typeComboBox.getValue())));
     }
 
-    protected Optional<AppointmentTime> getAppointmentTime() {
-        final boolean validStart = pattern.matcher(startTimeField.getText()).matches();
-        final boolean validEnd = pattern.matcher(endTimeField.getText()).matches();
+    protected void setFields(AppointmentDTO appointmentDTO) {
+        final AppointmentType type = appointmentDTO.getType();
+        final AppointmentLocation location = appointmentDTO.getLocation();
+        final AppointmentTime time = appointmentDTO.getTime();
+        final CustomerDTO customer = appointmentDTO.getCustomerDTO();
+        titleField.setText(appointmentDTO.getTitle());
+        descriptionField.setText(appointmentDTO.getDescription());
+        contactField.setText(appointmentDTO.getContact());
+        urlField.setText(appointmentDTO.getUrl());
+        typeComboBox.getSelectionModel().select(type.getName());
+        locationComboBox.getSelectionModel().select(location.getName());
+        customerIdField.setText(String.valueOf(customer.getId()));
+        setStartDateTime(time.getLocationStart());
+        setEndDateTime(time.getLocationEnd());
+    }
+
+    private Optional<AppointmentTime> getAppointmentTime() {
         try {
-            if (validStart && validEnd) {
-                final LocalDateTime start = AppointmentUtils.toLocalDateTime(startDatePicker.getValue(), startTimeField.getText());
-                final LocalDateTime end = AppointmentUtils.toLocalDateTime(endDatePicker.getValue(), endTimeField.getText());
-                return Optional.of(new AppointmentTime(start, end));
-            }
-            ControllerUtils.displayAsDefault(getValidationField());
-            setValidationField("Appointment time is invalid");
+            return Optional.of(new AppointmentTime(
+                    startDatePicker.getValue(),
+                    startTimeField.getText(),
+                    endDatePicker.getValue(),
+                    endTimeField.getText(),
+                    AppointmentLocation.valueOf(locationComboBox.getValue()).getZoneId()));
         } catch (AppointmentException e) {
+            ControllerUtils.displayAsRed(getValidationField());
             setValidationField(e.getMessage());
         }
         return Optional.empty();
     }
 
-    protected void setFields(AppointmentDTO appointmentDTO) {
-        titleField.setText(appointmentDTO.getTitle());
-        descriptionField.setText(appointmentDTO.getDescription());
-        customerIdField.setText(String.valueOf(appointmentDTO.getCustomerDTO().getId()));
-        contactField.setText(appointmentDTO.getContact());
-        urlField.setText(appointmentDTO.getUrl());
-        locationField.setText(appointmentDTO.getLocation());
-        typeComboBox.getSelectionModel().select(appointmentDTO.getType());
-        setStartTime(appointmentDTO.getTime().getStart());
-        setEndTime(appointmentDTO.getTime().getEnd());
+    private void setStartDateTime(ZonedDateTime locationStart) {
+        startDatePicker.setValue(locationStart.toLocalDate());
+        startTimeField.setText(getTimeField(locationStart.getHour(), locationStart.getMinute()));
     }
 
-    private void setStartTime(LocalDateTime start) {
-        startTimeField.setText(AppointmentUtils.getTimeField(start.getHour(), start.getMinute()));
-        startDatePicker.setValue(start.toLocalDate());
+    private void setEndDateTime(ZonedDateTime locationEnd) {
+        endDatePicker.setValue(locationEnd.toLocalDate());
+        endTimeField.setText(getTimeField(locationEnd.getHour(), locationEnd.getMinute()));
     }
 
-    private void setEndTime(LocalDateTime end) {
-        endTimeField.setText(AppointmentUtils.getTimeField(end.getHour(), end.getMinute()));
-        endDatePicker.setValue(end.toLocalDate());
+    private static ObservableList<String> getAppointmentTypes() {
+        return FXCollections.observableList(
+                Arrays.stream(AppointmentType.values())
+                        .map(AppointmentType::getName)
+                        .collect(Collectors.toList()));
+    }
+
+    private static ObservableList<String> getAppointmentLocations() {
+        return FXCollections.observableList(
+                Arrays.stream(AppointmentLocation.values())
+                        .map(AppointmentLocation::getName)
+                        .collect(Collectors.toList()));
+    }
+
+    private static String getTimeField(int hour, int minute) {
+        return String.format("%d:%d", hour, minute);
     }
 }
