@@ -13,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputControl;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -53,7 +54,7 @@ public class CustomerFormController extends FormController {
     private CheckBox active;
 
     private CustomerService customerService;
-    private Map<Label, TextField> formFields;
+    private Map<Label, TextInputControl> formFields;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -76,7 +77,7 @@ public class CustomerFormController extends FormController {
                 });
     }
 
-    protected Map<Label, TextField> getFormFields() {
+    protected Map<Label, TextInputControl> getFormFields() {
         return formFields;
     }
 

@@ -9,7 +9,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputControl;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -21,7 +21,7 @@ public final class ControllerUtils {
 
     public static final String TITLE = "C195 Scheduling App";
 
-    public static Map<Label, TextField> getInvalidTextFields(Map<Label, TextField> textFieldMap) {
+    public static Map<Label, TextInputControl> getInvalidTextFields(Map<Label, TextInputControl> textFieldMap) {
         return textFieldMap.entrySet().stream()
                 .filter(entry -> validTextInput().negate().test(entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -82,7 +82,7 @@ public final class ControllerUtils {
         }
     }
 
-    private static Predicate<TextField> validTextInput() {
+    private static Predicate<TextInputControl> validTextInput() {
         return textField -> {
             final String text = textField.getText();
             return text != null && !text.isEmpty();

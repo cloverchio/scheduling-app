@@ -29,7 +29,7 @@ public class Controller implements Initializable {
         this.messagingService = MessagingService.getInstance();
     }
 
-    public MessagingService getMessagingService() {
+    protected MessagingService getMessagingService() {
         return messagingService;
     }
 
@@ -41,7 +41,7 @@ public class Controller implements Initializable {
      * @param confirmedDatabaseAction action to be performed upon confirmation.
      * @param <T>                     the return type expected from the database operation.
      */
-    public <T> void showConfirmation(CheckedSupplier<T> confirmedDatabaseAction) {
+    protected  <T> void showConfirmation(CheckedSupplier<T> confirmedDatabaseAction) {
         showConfirmationAlert().ifPresent((response -> {
             if (response == ButtonType.OK) {
                 performDatabaseAction(confirmedDatabaseAction);
@@ -59,7 +59,7 @@ public class Controller implements Initializable {
      * @param <T>             the return type expected from the database operation.
      * @return optional of the database operation's expected return type.
      */
-    public <T> Optional<T> performDatabaseAction(CheckedSupplier<T> checkedSupplier) {
+    protected  <T> Optional<T> performDatabaseAction(CheckedSupplier<T> checkedSupplier) {
         try {
             return Optional.ofNullable(checkedSupplier.getWithIO());
         } catch (DAOException e) {
@@ -75,7 +75,7 @@ public class Controller implements Initializable {
      *
      * @return optional instance of the database connection.
      */
-    public Optional<Connection> getDatabaseConnection() {
+    protected Optional<Connection> getDatabaseConnection() {
         try {
             return Optional.ofNullable(MysqlConnection.getInstance(MysqlConfig.getInstance()));
         } catch (DAOConfigException e) {
@@ -93,7 +93,7 @@ public class Controller implements Initializable {
      * @param clazz       controller class.
      * @param viewPath    path of the view to transition to.
      */
-    public void showView(ActionEvent actionEvent, Class<?> clazz, String viewPath) {
+    protected void showView(ActionEvent actionEvent, Class<?> clazz, String viewPath) {
         try {
             ControllerUtils.showEventView(actionEvent, clazz, viewPath);
         } catch (IOException e) {
@@ -102,7 +102,7 @@ public class Controller implements Initializable {
         }
     }
 
-    private Optional<ButtonType> showConfirmationAlert() {
+    protected Optional<ButtonType> showConfirmationAlert() {
         return ControllerUtils.infoAlert(messagingService.getConfirmationTitle(),
                 messagingService.getConfirmationHeader(),
                 messagingService.getConfirmationContent())

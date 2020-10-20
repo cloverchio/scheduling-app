@@ -6,9 +6,10 @@ import com.c195.service.UserService;
 import com.c195.util.ControllerUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
-import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputControl;
 
 import java.net.URL;
 import java.util.Map;
@@ -47,6 +48,22 @@ public class FormController extends Controller implements Initializable {
     }
 
     /**
+     * Performs a form submission if the confirmation is accepted the user.
+     *
+     * @param formFields         fields to perform validation on.
+     * @param formDatabaseAction database action to be performed if no invalid fields.
+     * @param <T>                the return type expected from the database operation.
+     */
+    protected <T> void formFieldSubmitActionWithConfirmation(Map<Label, TextInputControl> formFields,
+                                                             CheckedSupplier<T> formDatabaseAction) {
+        showConfirmationAlert().ifPresent((response -> {
+            if (response == ButtonType.OK) {
+                formFieldSubmitAction(formFields, formDatabaseAction);
+            }
+        }));
+    }
+
+    /**
      * This is probably crossing the line but the result of an idea I had to reuse the form field
      * validation in conjunction with a database operation. Which are things we will most likely
      * want to use on every form submission within the project.
@@ -56,9 +73,9 @@ public class FormController extends Controller implements Initializable {
      * @param <T>                the return type expected from the database operation.
      * @return optional of the database operation's expected return type.
      */
-    public <T> Optional<T> formFieldSubmitAction(Map<Label, TextField> formFields,
-                                                 CheckedSupplier<T> formDatabaseAction) {
-        final Map<Label, TextField> invalidFields = ControllerUtils.getInvalidTextFields(formFields);
+    protected <T> Optional<T> formFieldSubmitAction(Map<Label, TextInputControl> formFields,
+                                                    CheckedSupplier<T> formDatabaseAction) {
+        final Map<Label, TextInputControl> invalidFields = ControllerUtils.getInvalidTextFields(formFields);
         if (!invalidFields.isEmpty()) {
             ControllerUtils.displayAsRed(validationField);
             showRequiredFieldMessage(invalidFields.keySet());

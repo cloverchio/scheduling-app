@@ -9,23 +9,29 @@
             <Font size="24.0" />
         </font>
     </Label>
-<!--    <Label fx:id="messageLabel" layoutX="85.0" layoutY="63.0" prefHeight="26.0" prefWidth="480.0" />-->
-<!--    <Label fx:id="nameLabel" layoutX="84.0" layoutY="108.0" prefHeight="26.0" prefWidth="51.0" text="Name" />-->
-<!--    <TextField fx:id="nameField" layoutX="148.0" layoutY="108.0" prefHeight="26.0" prefWidth="176.0" />-->
-<!--    <Label layoutX="344.0" layoutY="113.0" text="Active" />-->
-<!--    <CheckBox fx:id="active" layoutX="415.0" layoutY="112.0" mnemonicParsing="false" />-->
-<!--    <Label fx:id="addressLabel" layoutX="84.0" layoutY="155.0" prefHeight="26.0" prefWidth="57.0" text="Address" />-->
-<!--    <TextField fx:id="addressField" layoutX="148.0" layoutY="155.0" prefHeight="26.0" prefWidth="176.0" />-->
-<!--    <Label fx:id="aptLabel" layoutX="344.0" layoutY="160.0" text="Apt" />-->
-<!--    <TextField fx:id="aptField" layoutX="415.0" layoutY="160.0" prefHeight="26.0" prefWidth="57.0" />-->
-<!--    <Label fx:id="cityLabel" layoutX="84.0" layoutY="200.0" prefHeight="26.0" prefWidth="57.0" text="City" />-->
-<!--    <TextField fx:id="cityField" layoutX="148.0" layoutY="200.0" prefHeight="26.0" prefWidth="176.0" />-->
-<!--    <Label fx:id="countryLabel" layoutX="344.0" layoutY="200.0" prefHeight="26.0" prefWidth="57.0" text="Country" />-->
-<!--    <TextField fx:id="countryField" layoutX="415.0" layoutY="200.0" prefHeight="26.0" prefWidth="100.0" />-->
-<!--    <Label fx:id="phoneLabel" layoutX="84.0" layoutY="250.0" prefHeight="26.0" prefWidth="57.0" text="Phone" />-->
-<!--    <TextField fx:id="phoneField" layoutX="148.0" layoutY="250.0" prefHeight="26.0" prefWidth="176.0" />-->
-<!--    <Label fx:id="postalCodeLabel" layoutX="344.0" layoutY="250.0" prefHeight="26.0" prefWidth="57.0" text="Zip" />-->
-<!--    <TextField fx:id="postalCodeField" layoutX="415.0" layoutY="250.0" prefHeight="26.0" prefWidth="100.0" />-->
-    <Button layoutX="84.0" layoutY="318.0" mnemonicParsing="false" onAction="#cancelCreate" prefHeight="48.0" prefWidth="122.0" text="Cancel" />
-<!--    <Button layoutX="222.0" layoutY="318.0" mnemonicParsing="false" onAction="#saveCustomer" prefHeight="48.0" prefWidth="122.0" text="Save" />-->
+    <Label fx:id="validationField" layoutX="85.0" layoutY="63.0" prefHeight="26.0" prefWidth="480.0" />
+   <Label fx:id="titleLabel" layoutX="45.0" layoutY="110.0" prefHeight="26.0" prefWidth="73.0" text="Title" />
+   <TextField fx:id="titleField" layoutX="130.0" layoutY="110.0" />
+    <Label fx:id="customerIdLabel" layoutX="335.0" layoutY="110.0" prefHeight="26.0" prefWidth="88.0" text="Customer ID" />
+   <TextField fx:id="customerIdField" layoutX="430.0" layoutY="110.0" prefHeight="26.0" prefWidth="115.0" />
+    <Label fx:id="contactLabel" layoutX="45.0" layoutY="145.0" prefHeight="26.0" prefWidth="80.0" text="Contact" />
+   <TextField fx:id="contactField" layoutX="130.0" layoutY="145.0" />
+    <Label fx:id="urlLabel" layoutX="45.0" layoutY="183.0" prefHeight="26.0" prefWidth="80.0" text="URL" />
+   <TextField fx:id="urlField" layoutX="130.0" layoutY="183.0" />
+    <Label fx:id="locationLabel" layoutX="335.0" layoutY="145.0" prefHeight="26.0" prefWidth="80.0" text="Location" />
+   <ComboBox fx:id="locationComboBox" layoutX="430.0" layoutY="145.0" prefHeight="26.0" prefWidth="115.0" />
+    <Label fx:id="typeLabel" layoutX="335.0" layoutY="185.0" prefHeight="26.0" prefWidth="80.0" text="Type" />
+   <ComboBox fx:id="typeComboBox" layoutX="430.0" layoutY="185.0" prefHeight="26.0" prefWidth="115.0" />
+   <Label fx:id="startDateLabel" layoutX="45.0" layoutY="226.0" prefHeight="26.0" prefWidth="80.0" text="Start Date" />
+   <DatePicker fx:id="startDatePicker" layoutX="130.0" layoutY="226.0" prefHeight="26.0" prefWidth="171.0" />
+   <Label fx:id="endDateLabel" layoutX="45.0" layoutY="274.0" prefHeight="26.0" prefWidth="80.0" text="End Date" />
+   <DatePicker fx:id="endDatePicker" layoutX="130.0" layoutY="274.0" prefHeight="26.0" prefWidth="171.0" />
+   <Label fx:id="startTimeLabel" layoutX="335.0" layoutY="225.0" prefHeight="26.0" prefWidth="88.0" text="Start Time" />
+   <TextField fx:id="startTimeField" layoutX="430.0" layoutY="225.0" prefHeight="26.0" prefWidth="115.0" />
+   <Label fx:id="endTimeLabel" layoutX="335.0" layoutY="265.0" prefHeight="26.0" prefWidth="88.0" text="End" />
+   <TextField fx:id="endTimeField" layoutX="430.0" layoutY="265.0" prefHeight="26.0" prefWidth="115.0" />
+    <Label fx:id="descriptionLabel" layoutX="45.0" layoutY="385.0" prefHeight="26.0" prefWidth="80.0" text="Description" />
+    <TextArea fx:id="descriptionArea" layoutX="130.0" layoutY="330.0" prefHeight="135.0" prefWidth="412.0" />
+    <Button layoutX="85.0" layoutY="506.0" mnemonicParsing="false" onAction="#cancelCreate" prefHeight="48.0" prefWidth="122.0" text="Cancel" />
+    <Button layoutX="222.0" layoutY="506.0" mnemonicParsing="false" onAction="#saveAppointment"  prefHeight="48.0" prefWidth="122.0" text="Save" />
 </AnchorPane>

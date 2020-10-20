@@ -18,10 +18,6 @@ public class CustomerUpdateController extends CustomerFormController {
         super.initialize(url, resourceBundle);
     }
 
-    public void setCustomerDTO(CustomerDTO customerDTO) {
-        this.customerDTO = customerDTO;
-    }
-
     @FXML
     public void cancelUpdate(ActionEvent actionEvent) {
         showView(actionEvent, getClass(), "../../view/customer/customer.fxml");
@@ -36,6 +32,10 @@ public class CustomerUpdateController extends CustomerFormController {
                 .map(UserDTO::getUsername)
                 .map(username -> updateCustomer(customerDTO.getId(), customerDTO.getAddressDTO().getId(), username))
                 .ifPresent(updatedCustomerId -> setValidationField("Customer has been updated!"));
+    }
+
+    public void setCustomerDTO(CustomerDTO customerDTO) {
+        this.customerDTO = customerDTO;
     }
 
     private Integer updateCustomer(int customerId, int addressId, String currentUser) {

@@ -9,12 +9,10 @@ import com.c195.util.ControllerUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
 import java.net.URL;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,7 +26,7 @@ public class AppointmentFormController extends FormController {
     @FXML
     private Label descriptionLabel;
     @FXML
-    private TextField descriptionField;
+    private TextArea descriptionArea;
     @FXML
     private Label customerIdLabel;
     @FXML
@@ -67,7 +65,7 @@ public class AppointmentFormController extends FormController {
     private TextField endTimeField;
 
     private AppointmentService appointmentService;
-    private Map<Label, TextField> formFields;
+    private Map<Label, TextInputControl> formFields;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -76,7 +74,7 @@ public class AppointmentFormController extends FormController {
         this.locationComboBox.setItems(getAppointmentLocations());
         this.formFields = new HashMap<>();
         this.formFields.put(titleLabel, titleField);
-        this.formFields.put(descriptionLabel, descriptionField);
+        this.formFields.put(descriptionLabel, descriptionArea);
         this.formFields.put(customerIdLabel, customerIdField);
         this.formFields.put(contactLabel, contactField);
         this.formFields.put(urlLabel, urlField);
@@ -86,7 +84,7 @@ public class AppointmentFormController extends FormController {
                 .ifPresent(connection -> appointmentService = AppointmentService.getInstance(AppointmentDAO.getInstance(connection)));
     }
 
-    protected Map<Label, TextField> getFormFields() {
+    protected Map<Label, TextInputControl> getFormFields() {
         return formFields;
     }
 
@@ -94,15 +92,22 @@ public class AppointmentFormController extends FormController {
         return appointmentService;
     }
 
+    protected <T> void  submitWithOverlapConfirmation(int userId, Instant start, Instant end, CheckedSupplier<T> submitAction) {
+        performDatabaseAction(() -> appointmentService.getAppointmentsByUserBetween(userId, start, end))
+                .filter(overlappingAppointments -> !overlappingAppointments.isEmpty())
+                .ifPresent(overlappingAppointments -> formFieldSubmitActionWithConfirmation(formFields, submitAction));
+    }
+
     protected Optional<AppointmentDTO.Builder> getAppointmentDTO() {
         return getAppointmentTime()
                 .map(time -> new AppointmentDTO.Builder()
                         .withTitle(titleField.getText())
-                        .withDescription(descriptionField.getText())
+                        .withDescription(descriptionArea.getText())
                         .withUrl(urlField.getText())
                         .withContact(contactField.getText())
                         .withLocation(AppointmentLocation.valueOf(locationComboBox.getValue()))
-                        .withType(AppointmentType.valueOf(typeComboBox.getValue())));
+                        .withType(AppointmentType.valueOf(typeComboBox.getValue()))
+                        .withTime(time));
     }
 
     protected void setFields(AppointmentDTO appointmentDTO) {
@@ -111,7 +116,7 @@ public class AppointmentFormController extends FormController {
         final AppointmentTime time = appointmentDTO.getTime();
         final CustomerDTO customer = appointmentDTO.getCustomerDTO();
         titleField.setText(appointmentDTO.getTitle());
-        descriptionField.setText(appointmentDTO.getDescription());
+        descriptionArea.setText(appointmentDTO.getDescription());
         contactField.setText(appointmentDTO.getContact());
         urlField.setText(appointmentDTO.getUrl());
         typeComboBox.getSelectionModel().select(type.getName());
