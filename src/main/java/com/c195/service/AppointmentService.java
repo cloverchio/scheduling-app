@@ -116,9 +116,10 @@ public class AppointmentService {
      * @return the id of the saved appointment.
      * @throws DAOException if there are issues saving the appointment to the db.
      */
-    public Integer saveAppointment(AppointmentDTO appointmentDTO, String currentUser) throws DAOException {
+    public Integer saveAppointment(AppointmentDTO appointmentDTO, UserDTO currentUser) throws DAOException {
         final Appointment appointment = toAppointment(appointmentDTO);
-        appointment.setMetadata(MetadataDAO.getSaveMetadata(currentUser));
+        appointment.setUser(UserService.toUser(currentUser));
+        appointment.setMetadata(MetadataDAO.getSaveMetadata(currentUser.getUsername()));
         appointmentDAO.saveAppointment(appointment);
         return appointment.getId();
     }
@@ -131,9 +132,10 @@ public class AppointmentService {
      * @return the id of the updated appointment.
      * @throws DAOException if there are issues updating the appointment in the db.
      */
-    public Integer updateAppointment(AppointmentDTO appointmentDTO, String currentUser) throws DAOException {
+    public Integer updateAppointment(AppointmentDTO appointmentDTO, UserDTO currentUser) throws DAOException {
         final Appointment appointment = toAppointment(appointmentDTO);
-        appointment.setMetadata(MetadataDAO.getUpdateMetadata(currentUser));
+        appointment.setUser(UserService.toUser(currentUser));
+        appointment.setMetadata(MetadataDAO.getUpdateMetadata(currentUser.getUsername()));
         appointmentDAO.updateAppointment(appointment);
         return appointment.getId();
     }
@@ -154,6 +156,7 @@ public class AppointmentService {
         appointment.setId(appointmentDTO.getId());
         appointment.setLocation(appointmentDTO.getLocation().getName());
         appointment.setTitle(appointmentDTO.getTitle());
+        appointment.setUrl(appointmentDTO.getUrl());
         appointment.setDescription(appointmentDTO.getDescription());
         appointment.setContact(appointmentDTO.getContact());
         appointment.setStart(appointmentTime.getUtcStart());

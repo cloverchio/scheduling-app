@@ -1,6 +1,7 @@
 package com.c195.controller.customer;
 
 import com.c195.common.AddressDTO;
+import com.c195.common.CheckedSupplier;
 import com.c195.common.CustomerDTO;
 import com.c195.common.UserDTO;
 import javafx.event.ActionEvent;
@@ -25,12 +26,11 @@ public class CustomerUpdateController extends CustomerFormController {
 
     @FXML
     public void updateCustomer() {
-        // gets the username of the current user
+        // gets the current user
         // maps that username to an updated customer id (implicitly updates the customer)
         // displays messaging to the user if a customer id was returned
         getUserService().getCurrentUser()
-                .map(UserDTO::getUsername)
-                .map(username -> updateCustomer(customerDTO.getId(), customerDTO.getAddressDTO().getId(), username))
+                .map(currentUser -> updateCustomer(customerDTO.getId(), customerDTO.getAddressDTO().getId(), currentUser))
                 .ifPresent(updatedCustomerId -> setValidationField("Customer has been updated!"));
     }
 
@@ -38,15 +38,10 @@ public class CustomerUpdateController extends CustomerFormController {
         this.customerDTO = customerDTO;
     }
 
-    private Integer updateCustomer(int customerId, int addressId, String currentUser) {
-        final AddressDTO addressDTO = getAddressDTO()
-                .withId(addressId)
-                .build();
-        final CustomerDTO customerDTO = getCustomerDTO(addressDTO)
-                .withId(customerId)
-                .build();
-        return formFieldSubmitAction(getFormFields(), () ->
-                getCustomerService().updateCustomer(customerDTO, currentUser)).
-                orElse(null);
+    private Integer updateCustomer(int customerId, int addressId, UserDTO currentUser) {
+        final AddressDTO addressDTO = getAddressDTO().withId(addressId).build();
+        final CustomerDTO customerDTO = getCustomerDTO(addressDTO).withId(customerId).build();
+        final CheckedSupplier<Integer> submitAction = () -> getCustomerService().updateCustomer(customerDTO, currentUser);
+        return formFieldSubmitAction(getFormFields(), submitAction).orElse(null);
     }
 }

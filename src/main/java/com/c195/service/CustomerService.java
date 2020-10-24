@@ -2,6 +2,7 @@ package com.c195.service;
 
 import com.c195.common.AddressDTO;
 import com.c195.common.CustomerDTO;
+import com.c195.common.UserDTO;
 import com.c195.dao.CustomerDAO;
 import com.c195.dao.DAOException;
 import com.c195.dao.MetadataDAO;
@@ -37,10 +38,12 @@ public class CustomerService {
      * @param id in which to retrieve the customer for.
      * @return the customer corresponding to the given id.
      * @throws DAOException if there are issues retrieving the customer from the db.
+     * @throws CustomerException if the customer cannot be found
      */
-    public Optional<CustomerDTO> getCustomerById(int id) throws DAOException {
+    public CustomerDTO getCustomerById(int id) throws DAOException, CustomerException {
         return customerDAO.getCustomerById(id)
-                .map(CustomerService::toCustomerDTO);
+                .map(CustomerService::toCustomerDTO)
+                .orElseThrow(() -> new CustomerException("Customer does not exist"));
     }
 
     /**
@@ -63,10 +66,11 @@ public class CustomerService {
      * @return the id of the saved customer.
      * @throws DAOException if there are issues saving the customer to the db.
      */
-    public Integer saveCustomer(CustomerDTO customerDTO, String currentUser) throws DAOException {
+    public Integer saveCustomer(CustomerDTO customerDTO, UserDTO currentUser) throws DAOException {
         final Customer customer = toCustomer(customerDTO);
-        setAddress(customer, customerDTO.getAddressDTO(), currentUser);
-        customer.setMetadata(MetadataDAO.getSaveMetadata(currentUser));
+        final String currentUsername = currentUser.getUsername();
+        setAddress(customer, customerDTO.getAddressDTO(), currentUsername);
+        customer.setMetadata(MetadataDAO.getSaveMetadata(currentUsername));
         customerDAO.saveCustomer(customer);
         return customer.getId();
     }
@@ -79,10 +83,11 @@ public class CustomerService {
      * @return the id of the updated customer.
      * @throws DAOException if there are issues updating the customer in the db.
      */
-    public Integer updateCustomer(CustomerDTO customerDTO, String currentUser) throws DAOException {
-        addressService.updateAddress(customerDTO.getAddressDTO(), currentUser);
+    public Integer updateCustomer(CustomerDTO customerDTO, UserDTO currentUser) throws DAOException {
+        final String currentUsername = currentUser.getUsername();
+        addressService.updateAddress(customerDTO.getAddressDTO(), currentUsername);
         final Customer customer = toCustomer(customerDTO);
-        customer.setMetadata(MetadataDAO.getUpdateMetadata(currentUser));
+        customer.setMetadata(MetadataDAO.getUpdateMetadata(currentUsername));
         customerDAO.updateCustomer(customer);
         return customer.getId();
     }

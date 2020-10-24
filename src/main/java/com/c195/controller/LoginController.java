@@ -3,10 +3,7 @@ package com.c195.controller;
 import com.c195.util.ControllerUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -37,7 +34,7 @@ public class LoginController extends FormController {
     @FXML
     private Button loginButton;
 
-    private Map<Label, TextField> formFields;
+    private Map<Label, TextInputControl> formFields;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

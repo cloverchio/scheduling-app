@@ -51,7 +51,7 @@ public class AppointmentDAO {
             "INSERT INTO appointment " +
             "(customerId, userId, title, description, location, " +
             "contact, type, url, start, end, createDate, createdBy, lastUpdateBy) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE_APPOINTMENTS_SQL = "" +
             "UPDATE appointment " +
@@ -155,7 +155,7 @@ public class AppointmentDAO {
             statement.setString(6, appointment.getContact());
             statement.setString(7, appointment.getType());
             statement.setString(8, appointment.getUrl());
-            statement.setObject(9, appointment.getStart());
+            statement.setTimestamp(9, Timestamp.from(appointment.getStart()));
             statement.setTimestamp(10, Timestamp.from(appointment.getEnd()));
             statement.setTimestamp(11, Timestamp.from(appointment.getMetadata().getCreatedDate()));
             statement.setString(12, appointment.getMetadata().getCreatedBy().toLowerCase());

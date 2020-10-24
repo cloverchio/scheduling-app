@@ -6,10 +6,7 @@ import com.c195.service.UserService;
 import com.c195.util.ControllerUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
-import javafx.scene.control.Labeled;
-import javafx.scene.control.TextInputControl;
+import javafx.scene.control.*;
 
 import java.net.URL;
 import java.util.Map;
@@ -44,23 +41,33 @@ public class FormController extends Controller implements Initializable {
     }
 
     public void setValidationField(String validationFieldText) {
+        ControllerUtils.displayAsDefault(getValidationField());
+        validationField.setText(validationFieldText);
+    }
+
+    public void setValidationFieldError(String validationFieldText) {
+        ControllerUtils.displayAsRed(getValidationField());
         validationField.setText(validationFieldText);
     }
 
     /**
      * Performs a form submission if the confirmation is accepted the user.
      *
-     * @param formFields         fields to perform validation on.
-     * @param formDatabaseAction database action to be performed if no invalid fields.
-     * @param <T>                the return type expected from the database operation.
+     * @param formFields        fields to perform validation on.
+     * @param confirmationAlert alert to display while waiting for confirmation.
+     * @param submitAction      database action to be performed if no invalid fields.
+     * @param <T>               the return type expected from the database operation.
+     * @return optional of the submit operation's return type.
      */
-    protected <T> void formFieldSubmitActionWithConfirmation(Map<Label, TextInputControl> formFields,
-                                                             CheckedSupplier<T> formDatabaseAction) {
-        showConfirmationAlert().ifPresent((response -> {
-            if (response == ButtonType.OK) {
-                formFieldSubmitAction(formFields, formDatabaseAction);
-            }
-        }));
+    protected <T> Optional<T> formFieldSubmitActionWithConfirmation(Map<Label, TextInputControl> formFields,
+                                                                    Alert confirmationAlert,
+                                                                    CheckedSupplier<T> submitAction) {
+        final Optional<ButtonType> buttonResponse = confirmationAlert.showAndWait()
+                .filter(buttonType -> buttonType == ButtonType.OK);
+        if (buttonResponse.isPresent()) {
+            return formFieldSubmitAction(formFields, submitAction);
+        }
+        return Optional.empty();
     }
 
     /**

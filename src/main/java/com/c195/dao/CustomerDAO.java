@@ -11,7 +11,7 @@ public class CustomerDAO {
 
     private static final String CUSTOMER_BY_ID_SQL = "" +
             "SELECT * " +
-            "FROM customer cu" +
+            "FROM customer cu " +
             "JOIN address a " +
             "ON cu.addressId = a.addressId " +
             "JOIN city ci " +

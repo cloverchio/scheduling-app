@@ -1,14 +1,15 @@
 package com.c195.controller.appointment;
 
 import com.c195.common.AppointmentDTO;
+import com.c195.common.CheckedSupplier;
 import com.c195.common.UserDTO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
 import java.net.URL;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.function.Consumer;
 
 public class AppointmentCreateController extends AppointmentFormController {
 
@@ -24,17 +25,20 @@ public class AppointmentCreateController extends AppointmentFormController {
 
     @FXML
     public void saveAppointment() {
-        getUserService().getCurrentUser().ifPresent(submitAppointment());
+        getUserService().getCurrentUser()
+                .map(this::saveAppointment)
+                .ifPresent(savedAppointmentId -> setValidationField("Appointment has been saved!"));
     }
 
-    private Consumer<UserDTO> submitAppointment() {
-        return user -> getAppointmentDTO()
-                .map(AppointmentDTO.Builder::build)
-                .ifPresent(appointmentDTO -> {
-                    final Instant start = appointmentDTO.getTime().getUtcStart();
-                    final Instant end = appointmentDTO.getTime().getUtcEnd();
-                    submitWithOverlapConfirmation(user.getId(), start, end, () ->
-                            getAppointmentService().saveAppointment(appointmentDTO, user.getUsername()));
-                });
+    private Integer saveAppointment(UserDTO userDTO) {
+        final Optional<AppointmentDTO.Builder> appointmentDTOBuilder = getAppointmentDTO();
+        if (appointmentDTOBuilder.isPresent()) {
+            final AppointmentDTO appointmentDTO = appointmentDTOBuilder.get().build();
+            final Instant start = appointmentDTO.getTime().getUtcStart();
+            final Instant end = appointmentDTO.getTime().getUtcEnd();
+            final CheckedSupplier<Integer> submitAction  = () -> getAppointmentService().saveAppointment(appointmentDTO, userDTO);
+            return submitWithOverlapConfirmation(userDTO.getId(), start, end, submitAction).orElse(null);
+        }
+        return null;
     }
 }
