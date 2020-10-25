@@ -22,7 +22,8 @@ public final class ControllerUtils {
     public static final String TITLE = "C195 Scheduling App";
 
     public static Map<Label, TextInputControl> getInvalidTextFields(Map<Label, TextInputControl> textFieldMap) {
-        return textFieldMap.entrySet().stream()
+        return textFieldMap.entrySet()
+                .stream()
                 .filter(entry -> validTextInput().negate().test(entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }

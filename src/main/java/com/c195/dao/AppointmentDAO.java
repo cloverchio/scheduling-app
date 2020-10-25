@@ -14,7 +14,13 @@ public class AppointmentDAO {
             "SELECT * " +
             "FROM appointment ap " +
             "JOIN customer cu " +
-            "ON ap.customerId = ap.customerId " +
+            "ON ap.customerId = cu.customerId " +
+            "JOIN address a " +
+            "ON cu.addressId = a.addressId " +
+            "JOIN city ci " +
+            "ON a.cityId = ci.cityId " +
+            "JOIN country co " +
+            "on ci.countryId = co.countryId " +
             "JOIN user us " +
             "ON ap.userId = us.userId " +
             "WHERE ap.appointmentId = ?";
@@ -23,7 +29,13 @@ public class AppointmentDAO {
             "SELECT * " +
             "FROM appointment ap " +
             "JOIN customer cu " +
-            "ON ap.customerId = ap.customerId " +
+            "ON ap.customerId = cu.customerId " +
+            "JOIN address a " +
+            "ON cu.addressId = a.addressId " +
+            "JOIN city ci " +
+            "ON a.cityId = ci.cityId " +
+            "JOIN country co " +
+            "on ci.countryId = co.countryId " +
             "JOIN user us " +
             "ON ap.userId = us.userId";
 
@@ -31,7 +43,13 @@ public class AppointmentDAO {
             "SELECT * " +
             "FROM appointment ap " +
             "JOIN customer cu " +
-            "ON ap.customerId = ap.customerId " +
+            "ON ap.customerId = cu.customerId " +
+            "JOIN address a " +
+            "ON cu.addressId = a.addressId " +
+            "JOIN city ci " +
+            "ON a.cityId = ci.cityId " +
+            "JOIN country co " +
+            "on ci.countryId = co.countryId " +
             "JOIN user us " +
             "ON ap.userId = us.userId " +
             "WHERE ap.userId = ? " +
@@ -41,7 +59,13 @@ public class AppointmentDAO {
             "SELECT * " +
             "FROM appointment ap " +
             "JOIN customer cu " +
-            "ON ap.customerId = ap.customerId " +
+            "ON ap.customerId = cu.customerId " +
+            "JOIN address a " +
+            "ON cu.addressId = a.addressId " +
+            "JOIN city ci " +
+            "ON a.cityId = ci.cityId " +
+            "JOIN country co " +
+            "on ci.countryId = co.countryId " +
             "JOIN user us " +
             "ON ap.userId = us.userId " +
             "WHERE ap.userId = ? " +

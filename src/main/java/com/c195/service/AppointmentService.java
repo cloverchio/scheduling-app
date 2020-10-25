@@ -39,10 +39,10 @@ public class AppointmentService {
      *
      * @param userId in which to retrieve weekly appointments for.
      * @return list of appointments within the week.
-     * @throws DAOException if there are issues retrieving appointments from the db.
+     * @throws DAOException         if there are issues retrieving appointments from the db.
      * @throws AppointmentException if there are issues with the appointment time.
      */
-    public List<AppointmentDTO> getWeeklyAppointmentsByUser(int userId) throws DAOException, AppointmentException {
+    public List<AppointmentDTO> getUpcomingAppointmentsByUserWeek(int userId) throws DAOException, AppointmentException {
         final Instant start = Instant.now();
         final int dayOfTheWeek = start.atZone(zoneId).getDayOfWeek().getValue();
         return getAppointmentsByUserBetween(userId, start, start.plus(7 - dayOfTheWeek, ChronoUnit.DAYS));
@@ -53,10 +53,10 @@ public class AppointmentService {
      *
      * @param userId in which to retrieve monthly appointments for.
      * @return list of appointments within the month.
-     * @throws DAOException if there are issues retrieving appointments from the db.
+     * @throws DAOException         if there are issues retrieving appointments from the db.
      * @throws AppointmentException if there are issues with the appointment time.
      */
-    public List<AppointmentDTO> getMonthlyAppointmentsByUser(int userId) throws DAOException, AppointmentException {
+    public List<AppointmentDTO> getUpcomingAppointmentsByUserMonth(int userId) throws DAOException, AppointmentException {
         final Instant start = Instant.now();
         final ZonedDateTime zonedStart = start.atZone(zoneId);
         final int dayOfTheMonth = zonedStart.getDayOfMonth();
@@ -65,31 +65,32 @@ public class AppointmentService {
     }
 
     /**
+     * Gets a list of all future appointments for a given user.
+     *
+     * @param userId in which to retrieve future appoints for.
+     * @return list of appointments that have a start date greater than now.
+     * @throws DAOException         if there are issues retrieving appointments from the db.
+     * @throws AppointmentException if there are issues with the appointment time.
+     */
+    public List<AppointmentDTO> getUpcomingAppointmentsByUser(int userId) throws DAOException, AppointmentException {
+        return appointmentDAO.getAppointmentsByUserAfter(userId, Instant.now())
+                .stream()
+                .map(AppointmentService::toAppointmentDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Gets a list of appointments that will occur within the next 15 minutes for
      * a given user.
      *
      * @param userId in which to retrieve upcoming appointments for.
      * @return list of appointments that are quickly approaching...
-     * @throws DAOException if there are issues retrieving appointments from the db.
+     * @throws DAOException         if there are issues retrieving appointments from the db.
      * @throws AppointmentException if there are issues with the appointment time.
      */
     public List<AppointmentDTO> getReminderAppointmentsByUser(int userId) throws DAOException, AppointmentException {
         final Instant start = Instant.now();
         return getAppointmentsByUserBetween(userId, start, start.plus(15L, ChronoUnit.MINUTES));
-    }
-
-    /**
-     * Gets a list of all future appointments for a given user.
-     *
-     * @param userId in which to retrieve future appoints for.
-     * @return list of appointments that have a start date greater than now.
-     * @throws DAOException if there are issues retrieving appointments from the db.
-     * @throws AppointmentException if there are issues with the appointment time.
-     */
-    public List<AppointmentDTO> getUpcomingAppointmentsByUser(int userId) throws DAOException, AppointmentException {
-        return appointmentDAO.getAppointmentsByUserAfter(userId, Instant.now()).stream()
-                .map(AppointmentService::toAppointmentDTO)
-                .collect(Collectors.toList());
     }
 
     /**
@@ -99,11 +100,12 @@ public class AppointmentService {
      * @param start  the start of the interval.
      * @param end    the end of the interval.
      * @return a list of appointments between start and end for the given user.
-     * @throws DAOException if there are issues retrieving appointments from the db.
+     * @throws DAOException         if there are issues retrieving appointments from the db.
      * @throws AppointmentException if there are issues with the appointment time.
      */
     public List<AppointmentDTO> getAppointmentsByUserBetween(int userId, Instant start, Instant end) throws DAOException, AppointmentException {
-        return appointmentDAO.getAppointmentsByUserBetween(userId, start, end).stream()
+        return appointmentDAO.getAppointmentsByUserBetween(userId, start, end)
+                .stream()
                 .map(AppointmentService::toAppointmentDTO)
                 .collect(Collectors.toList());
     }
@@ -168,7 +170,7 @@ public class AppointmentService {
 
     public static AppointmentDTO toAppointmentDTO(Appointment appointment) throws AppointmentException {
         final AppointmentType type = AppointmentType.valueOf(appointment.getType());
-        final AppointmentLocation location = AppointmentLocation.valueOf(appointment.getLocation());
+        final AppointmentLocation location = AppointmentLocation.fromName(appointment.getLocation());
         final AppointmentTime time = new AppointmentTime(appointment.getStart(), appointment.getEnd(), location.getZoneId());
         final CustomerDTO customer = CustomerService.toCustomerDTO(appointment.getCustomer());
         return new AppointmentDTO.Builder()

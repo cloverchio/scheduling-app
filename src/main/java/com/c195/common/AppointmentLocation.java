@@ -1,5 +1,9 @@
 package com.c195.common;
 
+import com.c195.service.AppointmentException;
+
+import java.util.Arrays;
+
 public enum AppointmentLocation {
 
     PHOENIX("Phoenix", "America/Phoenix"),
@@ -20,5 +24,12 @@ public enum AppointmentLocation {
 
     public String getZoneId() {
         return zoneId;
+    }
+
+    public static AppointmentLocation fromName(String name) {
+        return Arrays.stream(AppointmentLocation.values())
+                .filter(location -> location.getName().equals(name))
+                .findFirst()
+                .orElseThrow(() -> new AppointmentException("Location not found for " + name));
     }
 }

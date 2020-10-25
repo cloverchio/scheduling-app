@@ -39,23 +39,15 @@ public class AppointmentFormController extends FormController {
     @FXML
     private TextField urlField;
     @FXML
-    private Label locationLabel;
-    @FXML
     private ComboBox<String> locationComboBox;
     @FXML
-    private Label typeLabel;
-    @FXML
     private ComboBox<String> typeComboBox;
-    @FXML
-    private Label startDateLabel;
     @FXML
     private DatePicker startDatePicker;
     @FXML
     private Label startTimeLabel;
     @FXML
     private TextField startTimeField;
-    @FXML
-    private Label endDateLabel;
     @FXML
     private DatePicker endDatePicker;
     @FXML
@@ -99,8 +91,30 @@ public class AppointmentFormController extends FormController {
         return appointmentService;
     }
 
-    protected <T> Optional<T> submitWithOverlapConfirmation(int userId, Instant start, Instant end, CheckedSupplier<T> submitAction) {
-        final List<String> overlappingAppointments = getOverlappingAppointments(userId, start, end);
+    protected <T> Optional<T> submitWithOverlapConfirmation(int appointmentId,
+                                                            int userId,
+                                                            AppointmentTime appointmentTime,
+                                                            CheckedSupplier<T> submitAction) {
+        final List<String> overlappingAppointments =
+                getOverlappingAppointments(appointmentId, userId, appointmentTime.getUtcStart(), appointmentTime.getUtcEnd())
+                        .stream()
+                        .map(AppointmentDTO::getTitle)
+                        .collect(Collectors.toList());
+        return submitWithOverlapConfirmation(overlappingAppointments, submitAction);
+    }
+
+    protected <T> Optional<T> submitWithOverlapConfirmation(int userId,
+                                                            AppointmentTime appointmentTime,
+                                                            CheckedSupplier<T> submitAction) {
+        final List<String> overlappingAppointments =
+                getOverlappingAppointments(userId, appointmentTime.getUtcStart(), appointmentTime.getUtcEnd())
+                        .stream()
+                        .map(AppointmentDTO::getTitle)
+                        .collect(Collectors.toList());
+        return submitWithOverlapConfirmation(overlappingAppointments, submitAction);
+    }
+
+    private <T> Optional<T> submitWithOverlapConfirmation(List<String> overlappingAppointments, CheckedSupplier<T> submitAction) {
         if (overlappingAppointments.isEmpty()) {
             return formFieldSubmitAction(formFields, submitAction);
         } else {
@@ -118,8 +132,8 @@ public class AppointmentFormController extends FormController {
                     .withDescription(descriptionArea.getText())
                     .withUrl(urlField.getText())
                     .withContact(contactField.getText())
-                    .withLocation(AppointmentLocation.valueOf(locationComboBox.getValue().toUpperCase()))
-                    .withType(AppointmentType.valueOf(typeComboBox.getValue().toUpperCase()))
+                    .withLocation(AppointmentLocation.fromName(locationComboBox.getValue()))
+                    .withType(AppointmentType.fromName(typeComboBox.getValue()))
                     .withTime(time.get())
                     .withCustomerDTO(customer.get()));
         }
@@ -144,12 +158,12 @@ public class AppointmentFormController extends FormController {
 
     private void setStartDateTime(ZonedDateTime locationStart) {
         startDatePicker.setValue(locationStart.toLocalDate());
-        startTimeField.setText(getTimeField(locationStart.getHour(), locationStart.getMinute()));
+        startTimeField.setText(locationStart.toLocalTime().toString());
     }
 
     private void setEndDateTime(ZonedDateTime locationEnd) {
         endDatePicker.setValue(locationEnd.toLocalDate());
-        endTimeField.setText(getTimeField(locationEnd.getHour(), locationEnd.getMinute()));
+        endTimeField.setText(locationEnd.toLocalTime().toString());
     }
 
     private Optional<AppointmentTime> getAppointmentTime() {
@@ -158,7 +172,7 @@ public class AppointmentFormController extends FormController {
                     startTimeField.getText(),
                     endDatePicker.getValue(),
                     endTimeField.getText(),
-                    AppointmentLocation.valueOf(locationComboBox.getValue().toUpperCase()).getZoneId()));
+                    AppointmentLocation.fromName(locationComboBox.getValue()).getZoneId()));
         } catch (AppointmentException e) {
             setValidationFieldError(e.getMessage());
             e.printStackTrace();
@@ -177,13 +191,18 @@ public class AppointmentFormController extends FormController {
         return Optional.empty();
     }
 
-    private List<String> getOverlappingAppointments(int userId, Instant start, Instant end) {
+    private List<AppointmentDTO> getOverlappingAppointments(int appointmentId, int userId, Instant start, Instant end) {
+        return getOverlappingAppointments(userId, start, end)
+                .stream()
+                .filter(appointment -> appointment.getId() != appointmentId)
+                .collect(Collectors.toList());
+    }
+
+    private List<AppointmentDTO> getOverlappingAppointments(int userId, Instant start, Instant end) {
         try {
             return performDatabaseAction(() ->
                     appointmentService.getAppointmentsByUserBetween(userId, start, end))
-                    .orElse(Collections.emptyList()).stream()
-                    .map(AppointmentDTO::getTitle)
-                    .collect(Collectors.toList());
+                    .orElse(Collections.emptyList());
         } catch (AppointmentException e) {
             setValidationFieldError(e.getMessage());
             e.printStackTrace();
@@ -203,10 +222,6 @@ public class AppointmentFormController extends FormController {
                 Arrays.stream(AppointmentLocation.values())
                         .map(AppointmentLocation::getName)
                         .collect(Collectors.toList()));
-    }
-
-    private static String getTimeField(int hour, int minute) {
-        return String.format("%d:%d", hour, minute);
     }
 
     private static Alert overlapAlert(String appointmentTitles) {

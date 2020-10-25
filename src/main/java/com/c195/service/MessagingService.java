@@ -31,7 +31,8 @@ public class MessagingService {
     }
 
     private static Map<String, String> getEncodedMessageBundle(ResourceBundle resourceBundle) {
-        return resourceBundle.keySet().stream()
+        return resourceBundle.keySet()
+                .stream()
                 .collect(Collectors.toMap(key -> key, value -> toUTF8(resourceBundle.getString(value))));
     }
 

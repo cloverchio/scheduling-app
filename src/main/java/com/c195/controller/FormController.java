@@ -94,7 +94,8 @@ public class FormController extends Controller implements Initializable {
     }
 
     private void showRequiredFieldMessage(Set<Label> invalidLabels) {
-        final String requiredFields = invalidLabels.stream()
+        final String requiredFields = invalidLabels
+                .stream()
                 .map(Labeled::getText)
                 .collect(Collectors.joining(", "));
         ControllerUtils.displayAsRed(validationField);

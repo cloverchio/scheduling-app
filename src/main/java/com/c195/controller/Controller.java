@@ -109,6 +109,7 @@ public class Controller implements Initializable {
                 .showAndWait();
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     private Optional<ButtonType> showDatabaseAlert() {
         return ControllerUtils.errorAlert(messagingService.getDatabaseErrorTitle(),
                 messagingService.getDatabaseErrorHeader(),
@@ -116,6 +117,7 @@ public class Controller implements Initializable {
                 .showAndWait();
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     private Optional<ButtonType> showUnexpectedAlert() {
         return ControllerUtils.errorAlert(messagingService.getUnexpectedErrorTitle(),
                 messagingService.getUnexpectedErrorHeader(),

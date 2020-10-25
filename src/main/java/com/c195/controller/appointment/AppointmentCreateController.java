@@ -7,7 +7,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
 import java.net.URL;
-import java.time.Instant;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -25,6 +24,9 @@ public class AppointmentCreateController extends AppointmentFormController {
 
     @FXML
     public void saveAppointment() {
+        // gets the current user
+        // maps that user to a saved appointment id (implicitly saves the appointment)
+        // displays messaging to the user if an appointment id was returned
         getUserService().getCurrentUser()
                 .map(this::saveAppointment)
                 .ifPresent(savedAppointmentId -> setValidationField("Appointment has been saved!"));
@@ -34,10 +36,8 @@ public class AppointmentCreateController extends AppointmentFormController {
         final Optional<AppointmentDTO.Builder> appointmentDTOBuilder = getAppointmentDTO();
         if (appointmentDTOBuilder.isPresent()) {
             final AppointmentDTO appointmentDTO = appointmentDTOBuilder.get().build();
-            final Instant start = appointmentDTO.getTime().getUtcStart();
-            final Instant end = appointmentDTO.getTime().getUtcEnd();
             final CheckedSupplier<Integer> submitAction  = () -> getAppointmentService().saveAppointment(appointmentDTO, userDTO);
-            return submitWithOverlapConfirmation(userDTO.getId(), start, end, submitAction).orElse(null);
+            return submitWithOverlapConfirmation(userDTO.getId(), appointmentDTO.getTime(), submitAction).orElse(null);
         }
         return null;
     }

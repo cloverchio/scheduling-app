@@ -53,7 +53,8 @@ public class CustomerService {
      * @throws DAOException if there are issues retrieving customers from the db.
      */
     public List<CustomerDTO> getAllCustomers() throws DAOException {
-        return customerDAO.getAllCustomers().stream()
+        return customerDAO.getAllCustomers()
+                .stream()
                 .map(CustomerService::toCustomerDTO)
                 .collect(Collectors.toList());
     }

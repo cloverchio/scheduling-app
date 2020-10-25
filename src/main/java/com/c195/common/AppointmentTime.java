@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 
 public class AppointmentTime {
@@ -13,6 +14,7 @@ public class AppointmentTime {
     private static final String TIME_PATTERN = "([01]?[0-9]|2[0-3]):[0-5][0-9]";
 
     private static final ZoneId utcZoneId = ZoneId.of("UTC");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
     private final ZonedDateTime locationStart;
     private final ZonedDateTime locationEnd;
@@ -44,7 +46,7 @@ public class AppointmentTime {
         this.userStart = utcStart.atZone(ZoneId.systemDefault());
         this.userEnd = utcEnd.atZone(ZoneId.systemDefault());
         this.locationStart = utcStart.atZone(ZoneId.of(locationZoneId));
-        this.locationEnd = utcStart.atZone(ZoneId.of(locationZoneId));
+        this.locationEnd = utcEnd.atZone(ZoneId.of(locationZoneId));
         validateTime(userStart, userEnd);
     }
 
@@ -52,16 +54,32 @@ public class AppointmentTime {
         return locationStart;
     }
 
+    public String getLocationStartISO() {
+        return locationStart.format(formatter);
+    }
+
     public ZonedDateTime getLocationEnd() {
         return locationEnd;
+    }
+
+    public String getLocationEndISO() {
+        return locationEnd.format(formatter);
     }
 
     public ZonedDateTime getUserStart() {
         return userStart;
     }
 
+    public String getUserStartISO() {
+        return userStart.format(formatter);
+    }
+
     public ZonedDateTime getUserEnd() {
         return userEnd;
+    }
+
+    public String getUserEndISO() {
+        return userEnd.format(formatter);
     }
 
     public Instant getUtcStart() {

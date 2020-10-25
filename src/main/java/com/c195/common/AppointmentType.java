@@ -1,5 +1,9 @@
 package com.c195.common;
 
+import com.c195.service.AppointmentException;
+
+import java.util.Arrays;
+
 public enum AppointmentType {
 
     SUPPORT("Support"),
@@ -13,5 +17,12 @@ public enum AppointmentType {
 
     public String getName() {
         return name;
+    }
+
+    public static AppointmentType fromName(String name) {
+        return Arrays.stream(AppointmentType.values())
+                .filter(location -> location.getName().equals(name))
+                .findFirst()
+                .orElseThrow(() -> new AppointmentException("Type not found for " + name));
     }
 }
