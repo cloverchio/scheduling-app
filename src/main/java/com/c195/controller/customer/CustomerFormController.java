@@ -85,7 +85,7 @@ public class CustomerFormController extends FormController {
         return customerService;
     }
 
-    protected CustomerDTO.Builder getCustomerDTO(AddressDTO addressDTO) {
+    protected CustomerDTO.Builder getCustomerDTOBuilder(AddressDTO addressDTO) {
         return new CustomerDTO.Builder()
                 .withName(nameField.getText())
                 .withActive(active.isSelected())

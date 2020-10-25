@@ -7,7 +7,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
 import java.net.URL;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class AppointmentUpdateController extends AppointmentFormController {
@@ -31,7 +30,7 @@ public class AppointmentUpdateController extends AppointmentFormController {
         // displays messaging to the user if an appointment id was returned
         getUserService().getCurrentUser()
                 .map(this::updateAppointment)
-                .ifPresent(savedAppointmentId -> setValidationField("Appointment has been updated!"));
+                .ifPresent(updatedAppointmentId -> setValidationField("Appointment has been updated!"));
     }
 
     public void setAppointmentId(Integer appointmentId) {
@@ -39,13 +38,10 @@ public class AppointmentUpdateController extends AppointmentFormController {
     }
 
     private Integer updateAppointment(UserDTO userDTO) {
-        final Optional<AppointmentDTO.Builder> appointmentDTOBuilder = getAppointmentDTO();
-        if (appointmentDTOBuilder.isPresent()) {
-            final AppointmentDTO appointmentDTO = appointmentDTOBuilder.get().build();
+        return getAppointmentDTOBuilder().map(appointmentDTOBuilder -> {
+            final AppointmentDTO appointmentDTO = appointmentDTOBuilder.withId(appointmentId).build();
             final CheckedSupplier<Integer> submitAction = () -> getAppointmentService().updateAppointment(appointmentDTO, userDTO);
-            return submitWithOverlapConfirmation(appointmentId, userDTO.getId(), appointmentDTO.getTime(), submitAction)
-                    .orElse(null);
-        }
-        return null;
+            return submitWithOverlapConfirmation(appointmentId, userDTO.getId(), appointmentDTO.getTime(), submitAction).orElse(null);
+        }).orElse(null);
     }
 }

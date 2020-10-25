@@ -7,7 +7,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
 import java.net.URL;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class AppointmentCreateController extends AppointmentFormController {
@@ -33,12 +32,10 @@ public class AppointmentCreateController extends AppointmentFormController {
     }
 
     private Integer saveAppointment(UserDTO userDTO) {
-        final Optional<AppointmentDTO.Builder> appointmentDTOBuilder = getAppointmentDTO();
-        if (appointmentDTOBuilder.isPresent()) {
-            final AppointmentDTO appointmentDTO = appointmentDTOBuilder.get().build();
-            final CheckedSupplier<Integer> submitAction  = () -> getAppointmentService().saveAppointment(appointmentDTO, userDTO);
+        return getAppointmentDTOBuilder().map(appointmentDTOBuilder -> {
+            final AppointmentDTO appointmentDTO = appointmentDTOBuilder.build();
+            final CheckedSupplier<Integer> submitAction = () -> getAppointmentService().saveAppointment(appointmentDTO, userDTO);
             return submitWithOverlapConfirmation(userDTO.getId(), appointmentDTO.getTime(), submitAction).orElse(null);
-        }
-        return null;
+        }).orElse(null);
     }
 }

@@ -163,13 +163,13 @@ public class AppointmentService {
         appointment.setContact(appointmentDTO.getContact());
         appointment.setStart(appointmentTime.getUtcStart());
         appointment.setEnd(appointmentTime.getUtcEnd());
-        appointment.setType(appointmentDTO.getType().toString());
+        appointment.setType(appointmentDTO.getType().getName());
         appointment.setCustomer(CustomerService.toCustomer(appointmentDTO.getCustomerDTO()));
         return appointment;
     }
 
     public static AppointmentDTO toAppointmentDTO(Appointment appointment) throws AppointmentException {
-        final AppointmentType type = AppointmentType.valueOf(appointment.getType());
+        final AppointmentType type = AppointmentType.fromName(appointment.getType());
         final AppointmentLocation location = AppointmentLocation.fromName(appointment.getLocation());
         final AppointmentTime time = new AppointmentTime(appointment.getStart(), appointment.getEnd(), location.getZoneId());
         final CustomerDTO customer = CustomerService.toCustomerDTO(appointment.getCustomer());

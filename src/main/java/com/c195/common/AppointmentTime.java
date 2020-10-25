@@ -14,7 +14,7 @@ public class AppointmentTime {
     private static final String TIME_PATTERN = "([01]?[0-9]|2[0-3]):[0-5][0-9]";
 
     private static final ZoneId utcZoneId = ZoneId.of("UTC");
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     private final ZonedDateTime locationStart;
     private final ZonedDateTime locationEnd;

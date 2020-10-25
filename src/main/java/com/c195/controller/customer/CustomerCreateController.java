@@ -34,7 +34,7 @@ public class CustomerCreateController extends CustomerFormController {
 
     private Integer saveCustomer(UserDTO currentUser) {
         final AddressDTO addressDTO = getAddressDTO().build();
-        final CustomerDTO customerDTO = getCustomerDTO(addressDTO).build();
+        final CustomerDTO customerDTO = getCustomerDTOBuilder(addressDTO).build();
         final CheckedSupplier<Integer> submitAction = () -> getCustomerService().saveCustomer(customerDTO, currentUser);
         return formFieldSubmitAction(getFormFields(), submitAction).orElse(null);
     }

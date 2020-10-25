@@ -40,7 +40,7 @@ public class CustomerUpdateController extends CustomerFormController {
 
     private Integer updateCustomer(int customerId, int addressId, UserDTO currentUser) {
         final AddressDTO addressDTO = getAddressDTO().withId(addressId).build();
-        final CustomerDTO customerDTO = getCustomerDTO(addressDTO).withId(customerId).build();
+        final CustomerDTO customerDTO = getCustomerDTOBuilder(addressDTO).withId(customerId).build();
         final CheckedSupplier<Integer> submitAction = () -> getCustomerService().updateCustomer(customerDTO, currentUser);
         return formFieldSubmitAction(getFormFields(), submitAction).orElse(null);
     }

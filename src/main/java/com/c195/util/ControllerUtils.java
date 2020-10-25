@@ -72,6 +72,7 @@ public final class ControllerUtils {
         alert.setTitle(title);
         alert.setHeaderText(header);
         alert.setContentText(content);
+        alert.setResizable(true);
         return alert;
     }
 

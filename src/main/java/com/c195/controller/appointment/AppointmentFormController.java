@@ -123,7 +123,7 @@ public class AppointmentFormController extends FormController {
         }
     }
 
-    protected Optional<AppointmentDTO.Builder> getAppointmentDTO() {
+    protected Optional<AppointmentDTO.Builder> getAppointmentDTOBuilder() {
         final Optional<CustomerDTO> customer = getCustomerDTO();
         final Optional<AppointmentTime> time = getAppointmentTime();
         if (customer.isPresent() && time.isPresent()) {
@@ -168,7 +168,8 @@ public class AppointmentFormController extends FormController {
 
     private Optional<AppointmentTime> getAppointmentTime() {
         try {
-            return Optional.of(new AppointmentTime(startDatePicker.getValue(),
+            return Optional.of(new AppointmentTime(
+                    startDatePicker.getValue(),
                     startTimeField.getText(),
                     endDatePicker.getValue(),
                     endTimeField.getText(),

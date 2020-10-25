@@ -82,7 +82,7 @@ public class MainController extends Controller implements Initializable {
         ControllerUtils.infoAlert(
                 "Appointment reminder",
                 "You have an upcoming appointment",
-                "You have the following appointments scheduled within the next 15 minutes\n" + appointmentTitles)
+                "You have the following appointments scheduled:\n" + appointmentTitles)
                 .showAndWait();
     }
 }
