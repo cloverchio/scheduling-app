@@ -1,4 +1,4 @@
-package com.c195.service;
+package com.c195.common;
 
 public class AppointmentException extends RuntimeException {
 

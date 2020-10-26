@@ -1,7 +1,5 @@
 package com.c195.common;
 
-import com.c195.service.AppointmentException;
-
 import java.util.Arrays;
 
 public enum AppointmentLocation {
@@ -30,6 +28,6 @@ public enum AppointmentLocation {
         return Arrays.stream(AppointmentLocation.values())
                 .filter(location -> location.getName().equals(name))
                 .findFirst()
-                .orElseThrow(() -> new AppointmentException("Location not found for " + name));
+                .orElseThrow(() -> new AppointmentException("Appointment location not found for " + name));
     }
 }

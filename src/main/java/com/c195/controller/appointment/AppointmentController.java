@@ -57,15 +57,15 @@ public class AppointmentController extends Controller implements Initializable {
     @FXML
     private TableColumn<AppointmentDTO, String> endColumn;
     @FXML
-    private ComboBox<String> appointmentView;
+    private ComboBox<String> appointmentViewComboBox;
 
     private UserService userService;
     private AppointmentService appointmentService;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        appointmentView.setItems(getAppointmentViews());
-        appointmentView.getSelectionModel().selectFirst();
+        appointmentViewComboBox.setItems(getAppointmentViews());
+        appointmentViewComboBox.getSelectionModel().selectFirst();
         super.initialize(url, resourceBundle);
         getDatabaseConnection()
                 .ifPresent(connection -> {
@@ -121,11 +121,11 @@ public class AppointmentController extends Controller implements Initializable {
     }
 
     private void updateAppointmentsByViewSelection() {
-        appointmentView.setOnAction(actionEvent -> appointmentTable.setItems(getAppointmentsByViewSelection()));
+        appointmentViewComboBox.setOnAction(actionEvent -> appointmentTable.setItems(getAppointmentsByViewSelection()));
     }
 
     private ObservableList<AppointmentDTO> getAppointmentsByViewSelection() {
-        final String selectedView = appointmentView.getSelectionModel().getSelectedItem();
+        final String selectedView = appointmentViewComboBox.getSelectionModel().getSelectedItem();
         if (selectedView.equals(AppointmentView.WEEK.getName())) {
             return getUpcomingAppointmentsByWeek();
         } else if (selectedView.equals(AppointmentView.MONTH.getName())) {
