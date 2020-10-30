@@ -1,6 +1,6 @@
 package com.c195.controller.appointment;
 
-import com.c195.common.AppointmentDTO;
+import com.c195.common.appointment.AppointmentDTO;
 import com.c195.common.CheckedSupplier;
 import com.c195.common.UserDTO;
 import javafx.event.ActionEvent;

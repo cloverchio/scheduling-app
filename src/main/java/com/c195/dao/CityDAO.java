@@ -11,7 +11,7 @@ public class CityDAO {
             "SELECT * " +
             "FROM city ci " +
             "JOIN country co " +
-            "on ci.countryId = co.countryId " +
+            "ON ci.countryId = co.countryId " +
             "WHERE ci.city = ?";
 
     private static final String SAVE_CITY_SQL = "" +

@@ -1,4 +1,4 @@
-package com.c195.common;
+package com.c195.common.appointment;
 
 import java.time.Instant;
 import java.time.LocalDate;

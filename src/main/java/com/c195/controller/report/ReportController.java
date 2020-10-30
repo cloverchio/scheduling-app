@@ -1,8 +1,11 @@
 package com.c195.controller.report;
 
-import com.c195.common.AppointmentDTO;
-import com.c195.common.ReportType;
+import com.c195.common.appointment.AppointmentDTO;
+import com.c195.common.report.ReportType;
 import com.c195.controller.Controller;
+import com.c195.dao.AppointmentDAO;
+import com.c195.service.AppointmentService;
+import com.c195.service.ReportService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -40,10 +43,18 @@ public class ReportController extends Controller implements Initializable {
     @FXML
     private ComboBox<String> reportTypeComboBox;
 
+    private ReportService reportService;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         reportTypeComboBox.setItems(getReportTypes());
         super.initialize(url, resourceBundle);
+        getDatabaseConnection()
+                .ifPresent(connection -> {
+                    final AppointmentService appointmentService =
+                            AppointmentService.getInstance(AppointmentDAO.getInstance(connection));
+                    reportService = ReportService.getInstance(appointmentService);
+                });
     }
 
     @FXML

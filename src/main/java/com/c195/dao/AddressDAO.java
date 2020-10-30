@@ -15,7 +15,7 @@ public class AddressDAO {
             "JOIN city ci " +
             "ON a.cityId = ci.cityId " +
             "JOIN country co " +
-            "on ci.countryId = co.countryId " +
+            "ON ci.countryId = co.countryId " +
             "WHERE addressId = ?";
 
     private static final String ADDRESS_SQL = "" +
@@ -24,7 +24,7 @@ public class AddressDAO {
             "JOIN city ci " +
             "ON a.cityId = ci.cityId " +
             "JOIN country co " +
-            "on ci.countryId = co.countryId " +
+            "ON ci.countryId = co.countryId " +
             "WHERE address = ?";
 
     private static final String ALL_ADDRESSES_SQL = "" +
@@ -33,7 +33,7 @@ public class AddressDAO {
             "JOIN city ci " +
             "ON a.cityId = ci.cityId " +
             "JOIN country co " +
-            "on ci.countryId = co.countryId";
+            "ON ci.countryId = co.countryId";
 
     private static final String SAVE_ADDRESS_SQL = "" +
             "INSERT INTO address " +

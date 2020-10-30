@@ -1,6 +1,9 @@
 package com.c195.controller.appointment;
 
 import com.c195.common.*;
+import com.c195.common.appointment.*;
+import com.c195.common.customer.CustomerDTO;
+import com.c195.common.customer.CustomerException;
 import com.c195.controller.FormController;
 import com.c195.dao.*;
 import com.c195.service.*;

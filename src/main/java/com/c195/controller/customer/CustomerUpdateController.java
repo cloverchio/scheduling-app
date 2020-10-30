@@ -1,8 +1,8 @@
 package com.c195.controller.customer;
 
-import com.c195.common.AddressDTO;
+import com.c195.common.customer.AddressDTO;
 import com.c195.common.CheckedSupplier;
-import com.c195.common.CustomerDTO;
+import com.c195.common.customer.CustomerDTO;
 import com.c195.common.UserDTO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

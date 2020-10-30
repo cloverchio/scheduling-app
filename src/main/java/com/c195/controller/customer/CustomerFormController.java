@@ -1,7 +1,7 @@
 package com.c195.controller.customer;
 
-import com.c195.common.AddressDTO;
-import com.c195.common.CustomerDTO;
+import com.c195.common.customer.AddressDTO;
+import com.c195.common.customer.CustomerDTO;
 import com.c195.controller.FormController;
 import com.c195.dao.AddressDAO;
 import com.c195.dao.CityDAO;

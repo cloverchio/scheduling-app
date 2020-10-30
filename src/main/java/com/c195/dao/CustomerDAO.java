@@ -17,7 +17,7 @@ public class CustomerDAO {
             "JOIN city ci " +
             "ON a.cityId = ci.cityId " +
             "JOIN country co " +
-            "on ci.countryId = co.countryId " +
+            "ON ci.countryId = co.countryId " +
             "WHERE cu.customerId = ?";
 
     private static final String ALL_CUSTOMERS_SQL = "" +
@@ -28,7 +28,7 @@ public class CustomerDAO {
             "JOIN city ci " +
             "ON a.cityId = ci.cityId " +
             "JOIN country co " +
-            "on ci.countryId = co.countryId";
+            "ON ci.countryId = co.countryId";
 
     private static final String SAVE_CUSTOMER_SQL = "" +
             "INSERT INTO customer " +

@@ -1,4 +1,4 @@
-package com.c195.common;
+package com.c195.common.appointment;
 
 public enum AppointmentView {
 

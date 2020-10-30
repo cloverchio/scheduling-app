@@ -1,8 +1,8 @@
 package com.c195.service;
 
-import com.c195.common.AddressDTO;
-import com.c195.common.CustomerDTO;
-import com.c195.common.CustomerException;
+import com.c195.common.customer.AddressDTO;
+import com.c195.common.customer.CustomerDTO;
+import com.c195.common.customer.CustomerException;
 import com.c195.common.UserDTO;
 import com.c195.dao.CustomerDAO;
 import com.c195.dao.DAOException;

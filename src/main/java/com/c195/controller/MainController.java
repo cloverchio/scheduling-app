@@ -1,6 +1,6 @@
 package com.c195.controller;
 
-import com.c195.common.AppointmentDTO;
+import com.c195.common.appointment.AppointmentDTO;
 import com.c195.common.UserDTO;
 import com.c195.dao.AppointmentDAO;
 import com.c195.dao.UserDAO;

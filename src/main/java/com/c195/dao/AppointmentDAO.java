@@ -20,7 +20,7 @@ public class AppointmentDAO {
             "JOIN city ci " +
             "ON a.cityId = ci.cityId " +
             "JOIN country co " +
-            "on ci.countryId = co.countryId " +
+            "ON ci.countryId = co.countryId " +
             "JOIN user us " +
             "ON ap.userId = us.userId " +
             "WHERE ap.appointmentId = ?";
@@ -35,7 +35,7 @@ public class AppointmentDAO {
             "JOIN city ci " +
             "ON a.cityId = ci.cityId " +
             "JOIN country co " +
-            "on ci.countryId = co.countryId " +
+            "ON ci.countryId = co.countryId " +
             "JOIN user us " +
             "ON ap.userId = us.userId";
 

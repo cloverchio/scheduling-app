@@ -1,6 +1,8 @@
 package com.c195.service;
 
 import com.c195.common.*;
+import com.c195.common.appointment.*;
+import com.c195.common.customer.CustomerDTO;
 import com.c195.dao.AppointmentDAO;
 import com.c195.dao.DAOException;
 import com.c195.dao.MetadataDAO;
@@ -111,6 +113,19 @@ public class AppointmentService {
     }
 
     /**
+     * Gets a list of all appointments.
+     *
+     * @return a list of all (past and present) appointments
+     * @throws DAOException if there are issues retrieving appointments from the db.
+     */
+    public List<AppointmentDTO> getAllAppointments() throws DAOException {
+        return appointmentDAO.getAllAppointments()
+                .stream()
+                .map(AppointmentService::toAppointmentDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Saves the appointment.
      *
      * @param appointmentDTO appointment information in which to save.
@@ -173,6 +188,7 @@ public class AppointmentService {
         final AppointmentLocation location = AppointmentLocation.fromName(appointment.getLocation());
         final AppointmentTime time = new AppointmentTime(appointment.getStart(), appointment.getEnd(), location.getZoneId());
         final CustomerDTO customer = CustomerService.toCustomerDTO(appointment.getCustomer());
+        final UserDTO user = UserService.toUserDTO(appointment.getUser());
         return new AppointmentDTO.Builder()
                 .withId(appointment.getId())
                 .withDescription(appointment.getDescription())
@@ -183,6 +199,7 @@ public class AppointmentService {
                 .withLocation(location)
                 .withTime(time)
                 .withCustomerDTO(customer)
+                .withUserDTO(user)
                 .build();
     }
 }

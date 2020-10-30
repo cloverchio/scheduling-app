@@ -1,11 +1,11 @@
-package com.c195.common;
+package com.c195.common.report;
 
 import java.util.Arrays;
 
 public enum ReportType {
 
-    APPOINTMENTS_BY_MONTH("Appointments by Month"),
-    APPOINTMENTS_BY_CUSTOMER("Appointments by Customer"),
+    APPOINTMENTS_BY_MONTH("Appointments Types by Month"),
+    APPOINTMENTS_BY_CUSTOMER("Appointments Types by Customer"),
     SCHEDULE_BY_CONSULTANT("Schedule by Consultant");
 
     private final String name;

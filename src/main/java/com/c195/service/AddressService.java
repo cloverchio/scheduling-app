@@ -1,6 +1,6 @@
 package com.c195.service;
 
-import com.c195.common.AddressDTO;
+import com.c195.common.customer.AddressDTO;
 import com.c195.dao.*;
 import com.c195.model.Address;
 import com.c195.model.City;

@@ -1,7 +1,7 @@
 package com.c195.controller.appointment;
 
-import com.c195.common.AppointmentDTO;
-import com.c195.common.AppointmentView;
+import com.c195.common.appointment.AppointmentDTO;
+import com.c195.common.appointment.AppointmentView;
 import com.c195.common.CheckedFunction;
 import com.c195.common.UserDTO;
 import com.c195.controller.Controller;

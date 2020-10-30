@@ -1,4 +1,7 @@
-package com.c195.common;
+package com.c195.common.appointment;
+
+import com.c195.common.customer.CustomerDTO;
+import com.c195.common.UserDTO;
 
 public class AppointmentDTO {
 
@@ -11,6 +14,7 @@ public class AppointmentDTO {
     private final AppointmentLocation location;
     private final AppointmentTime time;
     private final CustomerDTO customerDTO;
+    private final UserDTO userDTO;
 
     private AppointmentDTO(Builder builder) {
         this.id = builder.id;
@@ -22,6 +26,7 @@ public class AppointmentDTO {
         this.location = builder.location;
         this.time = builder.time;
         this.customerDTO = builder.customerDTO;
+        this.userDTO = builder.userDTO;
     }
 
     public int getId() {
@@ -60,6 +65,10 @@ public class AppointmentDTO {
         return customerDTO;
     }
 
+    public UserDTO getUserDTO() {
+        return userDTO;
+    }
+
     public static class Builder {
 
         private int id;
@@ -71,6 +80,7 @@ public class AppointmentDTO {
         private AppointmentLocation location;
         private AppointmentTime time;
         private CustomerDTO customerDTO;
+        private UserDTO userDTO;
 
         public Builder withId(int id) {
             this.id = id;
@@ -114,6 +124,11 @@ public class AppointmentDTO {
 
         public Builder withCustomerDTO(CustomerDTO customerDTO) {
             this.customerDTO = customerDTO;
+            return this;
+        }
+
+        public Builder withUserDTO(UserDTO userDTO) {
+            this.userDTO = userDTO;
             return this;
         }
 

@@ -1,6 +1,6 @@
 package com.c195.util;
 
-import com.c195.common.AddressDTO;
+import com.c195.common.customer.AddressDTO;
 
 public final class CustomerUtils {
 
