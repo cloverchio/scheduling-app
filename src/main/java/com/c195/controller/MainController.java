@@ -1,7 +1,7 @@
 package com.c195.controller;
 
-import com.c195.common.appointment.AppointmentDTO;
 import com.c195.common.UserDTO;
+import com.c195.common.appointment.AppointmentDTO;
 import com.c195.dao.AppointmentDAO;
 import com.c195.dao.UserDAO;
 import com.c195.service.AppointmentService;
@@ -50,6 +50,11 @@ public class MainController extends Controller implements Initializable {
     @FXML
     public void manageAppointments(ActionEvent actionEvent) {
         showView(actionEvent, getClass(), "../view/appointment/appointment.fxml");
+    }
+
+    @FXML
+    public void manageReports(ActionEvent actionEvent) {
+        showView(actionEvent, getClass(), "../view/report/report.fxml");
     }
 
     @FXML

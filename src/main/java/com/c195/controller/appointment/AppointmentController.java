@@ -1,9 +1,9 @@
 package com.c195.controller.appointment;
 
-import com.c195.common.appointment.AppointmentDTO;
-import com.c195.common.appointment.AppointmentView;
 import com.c195.common.CheckedFunction;
 import com.c195.common.UserDTO;
+import com.c195.common.appointment.AppointmentDTO;
+import com.c195.common.appointment.AppointmentView;
 import com.c195.controller.Controller;
 import com.c195.dao.AppointmentDAO;
 import com.c195.dao.UserDAO;
@@ -111,7 +111,7 @@ public class AppointmentController extends Controller implements Initializable {
     }
 
     private void createAppointmentTable() {
-        appointmentTable.setItems(getAppointmentsByViewSelection());
+        setAppointmentsByViewSelection();
         titleColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTitle()));
         locationColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getLocation().getName()));
         customerNameColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getCustomerDTO().getName()));
@@ -121,17 +121,18 @@ public class AppointmentController extends Controller implements Initializable {
     }
 
     private void updateAppointmentsByViewSelection() {
-        appointmentViewComboBox.setOnAction(actionEvent -> appointmentTable.setItems(getAppointmentsByViewSelection()));
+        appointmentViewComboBox.setOnAction(actionEvent -> setAppointmentsByViewSelection());
     }
 
-    private ObservableList<AppointmentDTO> getAppointmentsByViewSelection() {
+    private void setAppointmentsByViewSelection() {
         final String selectedView = appointmentViewComboBox.getSelectionModel().getSelectedItem();
         if (selectedView.equals(AppointmentView.WEEK.getName())) {
-            return getUpcomingAppointmentsByWeek();
+            appointmentTable.setItems(getUpcomingAppointmentsByWeek());
         } else if (selectedView.equals(AppointmentView.MONTH.getName())) {
-            return getUpcomingAppointmentsByMonth();
+            appointmentTable.setItems(getUpcomingAppointmentsByMonth());
+        } else {
+            appointmentTable.setItems(getAllUpcomingAppointments());
         }
-        return getAllUpcomingAppointments();
     }
 
     private ObservableList<AppointmentDTO> getAllUpcomingAppointments() {

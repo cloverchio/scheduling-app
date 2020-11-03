@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Just going to perform these aggregations in memory since the dataset will likely be small.
+ */
 public class ReportService {
 
     private static ReportService serviceInstance;

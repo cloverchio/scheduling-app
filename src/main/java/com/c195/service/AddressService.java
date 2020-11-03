@@ -85,7 +85,6 @@ public class AddressService {
      * @return the id of the updated address.
      * @throws DAOException if there are issues updating the address in the db.
      */
-    @SuppressWarnings("UnusedReturnValue")
     public Integer updateAddress(AddressDTO addressDTO, String currentUser) throws DAOException {
         final Address address = toAddress(addressDTO);
         address.setMetadata(MetadataDAO.getUpdateMetadata(currentUser));
