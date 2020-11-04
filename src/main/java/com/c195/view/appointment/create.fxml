@@ -9,7 +9,7 @@
             <Font size="24.0" />
         </font>
     </Label>
-    <Label fx:id="validationField" layoutX="85.0" layoutY="63.0" prefHeight="26.0" prefWidth="480.0" />
+    <Label fx:id="outputLabel" layoutX="85.0" layoutY="63.0" prefHeight="26.0" prefWidth="480.0" />
    <Label fx:id="titleLabel" layoutX="45.0" layoutY="110.0" prefHeight="26.0" prefWidth="73.0" text="Title" />
    <TextField fx:id="titleField" layoutX="130.0" layoutY="110.0" />
     <Label fx:id="customerIdLabel" layoutX="335.0" layoutY="110.0" prefHeight="26.0" prefWidth="88.0" text="Customer ID" />

@@ -6,24 +6,8 @@ import java.sql.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class AppointmentDAO {
-
-    private static final String APPOINTMENT_BY_ID_SQL = "" +
-            "SELECT * " +
-            "FROM appointment ap " +
-            "JOIN customer cu " +
-            "ON ap.customerId = cu.customerId " +
-            "JOIN address a " +
-            "ON cu.addressId = a.addressId " +
-            "JOIN city ci " +
-            "ON a.cityId = ci.cityId " +
-            "JOIN country co " +
-            "ON ci.countryId = co.countryId " +
-            "JOIN user us " +
-            "ON ap.userId = us.userId " +
-            "WHERE ap.appointmentId = ?";
 
     private static final String ALL_APPOINTMENTS_SQL = "" +
             "SELECT * " +
@@ -105,24 +89,10 @@ public class AppointmentDAO {
     }
 
     public static AppointmentDAO getInstance(Connection connection) {
-        return Optional.ofNullable(daoInstance)
-                .orElseGet(() -> {
-                    daoInstance = new AppointmentDAO(connection);
-                    return daoInstance;
-                });
-    }
-
-    public Optional<Appointment> getAppointmentById(int id) throws DAOException {
-        try (PreparedStatement statement = connection.prepareStatement(APPOINTMENT_BY_ID_SQL)) {
-            statement.setInt(1, id);
-            final ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                return Optional.of(toAppointment(resultSet));
-            }
-            return Optional.empty();
-        } catch (SQLException e) {
-            throw new DAOException("there was an issue retrieving an appointment", e);
+        if (daoInstance == null) {
+            daoInstance = new AppointmentDAO(connection);
         }
+        return daoInstance;
     }
 
     public List<Appointment> getAllAppointments() throws DAOException {

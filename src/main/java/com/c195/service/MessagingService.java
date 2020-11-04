@@ -23,11 +23,10 @@ public class MessagingService {
     }
 
     public static MessagingService getInstance() {
-        return Optional.ofNullable(serviceInstance)
-                .orElseGet(() -> {
-                    serviceInstance = new MessagingService();
-                    return serviceInstance;
-                });
+        if (serviceInstance == null) {
+            serviceInstance = new MessagingService();
+        }
+        return serviceInstance;
     }
 
     private static Map<String, String> getEncodedMessageBundle(ResourceBundle resourceBundle) {

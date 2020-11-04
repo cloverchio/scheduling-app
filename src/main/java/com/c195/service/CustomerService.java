@@ -1,9 +1,9 @@
 package com.c195.service;
 
+import com.c195.common.UserDTO;
 import com.c195.common.customer.AddressDTO;
 import com.c195.common.customer.CustomerDTO;
 import com.c195.common.customer.CustomerException;
-import com.c195.common.UserDTO;
 import com.c195.dao.CustomerDAO;
 import com.c195.dao.DAOException;
 import com.c195.dao.MetadataDAO;
@@ -26,11 +26,10 @@ public class CustomerService {
     }
 
     public static CustomerService getInstance(CustomerDAO customerDAO, AddressService addressService) {
-        return Optional.ofNullable(serviceInstance)
-                .orElseGet(() -> {
-                    serviceInstance = new CustomerService(customerDAO, addressService);
-                    return serviceInstance;
-                });
+        if (serviceInstance == null) {
+            serviceInstance = new CustomerService(customerDAO, addressService);
+        }
+        return serviceInstance;
     }
 
     /**

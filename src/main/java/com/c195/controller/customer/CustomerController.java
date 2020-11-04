@@ -1,5 +1,7 @@
 package com.c195.controller.customer;
 
+import com.c195.common.CheckedSupplier;
+import com.c195.common.customer.AddressDTO;
 import com.c195.common.customer.CustomerDTO;
 import com.c195.controller.Controller;
 import com.c195.dao.AddressDAO;
@@ -8,8 +10,6 @@ import com.c195.dao.CountryDAO;
 import com.c195.dao.CustomerDAO;
 import com.c195.service.AddressService;
 import com.c195.service.CustomerService;
-import com.c195.util.ControllerUtils;
-import com.c195.util.CustomerUtils;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -67,12 +67,12 @@ public class CustomerController extends Controller implements Initializable {
 
     @FXML
     public void cancel(ActionEvent actionEvent) {
-        showView(actionEvent, getClass(), "../../view/main.fxml");
+        eventViewHandler(actionEvent, getClass(), "../../view/main.fxml");
     }
 
     @FXML
     public void create(ActionEvent actionEvent) {
-        showView(actionEvent, getClass(), "../../view/customer/create.fxml");
+        eventViewHandler(actionEvent, getClass(), "../../view/customer/create.fxml");
     }
 
     @FXML
@@ -84,7 +84,7 @@ public class CustomerController extends Controller implements Initializable {
                     final CustomerUpdateController customerUpdateController = fxmlLoader.getController();
                     customerUpdateController.setCustomerDTO(selectedCustomer);
                     customerUpdateController.setFields(selectedCustomer);
-                    ControllerUtils.setEventStage(actionEvent, parent);
+                    eventStageHandler(actionEvent, parent);
                 });
     }
 
@@ -92,25 +92,43 @@ public class CustomerController extends Controller implements Initializable {
     public void delete() {
         Optional.ofNullable(customerTable.getSelectionModel().getSelectedItem())
                 .map(CustomerDTO::getId)
-                .ifPresent(selectedCustomerId -> showConfirmation(() -> {
-                    customerService.deleteCustomer(selectedCustomerId);
-                    createCustomerTable();
-                    return null;
-                }));
+                .map(this::customerDeleteSupplier)
+                .ifPresent(this::confirmationHandler);
     }
 
     private void createCustomerTable() {
         customerTable.setItems(getAllCustomers());
         idColumn.setCellValueFactory(c -> new SimpleStringProperty(String.valueOf(c.getValue().getId())));
         nameColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getName()));
-        addressColumn.setCellValueFactory(c -> new SimpleStringProperty(CustomerUtils.toAddressLine(c.getValue().getAddressDTO())));
+        addressColumn.setCellValueFactory(c -> new SimpleStringProperty(toAddressLine(c.getValue().getAddressDTO())));
         phoneColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getAddressDTO().getPhone()));
-        statusColumn.setCellValueFactory(c -> new SimpleStringProperty(CustomerUtils.toActiveLine(c.getValue().isActive())));
+        statusColumn.setCellValueFactory(c -> new SimpleStringProperty(toActiveLine(c.getValue().isActive())));
+    }
+
+    private CheckedSupplier<Void> customerDeleteSupplier(int customerId) {
+        return () -> {
+            customerService.deleteCustomer(customerId);
+            createCustomerTable();
+            return null;
+        };
     }
 
     private ObservableList<CustomerDTO> getAllCustomers() {
-        return performDatabaseAction(() -> customerService.getAllCustomers())
+        return serviceRequestHandler(() -> customerService.getAllCustomers())
                 .map(FXCollections::observableList)
                 .orElse(FXCollections.emptyObservableList());
+    }
+
+    private static String toAddressLine(AddressDTO addressDTO) {
+        return String.format("%s %s %s, %s, %s",
+                addressDTO.getAddress(),
+                addressDTO.getAddress2(),
+                addressDTO.getCity(),
+                addressDTO.getCountry(),
+                addressDTO.getPostalCode());
+    }
+
+    private static String toActiveLine(boolean activeStatus) {
+        return activeStatus ? "Active" : "Inactive";
     }
 }

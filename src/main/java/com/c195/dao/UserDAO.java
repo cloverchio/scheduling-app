@@ -24,11 +24,10 @@ public class UserDAO {
     }
 
     public static UserDAO getInstance(Connection connection) {
-        return Optional.ofNullable(daoInstance)
-                .orElseGet(() -> {
-                    daoInstance = new UserDAO(connection);
-                    return daoInstance;
-                });
+        if (daoInstance == null) {
+            daoInstance = new UserDAO(connection);
+        }
+        return daoInstance;
     }
 
     public Optional<User> getUserByUsernameAndPassword(String username, String password) throws DAOException {

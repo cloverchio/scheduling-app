@@ -1,9 +1,9 @@
 package com.c195.controller.customer;
 
-import com.c195.common.customer.AddressDTO;
 import com.c195.common.CheckedSupplier;
-import com.c195.common.customer.CustomerDTO;
 import com.c195.common.UserDTO;
+import com.c195.common.customer.AddressDTO;
+import com.c195.common.customer.CustomerDTO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
@@ -21,7 +21,7 @@ public class CustomerUpdateController extends CustomerFormController {
 
     @FXML
     public void cancelUpdate(ActionEvent actionEvent) {
-        showView(actionEvent, getClass(), "../../view/customer/customer.fxml");
+        eventViewHandler(actionEvent, getClass(), "../../view/customer/customer.fxml");
     }
 
     @FXML
@@ -31,7 +31,7 @@ public class CustomerUpdateController extends CustomerFormController {
         // displays messaging to the user if a customer id was returned
         getUserService().getCurrentUser()
                 .map(currentUser -> updateCustomer(customerDTO.getId(), customerDTO.getAddressDTO().getId(), currentUser))
-                .ifPresent(updatedCustomerId -> setValidationField("Customer has been updated!"));
+                .ifPresent(updatedCustomerId -> setDefaultOutput("Customer has been updated!"));
     }
 
     public void setCustomerDTO(CustomerDTO customerDTO) {
@@ -41,7 +41,7 @@ public class CustomerUpdateController extends CustomerFormController {
     private Integer updateCustomer(int customerId, int addressId, UserDTO currentUser) {
         final AddressDTO addressDTO = getAddressDTO().withId(addressId).build();
         final CustomerDTO customerDTO = getCustomerDTOBuilder(addressDTO).withId(customerId).build();
-        final CheckedSupplier<Integer> submitAction = () -> getCustomerService().updateCustomer(customerDTO, currentUser);
-        return formFieldSubmitAction(getFormFields(), submitAction).orElse(null);
+        final CheckedSupplier<Integer> formSupplier = () -> getCustomerService().updateCustomer(customerDTO, currentUser);
+        return formSubmitHandler(getInputForm(), formSupplier).orElse(null);
     }
 }

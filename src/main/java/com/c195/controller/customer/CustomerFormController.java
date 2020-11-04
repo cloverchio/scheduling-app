@@ -9,18 +9,18 @@ import com.c195.dao.CountryDAO;
 import com.c195.dao.CustomerDAO;
 import com.c195.service.AddressService;
 import com.c195.service.CustomerService;
+import com.c195.util.InputForm;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputControl;
 
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-public class CustomerFormController extends FormController {
+public class CustomerFormController extends FormController<TextField> {
 
     @FXML
     private Label nameLabel;
@@ -54,19 +54,12 @@ public class CustomerFormController extends FormController {
     private CheckBox active;
 
     private CustomerService customerService;
-    private Map<Label, TextInputControl> formFields;
+    private InputForm<TextField> inputForm;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         super.initialize(url, resourceBundle);
-        this.formFields = new HashMap<>();
-        this.formFields.put(nameLabel, nameField);
-        this.formFields.put(addressLabel, addressField);
-        this.formFields.put(aptLabel, aptField);
-        this.formFields.put(cityLabel, cityField);
-        this.formFields.put(countryLabel, countryField);
-        this.formFields.put(postalCodeLabel, postalCodeField);
-        this.formFields.put(phoneLabel, phoneField);
+        this.inputForm = createInputForm();
         getDatabaseConnection()
                 .ifPresent(connection -> {
                     final AddressDAO addressDAO = AddressDAO.getInstance(connection);
@@ -77,8 +70,8 @@ public class CustomerFormController extends FormController {
                 });
     }
 
-    protected Map<Label, TextInputControl> getFormFields() {
-        return formFields;
+    protected InputForm<TextField> getInputForm() {
+        return inputForm;
     }
 
     protected CustomerService getCustomerService() {
@@ -112,5 +105,20 @@ public class CustomerFormController extends FormController {
         postalCodeField.setText(addressDTO.getPostalCode());
         phoneField.setText(addressDTO.getPhone());
         active.setSelected(customerDTO.isActive());
+    }
+
+    private InputForm<TextField> createInputForm() {
+        final Map<String, TextField> fields = new HashMap<String, TextField>() {
+            {
+                put(nameLabel.getText(), nameField);
+                put(addressLabel.getText(), addressField);
+                put(aptLabel.getText(), aptField);
+                put(cityLabel.getText(), cityField);
+                put(countryLabel.getText(), countryField);
+                put(postalCodeLabel.getText(), postalCodeField);
+                put(phoneLabel.getText(), phoneField);
+            }
+        };
+        return new InputForm<>(fields);
     }
 }

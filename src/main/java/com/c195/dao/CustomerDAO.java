@@ -59,11 +59,10 @@ public class CustomerDAO {
     }
 
     public static CustomerDAO getInstance(Connection connection) {
-        return Optional.ofNullable(daoInstance)
-                .orElseGet(() -> {
-                    daoInstance = new CustomerDAO(connection);
-                    return daoInstance;
-                });
+        if (daoInstance == null) {
+            daoInstance = new CustomerDAO(connection);
+        }
+        return daoInstance;
     }
 
     public Optional<Customer> getCustomerById(int id) throws DAOException {

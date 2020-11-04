@@ -19,11 +19,10 @@ public class UserService {
     }
 
     public static UserService getInstance(UserDAO userDAO) {
-        return Optional.ofNullable(serviceInstance)
-                .orElseGet(() -> {
-                    serviceInstance = new UserService(userDAO);
-                    return serviceInstance;
-                });
+        if (serviceInstance == null) {
+            serviceInstance = new UserService(userDAO);
+        }
+        return serviceInstance;
     }
 
     /**

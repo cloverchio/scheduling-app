@@ -1,6 +1,6 @@
 package com.c195.controller.appointment;
 
-import com.c195.common.CheckedFunction;
+import com.c195.common.CheckedSupplier;
 import com.c195.common.UserDTO;
 import com.c195.common.appointment.AppointmentDTO;
 import com.c195.common.appointment.AppointmentView;
@@ -9,7 +9,6 @@ import com.c195.dao.AppointmentDAO;
 import com.c195.dao.UserDAO;
 import com.c195.service.AppointmentService;
 import com.c195.service.UserService;
-import com.c195.util.ControllerUtils;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -24,7 +23,10 @@ import javafx.scene.control.TableView;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
@@ -78,12 +80,12 @@ public class AppointmentController extends Controller implements Initializable {
 
     @FXML
     public void cancel(ActionEvent actionEvent) {
-        showView(actionEvent, getClass(), "../../view/main.fxml");
+        eventViewHandler(actionEvent, getClass(), "../../view/main.fxml");
     }
 
     @FXML
     public void create(ActionEvent actionEvent) {
-        showView(actionEvent, getClass(), "../../view/appointment/create.fxml");
+        eventViewHandler(actionEvent, getClass(), "../../view/appointment/create.fxml");
     }
 
     @FXML
@@ -95,7 +97,7 @@ public class AppointmentController extends Controller implements Initializable {
                     final AppointmentUpdateController appointmentUpdateController = fxmlLoader.getController();
                     appointmentUpdateController.setAppointmentId(selectedAppointment.getId());
                     appointmentUpdateController.setFields(selectedAppointment);
-                    ControllerUtils.setEventStage(actionEvent, parent);
+                    eventStageHandler(actionEvent, parent);
                 });
     }
 
@@ -103,11 +105,8 @@ public class AppointmentController extends Controller implements Initializable {
     public void delete() {
         Optional.ofNullable(appointmentTable.getSelectionModel().getSelectedItem())
                 .map(AppointmentDTO::getId)
-                .ifPresent(selectedAppointmentId -> showConfirmation(() -> {
-                    appointmentService.deleteAppointment(selectedAppointmentId);
-                    createAppointmentTable();
-                    return null;
-                }));
+                .map(this::appointmentDeleteSupplier)
+                .ifPresent(this::confirmationHandler);
     }
 
     private void createAppointmentTable() {
@@ -125,34 +124,44 @@ public class AppointmentController extends Controller implements Initializable {
     }
 
     private void setAppointmentsByViewSelection() {
+        userService.getCurrentUser()
+                .map(UserDTO::getId)
+                .ifPresent(this::handleViewSelection);
+    }
+
+    private void handleViewSelection(int userId) {
         final String selectedView = appointmentViewComboBox.getSelectionModel().getSelectedItem();
         if (selectedView.equals(AppointmentView.WEEK.getName())) {
-            appointmentTable.setItems(getUpcomingAppointmentsByWeek());
+            appointmentTable.setItems(getUpcomingAppointmentsByWeek(userId));
         } else if (selectedView.equals(AppointmentView.MONTH.getName())) {
-            appointmentTable.setItems(getUpcomingAppointmentsByMonth());
+            appointmentTable.setItems(getUpcomingAppointmentsByMonth(userId));
         } else {
-            appointmentTable.setItems(getAllUpcomingAppointments());
+            appointmentTable.setItems(getAllUpcomingAppointments(userId));
         }
     }
 
-    private ObservableList<AppointmentDTO> getAllUpcomingAppointments() {
-        return getUpcomingAppointments(userId -> appointmentService.getUpcomingAppointmentsByUser(userId));
+    private ObservableList<AppointmentDTO> getAllUpcomingAppointments(int userId) {
+        return getUpcomingAppointments(() -> appointmentService.getUpcomingAppointmentsByUser(userId));
     }
 
-    private ObservableList<AppointmentDTO> getUpcomingAppointmentsByWeek() {
-        return getUpcomingAppointments(userId -> appointmentService.getUpcomingAppointmentsByUserWeek(userId));
+    private ObservableList<AppointmentDTO> getUpcomingAppointmentsByWeek(int userId) {
+        return getUpcomingAppointments(() -> appointmentService.getUpcomingAppointmentsByUserWeek(userId));
     }
 
-    private ObservableList<AppointmentDTO> getUpcomingAppointmentsByMonth() {
-        return getUpcomingAppointments(userId -> appointmentService.getUpcomingAppointmentsByUserMonth(userId));
+    private ObservableList<AppointmentDTO> getUpcomingAppointmentsByMonth(int userId) {
+        return getUpcomingAppointments(() -> appointmentService.getUpcomingAppointmentsByUserMonth(userId));
     }
 
-    private ObservableList<AppointmentDTO> getUpcomingAppointments(CheckedFunction<Integer, List<AppointmentDTO>> appointmentFunction) {
-        return userService.getCurrentUser()
-                .map(UserDTO::getId)
-                .map(currentUserId ->
-                        performDatabaseAction(() -> appointmentFunction.applyWithIO(currentUserId))
-                                .orElseGet(Collections::emptyList))
+    private CheckedSupplier<Void> appointmentDeleteSupplier(int appointmentId) {
+        return () -> {
+            appointmentService.deleteAppointment(appointmentId);
+            createAppointmentTable();
+            return null;
+        };
+    }
+
+    private ObservableList<AppointmentDTO> getUpcomingAppointments(CheckedSupplier<List<AppointmentDTO>> appointmentSupplier) {
+        return serviceRequestHandler(appointmentSupplier)
                 .map(FXCollections::observableList)
                 .orElseGet(FXCollections::emptyObservableList);
     }

@@ -1,9 +1,13 @@
 package com.c195.controller;
 
-import com.c195.util.ControllerUtils;
+import com.c195.common.CheckedSupplier;
+import com.c195.util.InputForm;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -21,7 +25,7 @@ import java.util.ResourceBundle;
  * G. Write two or more lambda expressions to make your program more efficient, justifying
  * the use of each lambda expression with an in-line comment.
  */
-public class LoginController extends FormController {
+public class LoginController extends FormController<TextField> {
 
     @FXML
     private Label usernameLabel;
@@ -34,7 +38,7 @@ public class LoginController extends FormController {
     @FXML
     private Button loginButton;
 
-    private Map<Label, TextInputControl> formFields;
+    private InputForm<TextField> inputForm;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -42,26 +46,33 @@ public class LoginController extends FormController {
         this.usernameLabel.setText(getMessagingService().getUsername());
         this.passwordLabel.setText(getMessagingService().getPassword());
         this.loginButton.setText(getMessagingService().getLogin());
-        this.formFields = new HashMap<>();
-        this.formFields.put(usernameLabel, usernameField);
-        this.formFields.put(passwordLabel, passwordField);
-        setValidationField(getMessagingService().getNewLogin());
+        this.inputForm = createInputForm();
+        setDefaultOutput(getMessagingService().getNewLogin());
     }
 
     @FXML
     public void login(ActionEvent actionEvent) {
-        // passing the user service login functionality as a supplier to the form action method
+        // passing the user service login functionality as a supplier to the form submit handler method
         // which in this case will perform some validation and exception handling under the hood
-        formFieldSubmitAction(formFields, () -> getUserService().login(usernameField.getText(), passwordField.getText()))
-                .ifPresent(validLogin -> handleLoginStatus(actionEvent, validLogin));
+        final CheckedSupplier<Boolean> formSupplier = () -> getUserService().login(usernameField.getText(), passwordField.getText());
+        formSubmitHandler(inputForm, formSupplier).ifPresent(validLogin -> handleLoginStatus(actionEvent, validLogin));
     }
 
     private void handleLoginStatus(ActionEvent actionEvent, boolean validLogin) {
         if (validLogin) {
-            showView(actionEvent, getClass(), "../view/main.fxml");
+            eventViewHandler(actionEvent, getClass(), "../view/main.fxml");
         } else {
-            ControllerUtils.displayAsRed(getValidationField());
-            setValidationField(getMessagingService().getInvalidLogin());
+            setRedOutput(getMessagingService().getInvalidLogin());
         }
+    }
+
+    private InputForm<TextField> createInputForm() {
+        final Map<String, TextField> fields = new HashMap<String, TextField>() {
+            {
+                put(usernameLabel.getText(), usernameField);
+                put(passwordLabel.getText(), passwordField);
+            }
+        };
+        return new InputForm<>(fields);
     }
 }

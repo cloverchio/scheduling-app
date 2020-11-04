@@ -7,7 +7,6 @@ import com.c195.dao.DAOException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -23,11 +22,10 @@ public class ReportService {
     }
 
     public static ReportService getInstance(AppointmentService appointmentService) {
-        return Optional.ofNullable(serviceInstance)
-                .orElseGet(() -> {
-                    serviceInstance = new ReportService(appointmentService);
-                    return serviceInstance;
-                });
+        if (serviceInstance == null) {
+            serviceInstance = new ReportService(appointmentService);
+        }
+        return serviceInstance;
     }
 
     /**

@@ -1,13 +1,15 @@
 package com.c195.controller.report;
 
 import com.c195.common.CheckedSupplier;
+import com.c195.common.appointment.AppointmentDTO;
 import com.c195.common.report.ReportAggregationDTO;
 import com.c195.common.report.ReportType;
 import com.c195.controller.Controller;
 import com.c195.dao.AppointmentDAO;
 import com.c195.service.AppointmentService;
 import com.c195.service.ReportService;
-import com.c195.util.ReportUtils;
+import com.c195.util.AppointmentReportTree;
+import com.c195.util.CountReportTree;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -18,6 +20,7 @@ import javafx.scene.control.TreeView;
 
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -54,17 +57,13 @@ public class ReportController extends Controller implements Initializable {
                     final AppointmentService appointmentService =
                             AppointmentService.getInstance(AppointmentDAO.getInstance(connection));
                     reportService = ReportService.getInstance(appointmentService);
-                    updateReportByTypeSelection();
+                    reportTypeComboBox.setOnAction(actionEvent -> setReportTreeByTypeSelection());
                 });
     }
 
     @FXML
     public void cancel(ActionEvent actionEvent) {
-        showView(actionEvent, getClass(), "../../view/main.fxml");
-    }
-
-    private void updateReportByTypeSelection() {
-        reportTypeComboBox.setOnAction(actionEvent -> setReportTreeByTypeSelection());
+        eventViewHandler(actionEvent, getClass(), "../../view/main.fxml");
     }
 
     private void setReportTreeByTypeSelection() {
@@ -73,20 +72,32 @@ public class ReportController extends Controller implements Initializable {
             createAppointmentTypeCountByMonthTree();
         } else if (selectedView.equals(ReportType.APPOINTMENT_TYPES_BY_CUSTOMER.getName())) {
             createAppointmentTypeCountByCustomerTree();
+        } else {
+            createScheduleByContactTree();
         }
     }
 
     private void createAppointmentTypeCountByMonthTree() {
-        createCountTree("Months", "Appointment Types", () -> reportService.getAppointmentTypeCountByMonth());
+        createCountTree("Months", () -> reportService.getAppointmentTypeCountByMonth());
     }
 
     private void createAppointmentTypeCountByCustomerTree() {
-        createCountTree("Customers", "Appointment Types", () -> reportService.getAppointmentTypeCountByCustomer());
+        createCountTree("Customers", () -> reportService.getAppointmentTypeCountByCustomer());
     }
 
-    private void createCountTree(String rootKey, String subKey, CheckedSupplier<ReportAggregationDTO<Map<String, Long>>> reportSupplier) {
-        performDatabaseAction(reportSupplier)
-                .map(reportData -> ReportUtils.createReportNodes(rootKey, subKey, reportData.getData()))
+    private void createScheduleByContactTree() {
+        createAppointmentTree(() -> reportService.getAppointmentsByContact());
+    }
+
+    private void createCountTree(String rootLabel, CheckedSupplier<ReportAggregationDTO<Map<String, Long>>> reportSupplier) {
+        serviceRequestHandler(reportSupplier)
+                .map(reportData -> new CountReportTree(rootLabel, "Appointment Types", reportData).getTree())
+                .ifPresent(root -> reportTree.setRoot(root));
+    }
+
+    private void createAppointmentTree(CheckedSupplier<ReportAggregationDTO<List<AppointmentDTO>>> reportSupplier) {
+        serviceRequestHandler(reportSupplier)
+                .map(reportData -> new AppointmentReportTree("Schedules", reportData).getTree())
                 .ifPresent(root -> reportTree.setRoot(root));
     }
 

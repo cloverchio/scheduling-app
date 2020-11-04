@@ -27,11 +27,10 @@ public class CityDAO {
     }
 
     public static CityDAO getInstance(Connection connection) {
-        return Optional.ofNullable(daoInstance)
-                .orElseGet(() -> {
-                    daoInstance = new CityDAO(connection);
-                    return daoInstance;
-                });
+        if (daoInstance == null) {
+            daoInstance = new CityDAO(connection);
+        }
+        return daoInstance;
     }
 
     public Optional<City> getCityByName(String cityName) throws DAOException {

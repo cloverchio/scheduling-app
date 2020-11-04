@@ -22,11 +22,10 @@ public class AddressService {
     }
 
     public static AddressService getInstance(AddressDAO addressDAO, CityDAO cityDAO, CountryDAO countryDAO) {
-        return Optional.ofNullable(serviceInstance)
-                .orElseGet(() -> {
-                    serviceInstance = new AddressService(addressDAO, cityDAO, countryDAO);
-                    return serviceInstance;
-                });
+        if (serviceInstance == null) {
+            serviceInstance = new AddressService(addressDAO, cityDAO, countryDAO);
+        }
+        return serviceInstance;
     }
 
     /**

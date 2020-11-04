@@ -1,6 +1,6 @@
 package com.c195.service;
 
-import com.c195.common.*;
+import com.c195.common.UserDTO;
 import com.c195.common.appointment.*;
 import com.c195.common.customer.CustomerDTO;
 import com.c195.dao.AppointmentDAO;
@@ -14,7 +14,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class AppointmentService {
@@ -29,11 +28,10 @@ public class AppointmentService {
     }
 
     public static AppointmentService getInstance(AppointmentDAO appointmentDAO) {
-        return Optional.ofNullable(serviceInstance)
-                .orElseGet(() -> {
-                    serviceInstance = new AppointmentService(appointmentDAO);
-                    return serviceInstance;
-                });
+        if (serviceInstance == null) {
+            serviceInstance = new AppointmentService(appointmentDAO);
+        }
+        return serviceInstance;
     }
 
     /**

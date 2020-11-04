@@ -1,13 +1,15 @@
 package com.c195.controller.appointment;
 
-import com.c195.common.*;
+import com.c195.common.CheckedSupplier;
 import com.c195.common.appointment.*;
 import com.c195.common.customer.CustomerDTO;
 import com.c195.common.customer.CustomerException;
 import com.c195.controller.FormController;
 import com.c195.dao.*;
-import com.c195.service.*;
-import com.c195.util.ControllerUtils;
+import com.c195.service.AddressService;
+import com.c195.service.AppointmentService;
+import com.c195.service.CustomerService;
+import com.c195.util.InputForm;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -19,7 +21,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class AppointmentFormController extends FormController {
+public class AppointmentFormController extends FormController<TextInputControl> {
 
     @FXML
     private Label titleLabel;
@@ -60,21 +62,14 @@ public class AppointmentFormController extends FormController {
 
     private AppointmentService appointmentService;
     private CustomerService customerService;
-    private Map<Label, TextInputControl> formFields;
+    private InputForm<TextInputControl> inputForm;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         super.initialize(url, resourceBundle);
         this.typeComboBox.setItems(getAppointmentTypes());
         this.locationComboBox.setItems(getAppointmentLocations());
-        this.formFields = new HashMap<>();
-        this.formFields.put(titleLabel, titleField);
-        this.formFields.put(descriptionLabel, descriptionArea);
-        this.formFields.put(customerIdLabel, customerIdField);
-        this.formFields.put(contactLabel, contactField);
-        this.formFields.put(urlLabel, urlField);
-        this.formFields.put(startTimeLabel, startTimeField);
-        this.formFields.put(endTimeLabel, endTimeField);
+        this.inputForm = createInputForm();
         getDatabaseConnection()
                 .ifPresent(connection -> {
                     final AddressDAO addressDAO = AddressDAO.getInstance(connection);
@@ -86,44 +81,29 @@ public class AppointmentFormController extends FormController {
                 });
     }
 
-    protected Map<Label, TextInputControl> getFormFields() {
-        return formFields;
-    }
-
     protected AppointmentService getAppointmentService() {
         return appointmentService;
     }
 
-    protected <T> Optional<T> submitWithOverlapConfirmation(int appointmentId,
-                                                            int userId,
-                                                            AppointmentTime appointmentTime,
-                                                            CheckedSupplier<T> submitAction) {
-        final List<String> overlappingAppointments =
-                getOverlappingAppointments(appointmentId, userId, appointmentTime.getUtcStart(), appointmentTime.getUtcEnd())
-                        .stream()
-                        .map(AppointmentDTO::getTitle)
-                        .collect(Collectors.toList());
-        return submitWithOverlapConfirmation(overlappingAppointments, submitAction);
-    }
-
-    protected <T> Optional<T> submitWithOverlapConfirmation(int userId,
-                                                            AppointmentTime appointmentTime,
-                                                            CheckedSupplier<T> submitAction) {
-        final List<String> overlappingAppointments =
-                getOverlappingAppointments(userId, appointmentTime.getUtcStart(), appointmentTime.getUtcEnd())
-                        .stream()
-                        .map(AppointmentDTO::getTitle)
-                        .collect(Collectors.toList());
-        return submitWithOverlapConfirmation(overlappingAppointments, submitAction);
-    }
-
-    private <T> Optional<T> submitWithOverlapConfirmation(List<String> overlappingAppointments, CheckedSupplier<T> submitAction) {
+    protected  <T> Optional<T> overlapConfirmationHandler(List<String> overlappingAppointments,
+                                                       CheckedSupplier<T> confirmationSupplier) {
         if (overlappingAppointments.isEmpty()) {
-            return formFieldSubmitAction(formFields, submitAction);
+            return formSubmitHandler(inputForm, confirmationSupplier);
         } else {
             final Alert overlapAlert = overlapAlert(String.join("\n", overlappingAppointments));
-            return formFieldSubmitActionWithConfirmation(formFields, overlapAlert, submitAction);
+            return formSubmitConfirmationHandler(inputForm, overlapAlert, confirmationSupplier);
         }
+    }
+
+    protected List<AppointmentDTO> getOverlappingAppointments(int userId, Instant start, Instant end) {
+        try {
+            return serviceRequestHandler(() -> appointmentService.getAppointmentsByUserBetween(userId, start, end))
+                    .orElse(Collections.emptyList());
+        } catch (AppointmentException e) {
+            setRedOutput(e.getMessage());
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
     }
 
     protected Optional<AppointmentDTO.Builder> getAppointmentDTOBuilder() {
@@ -171,47 +151,45 @@ public class AppointmentFormController extends FormController {
 
     private Optional<AppointmentTime> getAppointmentTime() {
         try {
-            return Optional.of(new AppointmentTime(
-                    startDatePicker.getValue(),
-                    startTimeField.getText(),
-                    endDatePicker.getValue(),
-                    endTimeField.getText(),
-                    AppointmentLocation.fromName(locationComboBox.getValue()).getZoneId()));
+            return Optional.of(createAppointmentTime());
         } catch (AppointmentException e) {
-            setValidationFieldError(e.getMessage());
+            setRedOutput(e.getMessage());
             e.printStackTrace();
         }
         return Optional.empty();
+    }
+
+    private AppointmentTime createAppointmentTime() throws AppointmentException {
+        return new AppointmentTime(
+                startDatePicker.getValue(),
+                startTimeField.getText(),
+                endDatePicker.getValue(),
+                endTimeField.getText(),
+                AppointmentLocation.fromName(locationComboBox.getValue()).getZoneId());
     }
 
     private Optional<CustomerDTO> getCustomerDTO() {
         try {
             final int customerId = Integer.parseInt(customerIdField.getText());
-            return performDatabaseAction(() -> customerService.getCustomerById(customerId));
+            return serviceRequestHandler(() -> customerService.getCustomerById(customerId));
         } catch (CustomerException | NumberFormatException e) {
-            setValidationFieldError(e.getMessage());
+            setRedOutput(e.getMessage());
             e.printStackTrace();
         }
         return Optional.empty();
     }
 
-    private List<AppointmentDTO> getOverlappingAppointments(int appointmentId, int userId, Instant start, Instant end) {
-        return getOverlappingAppointments(userId, start, end)
-                .stream()
-                .filter(appointment -> appointment.getId() != appointmentId)
-                .collect(Collectors.toList());
-    }
-
-    private List<AppointmentDTO> getOverlappingAppointments(int userId, Instant start, Instant end) {
-        try {
-            return performDatabaseAction(() ->
-                    appointmentService.getAppointmentsByUserBetween(userId, start, end))
-                    .orElse(Collections.emptyList());
-        } catch (AppointmentException e) {
-            setValidationFieldError(e.getMessage());
-            e.printStackTrace();
-        }
-        return Collections.emptyList();
+    private InputForm<TextInputControl> createInputForm() {
+        final Map<String, TextInputControl> fields = new HashMap<String, TextInputControl>() {
+            {
+                put(titleLabel.getText(), titleField);
+                put(descriptionLabel.getText(), descriptionArea);
+                put(urlLabel.getText(), urlField);
+                put(customerIdLabel.getText(), customerIdField);
+                put(contactLabel.getText(), contactField);
+            }
+        };
+        return new InputForm<>(fields);
     }
 
     private static ObservableList<String> getAppointmentTypes() {
@@ -229,7 +207,7 @@ public class AppointmentFormController extends FormController {
     }
 
     private static Alert overlapAlert(String appointmentTitles) {
-        return ControllerUtils.infoAlert(
+        return infoAlert(
                 "Overlapping Appointments",
                 "You have a other appointments in this timeframe...",
                 "You have the following appointments scheduled within the provided timeframe\n" + appointmentTitles);

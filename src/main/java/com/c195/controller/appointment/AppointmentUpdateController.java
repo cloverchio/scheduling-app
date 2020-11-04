@@ -1,13 +1,18 @@
 package com.c195.controller.appointment;
 
-import com.c195.common.appointment.AppointmentDTO;
 import com.c195.common.CheckedSupplier;
 import com.c195.common.UserDTO;
+import com.c195.common.appointment.AppointmentDTO;
+import com.c195.common.appointment.AppointmentTime;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 
 import java.net.URL;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class AppointmentUpdateController extends AppointmentFormController {
 
@@ -20,7 +25,7 @@ public class AppointmentUpdateController extends AppointmentFormController {
 
     @FXML
     public void cancelUpdate(ActionEvent actionEvent) {
-        showView(actionEvent, getClass(), "../../view/appointment/appointment.fxml");
+        eventViewHandler(actionEvent, getClass(), "../../view/appointment/appointment.fxml");
     }
 
     @FXML
@@ -30,7 +35,7 @@ public class AppointmentUpdateController extends AppointmentFormController {
         // displays messaging to the user if an appointment id was returned
         getUserService().getCurrentUser()
                 .map(this::updateAppointment)
-                .ifPresent(updatedAppointmentId -> setValidationField("Appointment has been updated!"));
+                .ifPresent(updatedAppointmentId -> setDefaultOutput("Appointment has been updated!"));
     }
 
     public void setAppointmentId(Integer appointmentId) {
@@ -38,10 +43,34 @@ public class AppointmentUpdateController extends AppointmentFormController {
     }
 
     private Integer updateAppointment(UserDTO userDTO) {
-        return getAppointmentDTOBuilder().map(appointmentDTOBuilder -> {
-            final AppointmentDTO appointmentDTO = appointmentDTOBuilder.withId(appointmentId).build();
-            final CheckedSupplier<Integer> submitAction = () -> getAppointmentService().updateAppointment(appointmentDTO, userDTO);
-            return submitWithOverlapConfirmation(appointmentId, userDTO.getId(), appointmentDTO.getTime(), submitAction).orElse(null);
-        }).orElse(null);
+        final Optional<AppointmentDTO.Builder> appointmentDTOBuilder = getAppointmentDTOBuilder();
+        if (appointmentDTOBuilder.isPresent()) {
+            final AppointmentDTO appointmentDTO = appointmentDTOBuilder.get()
+                    .withId(appointmentId)
+                    .build();
+            final CheckedSupplier<Integer> formSupplier = () -> getAppointmentService().updateAppointment(appointmentDTO, userDTO);
+            return overlapConfirmationHandler(appointmentId, userDTO.getId(), appointmentDTO.getTime(), formSupplier)
+                    .orElse(null);
+        }
+        return null;
+    }
+
+    private <T> Optional<T> overlapConfirmationHandler(int appointmentId,
+                                                       int userId,
+                                                       AppointmentTime appointmentTime,
+                                                       CheckedSupplier<T> confirmationSupplier) {
+        final List<String> overlappingAppointments =
+                getOverlappingAppointments(appointmentId, userId, appointmentTime.getUtcStart(), appointmentTime.getUtcEnd())
+                        .stream()
+                        .map(AppointmentDTO::getTitle)
+                        .collect(Collectors.toList());
+        return overlapConfirmationHandler(overlappingAppointments, confirmationSupplier);
+    }
+
+    private List<AppointmentDTO> getOverlappingAppointments(int appointmentId, int userId, Instant start, Instant end) {
+        return getOverlappingAppointments(userId, start, end)
+                .stream()
+                .filter(appointment -> appointment.getId() != appointmentId)
+                .collect(Collectors.toList());
     }
 }

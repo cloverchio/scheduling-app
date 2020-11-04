@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
 
-public class MetadataDAO {
+public final class MetadataDAO {
 
     public static Metadata toMetadata(ResultSet resultSet) throws DAOException {
         try {

@@ -9,7 +9,7 @@
          <Font size="25.0" />
       </font>
    </Label>
-   <Label fx:id="validationField" alignment="CENTER" layoutX="15.0" layoutY="86.0" prefHeight="43.0" prefWidth="564.0" />
+   <Label fx:id="outputLabel" alignment="CENTER" layoutX="15.0" layoutY="86.0" prefHeight="43.0" prefWidth="564.0" />
    <Label fx:id="usernameLabel" layoutX="178.0" layoutY="150.0" text="Username" />
    <TextField fx:id="usernameField" layoutX="260.0" layoutY="148.0" />
    <Label fx:id="passwordLabel" layoutX="178.0" layoutY="200.0" text="Password" />

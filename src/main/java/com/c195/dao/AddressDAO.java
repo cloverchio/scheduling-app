@@ -3,20 +3,9 @@ package com.c195.dao;
 import com.c195.model.Address;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 public class AddressDAO {
-
-    private static final String ADDRESS_BY_ID_SQL = "" +
-            "SELECT * " +
-            "FROM address a " +
-            "JOIN city ci " +
-            "ON a.cityId = ci.cityId " +
-            "JOIN country co " +
-            "ON ci.countryId = co.countryId " +
-            "WHERE addressId = ?";
 
     private static final String ADDRESS_SQL = "" +
             "SELECT * " +
@@ -26,14 +15,6 @@ public class AddressDAO {
             "JOIN country co " +
             "ON ci.countryId = co.countryId " +
             "WHERE address = ?";
-
-    private static final String ALL_ADDRESSES_SQL = "" +
-            "SELECT * " +
-            "FROM address a" +
-            "JOIN city ci " +
-            "ON a.cityId = ci.cityId " +
-            "JOIN country co " +
-            "ON ci.countryId = co.countryId";
 
     private static final String SAVE_ADDRESS_SQL = "" +
             "INSERT INTO address " +
@@ -51,15 +32,6 @@ public class AddressDAO {
             "lastUpdateBy = ? " +
             "WHERE addressId = ?";
 
-    private static final String DELETE_ADDRESS_BY_ID_SQL = "" +
-            "DELETE a, ci, co " +
-            "FROM address a " +
-            "JOIN city ci " +
-            "ON a.cityId = ci.cityId " +
-            "JOIN country co " +
-            "ON ci.countryId = co.countryId " +
-            "WHERE a.addressId = ?";
-
     private static AddressDAO daoInstance;
     private final Connection connection;
 
@@ -68,24 +40,10 @@ public class AddressDAO {
     }
 
     public static AddressDAO getInstance(Connection connection) {
-        return Optional.ofNullable(daoInstance)
-                .orElseGet(() -> {
-                    daoInstance = new AddressDAO(connection);
-                    return daoInstance;
-                });
-    }
-
-    public Optional<Address> getAddressById(int id) throws DAOException {
-        try (PreparedStatement statement = connection.prepareStatement(ADDRESS_BY_ID_SQL)) {
-            statement.setInt(1, id);
-            final ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                return Optional.of(toAddress(resultSet));
-            }
-            return Optional.empty();
-        } catch (SQLException e) {
-            throw new DAOException("there was an issue retrieving an address", e);
+        if (daoInstance == null) {
+            daoInstance = new AddressDAO(connection);
         }
+        return daoInstance;
     }
 
     public Optional<Address> getAddress(String address) throws DAOException {
@@ -98,19 +56,6 @@ public class AddressDAO {
             return Optional.empty();
         } catch (SQLException e) {
             throw new DAOException("there was an issue retrieving an address", e);
-        }
-    }
-
-    public List<Address> getAllAddresses() throws DAOException {
-        try (final PreparedStatement statement = connection.prepareStatement(ALL_ADDRESSES_SQL)) {
-            final List<Address> addresses = new ArrayList<>();
-            final ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                addresses.add(toAddress(resultSet));
-            }
-            return addresses;
-        } catch (SQLException e) {
-            throw new DAOException("there was an issue retrieving addresses", e);
         }
     }
 
@@ -147,15 +92,6 @@ public class AddressDAO {
             statement.executeUpdate();
         } catch (SQLException e) {
             throw new DAOException("there was an issue updating an address", e);
-        }
-    }
-
-    public void deleteAddressById(int id) throws DAOException {
-        try (final PreparedStatement statement = connection.prepareStatement(DELETE_ADDRESS_BY_ID_SQL)) {
-            statement.setInt(1, id);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new DAOException("there was an issue removing an address", e);
         }
     }
 

@@ -6,12 +6,14 @@ import com.c195.dao.AppointmentDAO;
 import com.c195.dao.UserDAO;
 import com.c195.service.AppointmentService;
 import com.c195.service.UserService;
-import com.c195.util.ControllerUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Dialog;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -44,23 +46,23 @@ public class MainController extends Controller implements Initializable {
 
     @FXML
     public void manageCustomers(ActionEvent actionEvent) {
-        showView(actionEvent, getClass(), "../view/customer/customer.fxml");
+        eventViewHandler(actionEvent, getClass(), "../view/customer/customer.fxml");
     }
 
     @FXML
     public void manageAppointments(ActionEvent actionEvent) {
-        showView(actionEvent, getClass(), "../view/appointment/appointment.fxml");
+        eventViewHandler(actionEvent, getClass(), "../view/appointment/appointment.fxml");
     }
 
     @FXML
     public void manageReports(ActionEvent actionEvent) {
-        showView(actionEvent, getClass(), "../view/report/report.fxml");
+        eventViewHandler(actionEvent, getClass(), "../view/report/report.fxml");
     }
 
     @FXML
     public void logout(ActionEvent actionEvent) {
         userService.logout();
-        showView(actionEvent, getClass(), "../view/login.fxml");
+        eventViewHandler(actionEvent, getClass(), "../view/login.fxml");
     }
 
     private void getUpcomingAppointmentReminder() {
@@ -74,20 +76,23 @@ public class MainController extends Controller implements Initializable {
         // checking if the returned appointments are empty
         // if not we will map appointments to their corresponding title
         // and prompt an alert to the user
-        performDatabaseAction(() -> appointmentService.getReminderAppointmentsByUser(userId))
+        serviceRequestHandler(() -> appointmentService.getReminderAppointmentsByUser(userId))
                 .filter(appointmentDTOS -> !appointmentDTOS.isEmpty())
-                .map(appointmentDTOS -> appointmentDTOS
-                        .stream()
-                        .map(AppointmentDTO::getTitle)
-                        .collect(Collectors.joining("\n")))
-                .ifPresent(MainController::showAppointmentReminderAlert);
+                .map(MainController::toAppointmentTitles)
+                .map(MainController::appointmentReminderAlert)
+                .ifPresent(Dialog::showAndWait);
     }
 
-    private static void showAppointmentReminderAlert(String appointmentTitles) {
-        ControllerUtils.infoAlert(
-                "Appointment reminder",
+    private static String toAppointmentTitles(List<AppointmentDTO> appointments) {
+        return appointments
+                .stream()
+                .map(AppointmentDTO::getTitle)
+                .collect(Collectors.joining("\n"));
+    }
+
+    private static Alert appointmentReminderAlert(String appointmentTitles) {
+        return infoAlert("Appointment reminder",
                 "You have an upcoming appointment",
-                "You have the following appointments scheduled:\n" + appointmentTitles)
-                .showAndWait();
+                "You have the following appointments scheduled:\n" + appointmentTitles);
     }
 }

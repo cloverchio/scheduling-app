@@ -25,11 +25,10 @@ public class CountryDAO {
     }
 
     public static CountryDAO getInstance(Connection connection) {
-        return Optional.ofNullable(daoInstance)
-                .orElseGet(() -> {
-                    daoInstance = new CountryDAO(connection);
-                    return daoInstance;
-                });
+        if (daoInstance == null) {
+            daoInstance = new CountryDAO(connection);
+        }
+        return daoInstance;
     }
 
     public Optional<Country> getCountryByName(String countryName) throws DAOException {
