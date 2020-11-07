@@ -35,10 +35,10 @@ public class Logger {
 
     public void log(String content) throws LoggingException {
         final Path path = getFilePath().toAbsolutePath();
+        final StandardOpenOption openOption = Files.exists(path)
+                ? StandardOpenOption.APPEND
+                : StandardOpenOption.CREATE;
         try {
-            final StandardOpenOption openOption = Files.exists(path)
-                    ? StandardOpenOption.APPEND
-                    : StandardOpenOption.CREATE;
             Files.write(path, Collections.singletonList(toLogMessage(content)), StandardCharsets.UTF_8, openOption);
         } catch (IOException e) {
             throw new LoggingException(e);
@@ -52,6 +52,6 @@ public class Logger {
 
     private String toLogMessage(String content) {
         final String timestamp = DateTimeFormatter.ISO_INSTANT.format(clock.instant());
-        return String.format("%s %s: %s\n", timestamp, clazz.getName(), content);
+        return String.format("%s %s: %s", timestamp, clazz.getName(), content);
     }
 }

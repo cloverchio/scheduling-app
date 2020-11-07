@@ -5,10 +5,7 @@ import com.c195.common.appointment.*;
 import com.c195.common.customer.CustomerDTO;
 import com.c195.common.customer.CustomerException;
 import com.c195.controller.FormController;
-import com.c195.dao.*;
-import com.c195.service.AddressService;
 import com.c195.service.AppointmentService;
-import com.c195.service.CustomerService;
 import com.c195.util.form.InputForm;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -25,60 +22,63 @@ public class AppointmentFormController extends FormController<TextInputControl> 
 
     @FXML
     private Label titleLabel;
+
     @FXML
     private TextField titleField;
+
     @FXML
     private Label descriptionLabel;
+
     @FXML
     private TextArea descriptionArea;
+
     @FXML
     private Label customerIdLabel;
+
     @FXML
     private TextField customerIdField;
+
     @FXML
     private Label contactLabel;
+
     @FXML
     private TextField contactField;
+
     @FXML
     private Label urlLabel;
+
     @FXML
     private TextField urlField;
+
     @FXML
     private ComboBox<String> locationComboBox;
+
     @FXML
     private ComboBox<String> typeComboBox;
+
     @FXML
     private DatePicker startDatePicker;
+
     @FXML
     private TextField startTimeField;
+
     @FXML
     private DatePicker endDatePicker;
+
     @FXML
     private TextField endTimeField;
 
     private AppointmentService appointmentService;
-    private CustomerService customerService;
     private InputForm<TextInputControl> inputForm;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         super.initialize(url, resourceBundle);
-        this.typeComboBox.setItems(getAppointmentTypes());
-        this.locationComboBox.setItems(getAppointmentLocations());
-        this.inputForm = createInputForm();
-        getDatabaseConnection()
-                .ifPresent(connection -> {
-                    final AddressDAO addressDAO = AddressDAO.getInstance(connection);
-                    final CityDAO cityDAO = CityDAO.getInstance(connection);
-                    final CountryDAO countryDAO = CountryDAO.getInstance(connection);
-                    final AddressService addressService = AddressService.getInstance(addressDAO, cityDAO, countryDAO, getClock());
-                    customerService = CustomerService.getInstance(CustomerDAO.getInstance(connection), addressService, getClock());
-                    appointmentService = AppointmentService.getInstance(AppointmentDAO.getInstance(connection), getClock());
-                });
-    }
+        this.appointmentService = serviceResolver().getAppointmentService();
 
-    protected AppointmentService getAppointmentService() {
-        return appointmentService;
+        typeComboBox.setItems(getAppointmentTypes());
+        locationComboBox.setItems(getAppointmentLocations());
+        inputForm = createInputForm();
     }
 
     protected  <T> Optional<T> overlapConfirmationHandler(List<String> overlappingAppointments,
@@ -167,7 +167,7 @@ public class AppointmentFormController extends FormController<TextInputControl> 
     private Optional<CustomerDTO> getCustomerDTO() {
         try {
             final int customerId = Integer.parseInt(customerIdField.getText());
-            return serviceRequestHandler(() -> customerService.getCustomerById(customerId));
+            return serviceRequestHandler(() -> serviceResolver().getCustomerService().getCustomerById(customerId));
         } catch (CustomerException | NumberFormatException e) {
             setRedOutput(e.getMessage());
             e.printStackTrace();

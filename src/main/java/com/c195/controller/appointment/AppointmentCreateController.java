@@ -30,7 +30,8 @@ public class AppointmentCreateController extends AppointmentFormController {
         // gets the current user
         // maps that user to a saved appointment id (implicitly saves the appointment)
         // displays messaging to the user if an appointment id was returned
-        getUserService().getCurrentUser()
+        serviceResolver().getUserService()
+                .getCurrentUser()
                 .map(this::saveAppointment)
                 .ifPresent(savedAppointmentId -> setDefaultOutput("Appointment has been saved!"));
     }
@@ -39,7 +40,8 @@ public class AppointmentCreateController extends AppointmentFormController {
         final Optional<AppointmentDTO.Builder> appointmentDTOBuilder = getAppointmentDTOBuilder();
         if (appointmentDTOBuilder.isPresent()) {
             final AppointmentDTO appointmentDTO = appointmentDTOBuilder.get().build();
-            final CheckedSupplier<Integer> formSupplier = () -> getAppointmentService().saveAppointment(appointmentDTO, userDTO);
+            final CheckedSupplier<Integer> formSupplier =
+                    () -> serviceResolver().getAppointmentService().saveAppointment(appointmentDTO, userDTO);
             return overlapConfirmationHandler(userDTO.getId(), appointmentDTO.getTime(), formSupplier)
                     .orElse(null);
         }

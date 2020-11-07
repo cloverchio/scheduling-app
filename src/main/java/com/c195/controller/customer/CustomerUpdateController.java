@@ -29,7 +29,8 @@ public class CustomerUpdateController extends CustomerFormController {
         // gets the current user
         // maps that username to an updated customer id (implicitly updates the customer)
         // displays messaging to the user if a customer id was returned
-        getUserService().getCurrentUser()
+        serviceResolver().getUserService()
+                .getCurrentUser()
                 .map(currentUser -> updateCustomer(customerDTO.getId(), customerDTO.getAddressDTO().getId(), currentUser))
                 .ifPresent(updatedCustomerId -> setDefaultOutput("Customer has been updated!"));
     }
@@ -41,7 +42,8 @@ public class CustomerUpdateController extends CustomerFormController {
     private Integer updateCustomer(int customerId, int addressId, UserDTO currentUser) {
         final AddressDTO addressDTO = getAddressDTO().withId(addressId).build();
         final CustomerDTO customerDTO = getCustomerDTOBuilder(addressDTO).withId(customerId).build();
-        final CheckedSupplier<Integer> formSupplier = () -> getCustomerService().updateCustomer(customerDTO, currentUser);
+        final CheckedSupplier<Integer> formSupplier =
+                () -> serviceResolver().getCustomerService().updateCustomer(customerDTO, currentUser);
         return formSubmitHandler(getInputForm(), formSupplier).orElse(null);
     }
 }

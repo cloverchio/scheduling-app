@@ -6,6 +6,7 @@ import com.c195.dao.config.DAOConfigException;
 import com.c195.dao.config.MysqlConfig;
 import com.c195.dao.config.MysqlConnection;
 import com.c195.service.MessagingService;
+import com.c195.service.ServiceResolver;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -31,21 +32,27 @@ public class Controller implements Initializable {
 
     private static final String TITLE = "C195 Scheduling App";
 
-    private MessagingService messagingService;
     private Clock clock;
+    private ServiceResolver serviceResolver;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        this.messagingService = MessagingService.getInstance();
         this.clock = Clock.systemUTC();
     }
 
-    protected MessagingService getMessagingService() {
-        return messagingService;
-    }
-
-    protected Clock getClock() {
-        return clock;
+    /**
+     * Provides a service resolver instance populated with a database connection
+     * and clock. Used to more conveniently access different service instances.
+     *
+     * @return an instance of {@link ServiceResolver}
+     */
+    protected ServiceResolver serviceResolver() {
+        if (serviceResolver == null) {
+            serviceResolver = getDatabaseConnection()
+                    .map(connection -> new ServiceResolver(connection, clock))
+                    .orElse(null);
+        }
+        return serviceResolver;
     }
 
     /**
@@ -53,8 +60,8 @@ public class Controller implements Initializable {
      *
      * @param confirmationSupplier the service operation to be performed as a supplier.
      */
-    protected <T> void confirmationHandler(CheckedSupplier<T> confirmationSupplier) {
-        confirmationHandler(confirmationAlert(), confirmationSupplier, this::serviceRequestHandler);
+    protected static <T> void confirmationHandler(CheckedSupplier<T> confirmationSupplier) {
+        confirmationHandler(confirmationAlert(), confirmationSupplier, Controller::serviceRequestHandler);
     }
 
     /**
@@ -66,7 +73,7 @@ public class Controller implements Initializable {
      * @param <T>                  the return type expected from the service operation.
      * @return optional value of what is expected from the service operation.
      */
-    protected <T> Optional<T> confirmationHandler(Alert confirmationAlert,
+    protected static <T> Optional<T> confirmationHandler(Alert confirmationAlert,
                                                   CheckedSupplier<T> confirmationSupplier,
                                                   Function<CheckedSupplier<T>, Optional<T>> handler) {
         return confirmationAlert.showAndWait()
@@ -84,26 +91,10 @@ public class Controller implements Initializable {
      * @param <T>             the return type expected from the service operation.
      * @return optional value of what is expected from the service operation.
      */
-    protected <T> Optional<T> serviceRequestHandler(CheckedSupplier<T> checkedSupplier) {
+    protected static <T> Optional<T> serviceRequestHandler(CheckedSupplier<T> checkedSupplier) {
         try {
             return Optional.ofNullable(checkedSupplier.getWithIO());
         } catch (DAOException e) {
-            databaseAlert().showAndWait();
-            e.printStackTrace();
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * Provides the database connection instance. Will prompt an alert in the event
-     * that an exception is thrown while trying to establish the connection.
-     *
-     * @return optional instance of the database connection.
-     */
-    protected Optional<Connection> getDatabaseConnection() {
-        try {
-            return Optional.ofNullable(MysqlConnection.getInstance(MysqlConfig.getInstance()));
-        } catch (DAOConfigException e) {
             databaseAlert().showAndWait();
             e.printStackTrace();
         }
@@ -149,19 +140,22 @@ public class Controller implements Initializable {
         eventViewHandler(clazz, viewPath);
     }
 
-    private Alert confirmationAlert() {
+    private static Alert confirmationAlert() {
+        final MessagingService messagingService = ServiceResolver.getMessagingService();
         return infoAlert(messagingService.getConfirmationTitle(),
                 messagingService.getConfirmationHeader(),
                 messagingService.getConfirmationContent());
     }
 
-    private Alert databaseAlert() {
+    private static Alert databaseAlert() {
+        final MessagingService messagingService = ServiceResolver.getMessagingService();
         return errorAlert(messagingService.getDatabaseErrorTitle(),
                 messagingService.getDatabaseErrorHeader(),
                 messagingService.getDatabaseErrorContent());
     }
 
-    private Alert unexpectedAlert() {
+    private static Alert unexpectedAlert() {
+        final MessagingService messagingService = ServiceResolver.getMessagingService();
         return errorAlert(messagingService.getUnexpectedErrorTitle(),
                 messagingService.getUnexpectedErrorHeader(),
                 messagingService.getUnexpectedErrorContent());
@@ -174,6 +168,16 @@ public class Controller implements Initializable {
         stage.setScene(scene);
         stage.show();
         stage.setOnCloseRequest(windowEvent -> closeDatabaseConnection());
+    }
+
+    private static Optional<Connection> getDatabaseConnection() {
+        try {
+            return Optional.ofNullable(MysqlConnection.getInstance(MysqlConfig.getInstance()));
+        } catch (DAOConfigException e) {
+            databaseAlert().showAndWait();
+            e.printStackTrace();
+        }
+        return Optional.empty();
     }
 
     private static void closeDatabaseConnection() throws RuntimeException {

@@ -2,6 +2,9 @@ package com.c195.controller;
 
 import com.c195.common.CheckedSupplier;
 import com.c195.common.UserDTO;
+import com.c195.service.MessagingService;
+import com.c195.service.ServiceResolver;
+import com.c195.service.UserService;
 import com.c195.util.form.InputForm;
 import com.c195.util.logging.Logger;
 import javafx.event.ActionEvent;
@@ -37,33 +40,44 @@ public class LoginController extends FormController<TextField> {
 
     @FXML
     private Label usernameLabel;
+
     @FXML
     private TextField usernameField;
+
     @FXML
     private Label passwordLabel;
+
     @FXML
     private PasswordField passwordField;
+
     @FXML
     private Button loginButton;
 
     private InputForm<TextField> inputForm;
+    private MessagingService messagingService;
+    private UserService userService;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         super.initialize(url, resourceBundle);
-        this.usernameLabel.setText(getMessagingService().getUsername());
-        this.passwordLabel.setText(getMessagingService().getPassword());
-        this.loginButton.setText(getMessagingService().getLogin());
-        this.inputForm = createInputForm();
-        setDefaultOutput(getMessagingService().getNewLogin());
+        this.messagingService = ServiceResolver.getMessagingService();
+        this.userService = serviceResolver().getUserService();
+
+        usernameLabel.setText(messagingService.getUsername());
+        passwordLabel.setText(messagingService.getPassword());
+        loginButton.setText(messagingService.getLogin());
+        inputForm = createInputForm();
+
+        setDefaultOutput(messagingService.getNewLogin());
     }
 
     @FXML
     public void login(ActionEvent actionEvent) {
         // passing the user service login functionality as a supplier to the form submit handler method
         // which in this case will perform some validation and exception handling under the hood
-        final CheckedSupplier<Boolean> formSupplier = () -> getUserService().login(usernameField.getText(), passwordField.getText());
-        formSubmitHandler(inputForm, formSupplier).ifPresent(validLogin -> handleLoginStatus(actionEvent, validLogin));
+        final CheckedSupplier<Boolean> formSupplier = () -> userService.login(usernameField.getText(), passwordField.getText());
+        formSubmitHandler(inputForm, formSupplier)
+                .ifPresent(validLogin -> handleLoginStatus(actionEvent, validLogin));
     }
 
     private void handleLoginStatus(ActionEvent actionEvent, boolean validLogin) {
@@ -71,12 +85,12 @@ public class LoginController extends FormController<TextField> {
             logger.log(String.format("successful login for user: %s", getUserId()));
             eventViewHandler(actionEvent, getClass(), "../view/main.fxml");
         } else {
-            setRedOutput(getMessagingService().getInvalidLogin());
+            setRedOutput(messagingService.getInvalidLogin());
         }
     }
 
     private String getUserId() {
-        return getUserService().getCurrentUser()
+        return userService.getCurrentUser()
                 .map(UserDTO::getId)
                 .map(String::valueOf)
                 .orElse(null);

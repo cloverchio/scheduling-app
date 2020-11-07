@@ -5,8 +5,6 @@ import com.c195.common.appointment.AppointmentDTO;
 import com.c195.common.report.ReportAggregationDTO;
 import com.c195.common.report.ReportType;
 import com.c195.controller.Controller;
-import com.c195.dao.AppointmentDAO;
-import com.c195.service.AppointmentService;
 import com.c195.service.ReportService;
 import com.c195.util.report.AppointmentReportTree;
 import com.c195.util.report.CountReportTree;
@@ -50,15 +48,11 @@ public class ReportController extends Controller implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        reportTypeComboBox.setItems(getReportTypes());
         super.initialize(url, resourceBundle);
-        getDatabaseConnection()
-                .ifPresent(connection -> {
-                    final AppointmentService appointmentService =
-                            AppointmentService.getInstance(AppointmentDAO.getInstance(connection), getClock());
-                    reportService = ReportService.getInstance(appointmentService);
-                    reportTypeComboBox.setOnAction(actionEvent -> setReportTreeByTypeSelection());
-                });
+        this.reportService = serviceResolver().getReportService();
+
+        reportTypeComboBox.setItems(getReportTypes());
+        reportTypeComboBox.setOnAction(actionEvent -> setReportTreeByTypeSelection());
     }
 
     @FXML

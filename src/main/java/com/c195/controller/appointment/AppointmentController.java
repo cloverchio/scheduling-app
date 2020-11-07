@@ -5,10 +5,7 @@ import com.c195.common.UserDTO;
 import com.c195.common.appointment.AppointmentDTO;
 import com.c195.common.appointment.AppointmentView;
 import com.c195.controller.Controller;
-import com.c195.dao.AppointmentDAO;
-import com.c195.dao.UserDAO;
 import com.c195.service.AppointmentService;
-import com.c195.service.UserService;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -46,36 +43,40 @@ public class AppointmentController extends Controller implements Initializable {
 
     @FXML
     private TableView<AppointmentDTO> appointmentTable;
+
     @FXML
     private TableColumn<AppointmentDTO, String> titleColumn;
+
     @FXML
     private TableColumn<AppointmentDTO, String> locationColumn;
+
     @FXML
     private TableColumn<AppointmentDTO, String> customerNameColumn;
+
     @FXML
     private TableColumn<AppointmentDTO, String> typeColumn;
+
     @FXML
     private TableColumn<AppointmentDTO, String> startColumn;
+
     @FXML
     private TableColumn<AppointmentDTO, String> endColumn;
+
     @FXML
     private ComboBox<String> appointmentViewComboBox;
 
-    private UserService userService;
     private AppointmentService appointmentService;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        super.initialize(url, resourceBundle);
+        this.appointmentService = serviceResolver().getAppointmentService();
+
         appointmentViewComboBox.setItems(getAppointmentViews());
         appointmentViewComboBox.getSelectionModel().selectFirst();
-        super.initialize(url, resourceBundle);
-        getDatabaseConnection()
-                .ifPresent(connection -> {
-                    userService = UserService.getInstance(UserDAO.getInstance(connection));
-                    appointmentService = AppointmentService.getInstance(AppointmentDAO.getInstance(connection), getClock());
-                    createAppointmentTable();
-                    updateAppointmentsByViewSelection();
-                });
+
+        createAppointmentTable();
+        updateAppointmentsByViewSelection();
     }
 
     @FXML
@@ -106,7 +107,7 @@ public class AppointmentController extends Controller implements Initializable {
         Optional.ofNullable(appointmentTable.getSelectionModel().getSelectedItem())
                 .map(AppointmentDTO::getId)
                 .map(this::appointmentDeleteSupplier)
-                .ifPresent(this::confirmationHandler);
+                .ifPresent(Controller::confirmationHandler);
     }
 
     private void createAppointmentTable() {
@@ -124,7 +125,8 @@ public class AppointmentController extends Controller implements Initializable {
     }
 
     private void setAppointmentsByViewSelection() {
-        userService.getCurrentUser()
+        serviceResolver().getUserService()
+                .getCurrentUser()
                 .map(UserDTO::getId)
                 .ifPresent(this::handleViewSelection);
     }

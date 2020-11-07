@@ -3,12 +3,6 @@ package com.c195.controller.customer;
 import com.c195.common.customer.AddressDTO;
 import com.c195.common.customer.CustomerDTO;
 import com.c195.controller.FormController;
-import com.c195.dao.AddressDAO;
-import com.c195.dao.CityDAO;
-import com.c195.dao.CountryDAO;
-import com.c195.dao.CustomerDAO;
-import com.c195.service.AddressService;
-import com.c195.service.CustomerService;
 import com.c195.util.form.InputForm;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -24,59 +18,59 @@ public class CustomerFormController extends FormController<TextField> {
 
     @FXML
     private Label nameLabel;
+
     @FXML
     private TextField nameField;
+
     @FXML
     private Label addressLabel;
+
     @FXML
     private TextField addressField;
+
     @FXML
     private Label aptLabel;
+
     @FXML
     private TextField aptField;
+
     @FXML
     private Label cityLabel;
+
     @FXML
     private TextField cityField;
+
     @FXML
     private Label countryLabel;
+
     @FXML
     private TextField countryField;
+
     @FXML
     private Label postalCodeLabel;
+
     @FXML
     private TextField postalCodeField;
+
     @FXML
     private Label phoneLabel;
+
     @FXML
     private TextField phoneField;
+
     @FXML
     private CheckBox active;
 
-    private CustomerService customerService;
     private InputForm<TextField> inputForm;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         super.initialize(url, resourceBundle);
-        this.inputForm = createInputForm();
-        getDatabaseConnection()
-                .ifPresent(connection -> {
-                    final AddressDAO addressDAO = AddressDAO.getInstance(connection);
-                    final CityDAO cityDAO = CityDAO.getInstance(connection);
-                    final CountryDAO countryDAO = CountryDAO.getInstance(connection);
-                    final AddressService addressService =
-                            AddressService.getInstance(addressDAO, cityDAO, countryDAO, getClock());
-                    customerService = CustomerService.getInstance(CustomerDAO.getInstance(connection), addressService, getClock());
-                });
+        inputForm = createInputForm();
     }
 
     protected InputForm<TextField> getInputForm() {
         return inputForm;
-    }
-
-    protected CustomerService getCustomerService() {
-        return customerService;
     }
 
     protected CustomerDTO.Builder getCustomerDTOBuilder(AddressDTO addressDTO) {

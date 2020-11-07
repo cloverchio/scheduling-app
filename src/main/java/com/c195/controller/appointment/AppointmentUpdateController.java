@@ -33,7 +33,8 @@ public class AppointmentUpdateController extends AppointmentFormController {
         // gets the current user
         // maps that username to an updated appointment id (implicitly updates the appointment)
         // displays messaging to the user if an appointment id was returned
-        getUserService().getCurrentUser()
+        serviceResolver().getUserService()
+                .getCurrentUser()
                 .map(this::updateAppointment)
                 .ifPresent(updatedAppointmentId -> setDefaultOutput("Appointment has been updated!"));
     }
@@ -48,7 +49,8 @@ public class AppointmentUpdateController extends AppointmentFormController {
             final AppointmentDTO appointmentDTO = appointmentDTOBuilder.get()
                     .withId(appointmentId)
                     .build();
-            final CheckedSupplier<Integer> formSupplier = () -> getAppointmentService().updateAppointment(appointmentDTO, userDTO);
+            final CheckedSupplier<Integer> formSupplier =
+                    () -> serviceResolver().getAppointmentService().updateAppointment(appointmentDTO, userDTO);
             return overlapConfirmationHandler(appointmentId, userDTO.getId(), appointmentDTO.getTime(), formSupplier)
                     .orElse(null);
         }

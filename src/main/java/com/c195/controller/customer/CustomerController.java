@@ -4,11 +4,6 @@ import com.c195.common.CheckedSupplier;
 import com.c195.common.customer.AddressDTO;
 import com.c195.common.customer.CustomerDTO;
 import com.c195.controller.Controller;
-import com.c195.dao.AddressDAO;
-import com.c195.dao.CityDAO;
-import com.c195.dao.CountryDAO;
-import com.c195.dao.CustomerDAO;
-import com.c195.service.AddressService;
 import com.c195.service.CustomerService;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -38,14 +33,19 @@ public class CustomerController extends Controller implements Initializable {
 
     @FXML
     private TableView<CustomerDTO> customerTable;
+
     @FXML
     private TableColumn<CustomerDTO, String> idColumn;
+
     @FXML
     private TableColumn<CustomerDTO, String> nameColumn;
+
     @FXML
     private TableColumn<CustomerDTO, String> addressColumn;
+
     @FXML
     private TableColumn<CustomerDTO, String> phoneColumn;
+
     @FXML
     private TableColumn<CustomerDTO, String> statusColumn;
 
@@ -54,15 +54,8 @@ public class CustomerController extends Controller implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         super.initialize(url, resourceBundle);
-        getDatabaseConnection()
-                .ifPresent(connection -> {
-                    final AddressDAO addressDAO = AddressDAO.getInstance(connection);
-                    final CityDAO cityDAO = CityDAO.getInstance(connection);
-                    final CountryDAO countryDAO = CountryDAO.getInstance(connection);
-                    final AddressService addressService = AddressService.getInstance(addressDAO, cityDAO, countryDAO, getClock());
-                    customerService = CustomerService.getInstance(CustomerDAO.getInstance(connection), addressService, getClock());
-                    createCustomerTable();
-                });
+        this.customerService = serviceResolver().getCustomerService();
+        createCustomerTable();
     }
 
     @FXML
@@ -93,7 +86,7 @@ public class CustomerController extends Controller implements Initializable {
         Optional.ofNullable(customerTable.getSelectionModel().getSelectedItem())
                 .map(CustomerDTO::getId)
                 .map(this::customerDeleteSupplier)
-                .ifPresent(this::confirmationHandler);
+                .ifPresent(Controller::confirmationHandler);
     }
 
     private void createCustomerTable() {

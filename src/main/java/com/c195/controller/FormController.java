@@ -1,8 +1,7 @@
 package com.c195.controller;
 
 import com.c195.common.CheckedSupplier;
-import com.c195.dao.UserDAO;
-import com.c195.service.UserService;
+import com.c195.service.ServiceResolver;
 import com.c195.util.form.InputForm;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -23,17 +22,9 @@ public class FormController<V extends TextInputControl> extends Controller imple
     @FXML
     private Label outputLabel;
 
-    private UserService userService;
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         super.initialize(url, resourceBundle);
-        getDatabaseConnection()
-                .ifPresent(connection -> userService = UserService.getInstance(UserDAO.getInstance(connection)));
-    }
-
-    public UserService getUserService() {
-        return userService;
     }
 
     public void setDefaultOutput(String outputText) {
@@ -55,7 +46,8 @@ public class FormController<V extends TextInputControl> extends Controller imple
     protected <T> Optional<T> formSubmitHandler(InputForm<V> inputForm, CheckedSupplier<T> formSupplier) {
         final Map<String, V> invalidFields = inputForm.getInvalidFields();
         if (!inputForm.getInvalidFields().isEmpty()) {
-            setRedOutput(getMessagingService().getRequiredFields() + ": " + String.join(", ", invalidFields.keySet()));
+            setRedOutput(ServiceResolver.getMessagingService().getRequiredFields() +
+                    ": " + String.join(", ", invalidFields.keySet()));
             return Optional.empty();
         } else {
             return serviceRequestHandler(formSupplier);

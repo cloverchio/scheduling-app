@@ -2,9 +2,6 @@ package com.c195.controller;
 
 import com.c195.common.UserDTO;
 import com.c195.common.appointment.AppointmentDTO;
-import com.c195.dao.AppointmentDAO;
-import com.c195.dao.UserDAO;
-import com.c195.service.AppointmentService;
 import com.c195.service.UserService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -30,18 +27,12 @@ import java.util.stream.Collectors;
 public class MainController extends Controller implements Initializable {
 
     private UserService userService;
-    private AppointmentService appointmentService;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         super.initialize(url, resourceBundle);
-        // initializing multiple service layer classes using lambda expressions
-        getDatabaseConnection()
-                .ifPresent(connection -> {
-                    userService = UserService.getInstance(UserDAO.getInstance(connection));
-                    appointmentService = AppointmentService.getInstance(AppointmentDAO.getInstance(connection), getClock());
-                    getUpcomingAppointmentReminder();
-                });
+        this.userService = serviceResolver().getUserService();
+        getUpcomingAppointmentReminder();
     }
 
     @FXML
@@ -72,11 +63,12 @@ public class MainController extends Controller implements Initializable {
     }
 
     private void showAppointmentReminder(int userId) {
-        // passing the appointment service reminder functionality as a supplier to the database action method
+        // passing the appointment service reminder functionality as a supplier to the handler
         // checking if the returned appointments are empty
         // if not we will map appointments to their corresponding title
         // and prompt an alert to the user
-        serviceRequestHandler(() -> appointmentService.getReminderAppointmentsByUser(userId))
+        serviceRequestHandler(() -> serviceResolver().getAppointmentService()
+                .getReminderAppointmentsByUser(userId))
                 .filter(appointmentDTOS -> !appointmentDTOS.isEmpty())
                 .map(MainController::toAppointmentTitles)
                 .map(MainController::appointmentReminderAlert)
