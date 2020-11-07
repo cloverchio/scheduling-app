@@ -1,7 +1,9 @@
 package com.c195.controller;
 
 import com.c195.common.CheckedSupplier;
+import com.c195.common.UserDTO;
 import com.c195.util.form.InputForm;
+import com.c195.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -24,8 +26,14 @@ import java.util.ResourceBundle;
  * <p>
  * G. Write two or more lambda expressions to make your program more efficient, justifying
  * the use of each lambda expression with an in-line comment.
+ * <p>
+ * J. Provide the ability to track user activity by recording timestamps for user log-ins
+ * in a .txt file. Each new record should be appended to the log file,
+ * if the file already exists.
  */
 public class LoginController extends FormController<TextField> {
+
+    private static final Logger logger = Logger.getLogger(LoginController.class);
 
     @FXML
     private Label usernameLabel;
@@ -60,10 +68,18 @@ public class LoginController extends FormController<TextField> {
 
     private void handleLoginStatus(ActionEvent actionEvent, boolean validLogin) {
         if (validLogin) {
+            logger.log(String.format("successful login for user: %s", getUserId()));
             eventViewHandler(actionEvent, getClass(), "../view/main.fxml");
         } else {
             setRedOutput(getMessagingService().getInvalidLogin());
         }
+    }
+
+    private String getUserId() {
+        return getUserService().getCurrentUser()
+                .map(UserDTO::getId)
+                .map(String::valueOf)
+                .orElse(null);
     }
 
     private InputForm<TextField> createInputForm() {
