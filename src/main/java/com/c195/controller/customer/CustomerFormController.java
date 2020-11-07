@@ -102,7 +102,8 @@ public class CustomerFormController extends FormController<TextField> {
         active.setSelected(customerDTO.isActive());
     }
 
-    private InputForm<TextField> createInputForm() {
+    @Override
+    protected InputForm<TextField> createInputForm() {
         final Map<String, TextField> fields = new HashMap<String, TextField>() {
             {
                 put(nameLabel.getText(), nameField);

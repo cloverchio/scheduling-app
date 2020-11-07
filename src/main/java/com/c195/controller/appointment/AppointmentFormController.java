@@ -105,14 +105,15 @@ public class AppointmentFormController extends FormController<TextInputControl> 
     protected Optional<AppointmentDTO.Builder> getAppointmentDTOBuilder() {
         final Optional<CustomerDTO> customer = getCustomerDTO();
         final Optional<AppointmentTime> time = getAppointmentTime();
-        if (customer.isPresent() && time.isPresent()) {
+        final Optional<AppointmentType> type = getAppointmentType();
+        if (customer.isPresent() && time.isPresent() && type.isPresent()) {
             return Optional.of(new AppointmentDTO.Builder()
                     .withTitle(titleField.getText())
                     .withDescription(descriptionArea.getText())
                     .withUrl(urlField.getText())
                     .withContact(contactField.getText())
                     .withLocation(AppointmentLocation.fromName(locationComboBox.getValue()))
-                    .withType(AppointmentType.fromName(typeComboBox.getValue()))
+                    .withType(type.get())
                     .withTime(time.get())
                     .withCustomerDTO(customer.get()));
         }
@@ -135,6 +136,20 @@ public class AppointmentFormController extends FormController<TextInputControl> 
         setEndDateTime(time.getLocationEnd());
     }
 
+    @Override
+    protected InputForm<TextInputControl> createInputForm() {
+        final Map<String, TextInputControl> fields = new HashMap<String, TextInputControl>() {
+            {
+                put(titleLabel.getText(), titleField);
+                put(descriptionLabel.getText(), descriptionArea);
+                put(urlLabel.getText(), urlField);
+                put(customerIdLabel.getText(), customerIdField);
+                put(contactLabel.getText(), contactField);
+            }
+        };
+        return new InputForm<>(fields);
+    }
+
     private void setStartDateTime(ZonedDateTime locationStart) {
         startDatePicker.setValue(locationStart.toLocalDate());
         startTimeField.setText(locationStart.toLocalTime().toString());
@@ -143,6 +158,16 @@ public class AppointmentFormController extends FormController<TextInputControl> 
     private void setEndDateTime(ZonedDateTime locationEnd) {
         endDatePicker.setValue(locationEnd.toLocalDate());
         endTimeField.setText(locationEnd.toLocalTime().toString());
+    }
+
+    private Optional<AppointmentType> getAppointmentType() {
+        try {
+            return Optional.of(AppointmentType.fromName(typeComboBox.getValue()));
+        } catch (AppointmentException e) {
+            setRedOutput(e.getMessage());
+            e.printStackTrace();
+        }
+        return Optional.empty();
     }
 
     private Optional<AppointmentTime> getAppointmentTime() {
@@ -173,19 +198,6 @@ public class AppointmentFormController extends FormController<TextInputControl> 
             e.printStackTrace();
         }
         return Optional.empty();
-    }
-
-    private InputForm<TextInputControl> createInputForm() {
-        final Map<String, TextInputControl> fields = new HashMap<String, TextInputControl>() {
-            {
-                put(titleLabel.getText(), titleField);
-                put(descriptionLabel.getText(), descriptionArea);
-                put(urlLabel.getText(), urlField);
-                put(customerIdLabel.getText(), customerIdField);
-                put(contactLabel.getText(), contactField);
-            }
-        };
-        return new InputForm<>(fields);
     }
 
     private static ObservableList<String> getAppointmentTypes() {

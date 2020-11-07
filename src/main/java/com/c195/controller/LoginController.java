@@ -96,7 +96,8 @@ public class LoginController extends FormController<TextField> {
                 .orElse(null);
     }
 
-    private InputForm<TextField> createInputForm() {
+    @Override
+    protected InputForm<TextField> createInputForm() {
         final Map<String, TextField> fields = new HashMap<String, TextField>() {
             {
                 put(usernameLabel.getText(), usernameField);

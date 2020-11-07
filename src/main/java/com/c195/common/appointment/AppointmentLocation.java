@@ -24,10 +24,13 @@ public enum AppointmentLocation {
         return zoneId;
     }
 
-    public static AppointmentLocation fromName(String name) {
-        return Arrays.stream(AppointmentLocation.values())
-                .filter(location -> location.getName().equals(name))
-                .findFirst()
-                .orElseThrow(() -> new AppointmentException("Appointment location not found for " + name));
+    public static AppointmentLocation fromName(String name) throws AppointmentException {
+        if (name != null) {
+            return Arrays.stream(AppointmentLocation.values())
+                    .filter(location -> location.getName().equals(name))
+                    .findFirst()
+                    .orElseThrow(() -> new AppointmentException("Appointment location not found for " + name));
+        }
+        throw new AppointmentException("Appointment location is required");
     }
 }

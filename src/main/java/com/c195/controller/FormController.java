@@ -17,7 +17,7 @@ import java.util.ResourceBundle;
 /**
  * Functionality specific to forms and submission.
  */
-public class FormController<V extends TextInputControl> extends Controller implements Initializable {
+public abstract class FormController<V extends TextInputControl> extends Controller implements Initializable {
 
     @FXML
     private Label outputLabel;
@@ -53,4 +53,6 @@ public class FormController<V extends TextInputControl> extends Controller imple
             return serviceRequestHandler(formSupplier);
         }
     }
+
+    protected abstract InputForm<V> createInputForm();
 }
