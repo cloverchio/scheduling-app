@@ -63,7 +63,7 @@ public class ReportService {
     }
 
     /**
-     * Retrieves schedule by consultant data.
+     * Retrieves schedule by consultant. (Assuming consultant is contact?)
      *
      * @return a {@link ReportAggregationDTO} containing appointments grouped by the contact.
      * @throws DAOException if there are issues retrieving appointments from the db.

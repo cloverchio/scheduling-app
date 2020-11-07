@@ -22,10 +22,9 @@ public final class MysqlConfig {
     }
 
     private void loadProperties() throws DAOConfigException {
-        final InputStream inputStream = this.getClass()
+        try (InputStream inputStream = this.getClass()
                 .getClassLoader()
-                .getResourceAsStream("mysql.properties");
-        try {
+                .getResourceAsStream("mysql.properties")) {
             mysqlProperties.load(inputStream);
         } catch (IOException e) {
             throw new DAOConfigException("there was an issue loading db properties", e);

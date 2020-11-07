@@ -6,6 +6,7 @@ import com.c195.model.Address;
 import com.c195.model.City;
 import com.c195.model.Country;
 
+import java.time.Clock;
 import java.util.Optional;
 
 public class AddressService {
@@ -14,16 +15,24 @@ public class AddressService {
     private final AddressDAO addressDAO;
     private final CityDAO cityDAO;
     private final CountryDAO countryDAO;
+    private final Clock clock;
 
-    private AddressService(AddressDAO addressDAO, CityDAO cityDAO, CountryDAO countryDAO) {
+    private AddressService(AddressDAO addressDAO,
+                           CityDAO cityDAO,
+                           CountryDAO countryDAO,
+                           Clock clock) {
         this.addressDAO = addressDAO;
         this.cityDAO = cityDAO;
         this.countryDAO = countryDAO;
+        this.clock = clock;
     }
 
-    public static AddressService getInstance(AddressDAO addressDAO, CityDAO cityDAO, CountryDAO countryDAO) {
+    public static AddressService getInstance(AddressDAO addressDAO,
+                                             CityDAO cityDAO,
+                                             CountryDAO countryDAO,
+                                             Clock clock) {
         if (serviceInstance == null) {
-            serviceInstance = new AddressService(addressDAO, cityDAO, countryDAO);
+            serviceInstance = new AddressService(addressDAO, cityDAO, countryDAO, clock);
         }
         return serviceInstance;
     }
@@ -66,7 +75,7 @@ public class AddressService {
      */
     public Integer saveAddress(AddressDTO addressDTO, String currentUser) throws DAOException {
         final Address address = toAddress(addressDTO);
-        address.setMetadata(MetadataDAO.getSaveMetadata(currentUser));
+        address.setMetadata(MetadataDAO.getSaveMetadata(currentUser, clock.instant()));
         setCity(address, currentUser);
         addressDAO.saveAddress(address);
         return address.getId();
@@ -86,7 +95,7 @@ public class AddressService {
      */
     public Integer updateAddress(AddressDTO addressDTO, String currentUser) throws DAOException {
         final Address address = toAddress(addressDTO);
-        address.setMetadata(MetadataDAO.getUpdateMetadata(currentUser));
+        address.setMetadata(MetadataDAO.getUpdateMetadata(currentUser, clock.instant()));
         setCity(address, currentUser);
         addressDAO.updateAddress(address);
         return address.getId();
@@ -99,7 +108,7 @@ public class AddressService {
             address.setCity(existingCity.get());
         } else {
             setCountry(city, currentUser);
-            city.setMetadata(MetadataDAO.getSaveMetadata(currentUser));
+            city.setMetadata(MetadataDAO.getSaveMetadata(currentUser, clock.instant()));
             cityDAO.saveCity(city);
         }
     }
@@ -110,7 +119,7 @@ public class AddressService {
             city.setCountry(existingCountry.get());
         } else {
             final Country country = city.getCountry();
-            country.setMetadata(MetadataDAO.getSaveMetadata(currentUser));
+            country.setMetadata(MetadataDAO.getSaveMetadata(currentUser, clock.instant()));
             countryDAO.saveCountry(city.getCountry());
         }
     }

@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
+import java.time.Clock;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Function;
@@ -31,14 +32,20 @@ public class Controller implements Initializable {
     private static final String TITLE = "C195 Scheduling App";
 
     private MessagingService messagingService;
+    private Clock clock;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         this.messagingService = MessagingService.getInstance();
+        this.clock = Clock.systemUTC();
     }
 
     protected MessagingService getMessagingService() {
         return messagingService;
+    }
+
+    protected Clock getClock() {
+        return clock;
     }
 
     /**

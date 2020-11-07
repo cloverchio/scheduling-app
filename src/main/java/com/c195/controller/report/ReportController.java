@@ -8,8 +8,8 @@ import com.c195.controller.Controller;
 import com.c195.dao.AppointmentDAO;
 import com.c195.service.AppointmentService;
 import com.c195.service.ReportService;
-import com.c195.util.AppointmentReportTree;
-import com.c195.util.CountReportTree;
+import com.c195.util.report.AppointmentReportTree;
+import com.c195.util.report.CountReportTree;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -55,7 +55,7 @@ public class ReportController extends Controller implements Initializable {
         getDatabaseConnection()
                 .ifPresent(connection -> {
                     final AppointmentService appointmentService =
-                            AppointmentService.getInstance(AppointmentDAO.getInstance(connection));
+                            AppointmentService.getInstance(AppointmentDAO.getInstance(connection), getClock());
                     reportService = ReportService.getInstance(appointmentService);
                     reportTypeComboBox.setOnAction(actionEvent -> setReportTreeByTypeSelection());
                 });

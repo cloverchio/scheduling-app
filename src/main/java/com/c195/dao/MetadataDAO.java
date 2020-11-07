@@ -21,17 +21,17 @@ public final class MetadataDAO {
         }
     }
 
-    public static Metadata getSaveMetadata(String currentUser) {
+    public static Metadata getSaveMetadata(String currentUser, Instant createdDate) {
         return new Metadata.Builder()
-                .withCreatedDate(Instant.now())
+                .withCreatedDate(createdDate)
                 .withCreatedBy(currentUser)
                 .withUpdatedBy(currentUser)
                 .build();
     }
 
-    public static Metadata getUpdateMetadata(String currentUser) {
+    public static Metadata getUpdateMetadata(String currentUser, Instant updatedDate) {
         return new Metadata.Builder()
-                .withUpdatedDate(Instant.now())
+                .withUpdatedDate(updatedDate)
                 .withUpdatedBy(currentUser)
                 .build();
     }

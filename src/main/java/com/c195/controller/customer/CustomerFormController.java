@@ -9,7 +9,7 @@ import com.c195.dao.CountryDAO;
 import com.c195.dao.CustomerDAO;
 import com.c195.service.AddressService;
 import com.c195.service.CustomerService;
-import com.c195.util.InputForm;
+import com.c195.util.form.InputForm;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -65,8 +65,9 @@ public class CustomerFormController extends FormController<TextField> {
                     final AddressDAO addressDAO = AddressDAO.getInstance(connection);
                     final CityDAO cityDAO = CityDAO.getInstance(connection);
                     final CountryDAO countryDAO = CountryDAO.getInstance(connection);
-                    final AddressService addressService = AddressService.getInstance(addressDAO, cityDAO, countryDAO);
-                    customerService = CustomerService.getInstance(CustomerDAO.getInstance(connection), addressService);
+                    final AddressService addressService =
+                            AddressService.getInstance(addressDAO, cityDAO, countryDAO, getClock());
+                    customerService = CustomerService.getInstance(CustomerDAO.getInstance(connection), addressService, getClock());
                 });
     }
 

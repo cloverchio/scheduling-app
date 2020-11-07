@@ -8,10 +8,7 @@ import com.c195.dao.DAOException;
 import com.c195.dao.MetadataDAO;
 import com.c195.model.Appointment;
 
-import java.time.Instant;
-import java.time.Month;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,14 +19,16 @@ public class AppointmentService {
 
     private static AppointmentService serviceInstance;
     private final AppointmentDAO appointmentDAO;
+    private final Clock clock;
 
-    private AppointmentService(AppointmentDAO appointmentDAO) {
+    private AppointmentService(AppointmentDAO appointmentDAO, Clock clock) {
         this.appointmentDAO = appointmentDAO;
+        this.clock = clock;
     }
 
-    public static AppointmentService getInstance(AppointmentDAO appointmentDAO) {
+    public static AppointmentService getInstance(AppointmentDAO appointmentDAO, Clock clock) {
         if (serviceInstance == null) {
-            serviceInstance = new AppointmentService(appointmentDAO);
+            serviceInstance = new AppointmentService(appointmentDAO, clock);
         }
         return serviceInstance;
     }
@@ -43,7 +42,7 @@ public class AppointmentService {
      * @throws AppointmentException if there are issues with the appointment time.
      */
     public List<AppointmentDTO> getUpcomingAppointmentsByUserWeek(int userId) throws DAOException, AppointmentException {
-        final Instant start = Instant.now();
+        final Instant start = clock.instant();
         final int dayOfTheWeek = start.atZone(zoneId).getDayOfWeek().getValue();
         return getAppointmentsByUserBetween(userId, start, start.plus(7 - dayOfTheWeek, ChronoUnit.DAYS));
     }
@@ -57,7 +56,7 @@ public class AppointmentService {
      * @throws AppointmentException if there are issues with the appointment time.
      */
     public List<AppointmentDTO> getUpcomingAppointmentsByUserMonth(int userId) throws DAOException, AppointmentException {
-        final Instant start = Instant.now();
+        final Instant start = clock.instant();
         final ZonedDateTime zonedStart = start.atZone(zoneId);
         final int dayOfTheMonth = zonedStart.getDayOfMonth();
         final int lengthOfMonth = Month.from(zonedStart).length(zonedStart.toLocalDate().isLeapYear());
@@ -73,7 +72,7 @@ public class AppointmentService {
      * @throws AppointmentException if there are issues with the appointment time.
      */
     public List<AppointmentDTO> getUpcomingAppointmentsByUser(int userId) throws DAOException, AppointmentException {
-        return appointmentDAO.getAppointmentsByUserAfter(userId, Instant.now())
+        return appointmentDAO.getAppointmentsByUserAfter(userId, clock.instant())
                 .stream()
                 .map(AppointmentService::toAppointmentDTO)
                 .collect(Collectors.toList());
@@ -89,7 +88,7 @@ public class AppointmentService {
      * @throws AppointmentException if there are issues with the appointment time.
      */
     public List<AppointmentDTO> getReminderAppointmentsByUser(int userId) throws DAOException, AppointmentException {
-        final Instant start = Instant.now();
+        final Instant start = clock.instant();
         return getAppointmentsByUserBetween(userId, start, start.plus(15L, ChronoUnit.MINUTES));
     }
 
@@ -134,7 +133,7 @@ public class AppointmentService {
     public Integer saveAppointment(AppointmentDTO appointmentDTO, UserDTO currentUser) throws DAOException {
         final Appointment appointment = toAppointment(appointmentDTO);
         appointment.setUser(UserService.toUser(currentUser));
-        appointment.setMetadata(MetadataDAO.getSaveMetadata(currentUser.getUsername()));
+        appointment.setMetadata(MetadataDAO.getSaveMetadata(currentUser.getUsername(), clock.instant()));
         appointmentDAO.saveAppointment(appointment);
         return appointment.getId();
     }
@@ -150,7 +149,7 @@ public class AppointmentService {
     public Integer updateAppointment(AppointmentDTO appointmentDTO, UserDTO currentUser) throws DAOException {
         final Appointment appointment = toAppointment(appointmentDTO);
         appointment.setUser(UserService.toUser(currentUser));
-        appointment.setMetadata(MetadataDAO.getUpdateMetadata(currentUser.getUsername()));
+        appointment.setMetadata(MetadataDAO.getUpdateMetadata(currentUser.getUsername(), clock.instant()));
         appointmentDAO.updateAppointment(appointment);
         return appointment.getId();
     }

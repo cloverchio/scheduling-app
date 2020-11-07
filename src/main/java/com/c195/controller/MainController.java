@@ -39,7 +39,7 @@ public class MainController extends Controller implements Initializable {
         getDatabaseConnection()
                 .ifPresent(connection -> {
                     userService = UserService.getInstance(UserDAO.getInstance(connection));
-                    appointmentService = AppointmentService.getInstance(AppointmentDAO.getInstance(connection));
+                    appointmentService = AppointmentService.getInstance(AppointmentDAO.getInstance(connection), getClock());
                     getUpcomingAppointmentReminder();
                 });
     }

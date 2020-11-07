@@ -1,4 +1,4 @@
-package com.c195.util;
+package com.c195.util.form;
 
 import javafx.scene.control.TextInputControl;
 

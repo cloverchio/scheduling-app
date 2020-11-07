@@ -59,8 +59,8 @@ public class CustomerController extends Controller implements Initializable {
                     final AddressDAO addressDAO = AddressDAO.getInstance(connection);
                     final CityDAO cityDAO = CityDAO.getInstance(connection);
                     final CountryDAO countryDAO = CountryDAO.getInstance(connection);
-                    final AddressService addressService = AddressService.getInstance(addressDAO, cityDAO, countryDAO);
-                    customerService = CustomerService.getInstance(CustomerDAO.getInstance(connection), addressService);
+                    final AddressService addressService = AddressService.getInstance(addressDAO, cityDAO, countryDAO, getClock());
+                    customerService = CustomerService.getInstance(CustomerDAO.getInstance(connection), addressService, getClock());
                     createCustomerTable();
                 });
     }

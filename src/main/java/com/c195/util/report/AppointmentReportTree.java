@@ -1,4 +1,4 @@
-package com.c195.util;
+package com.c195.util.report;
 
 import com.c195.common.appointment.AppointmentDTO;
 import com.c195.common.report.ReportAggregationDTO;

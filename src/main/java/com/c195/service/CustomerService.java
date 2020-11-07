@@ -10,6 +10,7 @@ import com.c195.dao.MetadataDAO;
 import com.c195.model.Address;
 import com.c195.model.Customer;
 
+import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,15 +20,21 @@ public class CustomerService {
     private static CustomerService serviceInstance;
     private final CustomerDAO customerDAO;
     private final AddressService addressService;
+    private final Clock clock;
 
-    private CustomerService(CustomerDAO customerDAO, AddressService addressService) {
+    private CustomerService(CustomerDAO customerDAO,
+                            AddressService addressService,
+                            Clock clock) {
         this.customerDAO = customerDAO;
         this.addressService = addressService;
+        this.clock = clock;
     }
 
-    public static CustomerService getInstance(CustomerDAO customerDAO, AddressService addressService) {
+    public static CustomerService getInstance(CustomerDAO customerDAO,
+                                              AddressService addressService,
+                                              Clock clock) {
         if (serviceInstance == null) {
-            serviceInstance = new CustomerService(customerDAO, addressService);
+            serviceInstance = new CustomerService(customerDAO, addressService, clock);
         }
         return serviceInstance;
     }
@@ -71,7 +78,7 @@ public class CustomerService {
         final Customer customer = toCustomer(customerDTO);
         final String currentUsername = currentUser.getUsername();
         setAddress(customer, customerDTO.getAddressDTO(), currentUsername);
-        customer.setMetadata(MetadataDAO.getSaveMetadata(currentUsername));
+        customer.setMetadata(MetadataDAO.getSaveMetadata(currentUsername, clock.instant()));
         customerDAO.saveCustomer(customer);
         return customer.getId();
     }
@@ -88,7 +95,7 @@ public class CustomerService {
         final String currentUsername = currentUser.getUsername();
         addressService.updateAddress(customerDTO.getAddressDTO(), currentUsername);
         final Customer customer = toCustomer(customerDTO);
-        customer.setMetadata(MetadataDAO.getUpdateMetadata(currentUsername));
+        customer.setMetadata(MetadataDAO.getUpdateMetadata(currentUsername, clock.instant()));
         customerDAO.updateCustomer(customer);
         return customer.getId();
     }

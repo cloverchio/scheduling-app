@@ -1,7 +1,7 @@
 package com.c195.controller;
 
 import com.c195.common.CheckedSupplier;
-import com.c195.util.InputForm;
+import com.c195.util.form.InputForm;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;

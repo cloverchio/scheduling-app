@@ -3,7 +3,7 @@ package com.c195.controller;
 import com.c195.common.CheckedSupplier;
 import com.c195.dao.UserDAO;
 import com.c195.service.UserService;
-import com.c195.util.InputForm;
+import com.c195.util.form.InputForm;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;

@@ -9,7 +9,7 @@ import com.c195.dao.*;
 import com.c195.service.AddressService;
 import com.c195.service.AppointmentService;
 import com.c195.service.CustomerService;
-import com.c195.util.InputForm;
+import com.c195.util.form.InputForm;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -50,13 +50,9 @@ public class AppointmentFormController extends FormController<TextInputControl> 
     @FXML
     private DatePicker startDatePicker;
     @FXML
-    private Label startTimeLabel;
-    @FXML
     private TextField startTimeField;
     @FXML
     private DatePicker endDatePicker;
-    @FXML
-    private Label endTimeLabel;
     @FXML
     private TextField endTimeField;
 
@@ -75,9 +71,9 @@ public class AppointmentFormController extends FormController<TextInputControl> 
                     final AddressDAO addressDAO = AddressDAO.getInstance(connection);
                     final CityDAO cityDAO = CityDAO.getInstance(connection);
                     final CountryDAO countryDAO = CountryDAO.getInstance(connection);
-                    final AddressService addressService = AddressService.getInstance(addressDAO, cityDAO, countryDAO);
-                    customerService = CustomerService.getInstance(CustomerDAO.getInstance(connection), addressService);
-                    appointmentService = AppointmentService.getInstance(AppointmentDAO.getInstance(connection));
+                    final AddressService addressService = AddressService.getInstance(addressDAO, cityDAO, countryDAO, getClock());
+                    customerService = CustomerService.getInstance(CustomerDAO.getInstance(connection), addressService, getClock());
+                    appointmentService = AppointmentService.getInstance(AppointmentDAO.getInstance(connection), getClock());
                 });
     }
 

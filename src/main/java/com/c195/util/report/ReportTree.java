@@ -1,4 +1,4 @@
-package com.c195.util;
+package com.c195.util.report;
 
 import javafx.scene.control.TreeItem;
 
