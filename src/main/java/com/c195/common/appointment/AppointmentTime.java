@@ -46,7 +46,6 @@ public class AppointmentTime {
         this.userEnd = utcEnd.atZone(ZoneId.systemDefault());
         this.locationStart = utcStart.atZone(ZoneId.of(locationZoneId));
         this.locationEnd = utcEnd.atZone(ZoneId.of(locationZoneId));
-        validateDateTime(userStart, userEnd);
     }
 
     public ZonedDateTime getLocationStart() {

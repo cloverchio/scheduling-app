@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
@@ -27,7 +28,7 @@ public class Logger {
 
     public static Logger getLogger(Class<?> clazz) {
         try {
-            return new Logger(clazz, LoggingConfig.getInstance(), Clock.systemUTC());
+            return new Logger(clazz, LoggingConfig.getInstance(), Clock.systemDefaultZone());
         } catch (LoggingConfigException e) {
             throw new LoggingException("There was an issue generating logging", e);
         }
@@ -51,7 +52,7 @@ public class Logger {
     }
 
     private String toLogMessage(String content) {
-        final String timestamp = DateTimeFormatter.ISO_INSTANT.format(clock.instant());
+        final String timestamp = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(LocalDateTime.now(clock));
         return String.format("%s %s: %s", timestamp, clazz.getName(), content);
     }
 }

@@ -88,12 +88,12 @@ public class AppointmentFormController extends FormController<TextInputControl> 
     }
 
     protected  <T> Optional<T> overlapConfirmationHandler(List<String> overlappingAppointments,
-                                                       CheckedSupplier<T> confirmationSupplier) {
+                                                          CheckedSupplier<T> confirmationSupplier) {
         if (overlappingAppointments.isEmpty()) {
             return formSubmitHandler(inputForm, confirmationSupplier);
         } else {
-            final Alert overlapAlert = overlapAlert(String.join("\n", overlappingAppointments));
-            return formSubmitConfirmationHandler(inputForm, overlapAlert, confirmationSupplier);
+            overlapAlert(String.join("\n", overlappingAppointments)).showAndWait();
+            return Optional.empty();
         }
     }
 
@@ -137,8 +137,8 @@ public class AppointmentFormController extends FormController<TextInputControl> 
         typeComboBox.getSelectionModel().select(type.getName());
         locationComboBox.getSelectionModel().select(location.getName());
         customerIdField.setText(String.valueOf(customer.getId()));
-        setStartDateTime(time.getLocationStart());
-        setEndDateTime(time.getLocationEnd());
+        setStartDateTime(time.getUserStart());
+        setEndDateTime(time.getUserEnd());
     }
 
     @Override

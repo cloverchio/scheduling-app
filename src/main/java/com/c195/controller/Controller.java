@@ -117,6 +117,7 @@ public class Controller implements Initializable {
             viewHandler(actionEvent, clazz, viewPath);
         } catch (IOException e) {
             unexpectedAlert().showAndWait();
+            e.printStackTrace();
         }
     }
 

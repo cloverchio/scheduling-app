@@ -43,9 +43,9 @@ public class AppointmentService {
      * @throws AppointmentException if there are issues with the appointment time.
      */
     public List<AppointmentDTO> getUpcomingAppointmentsByUserWeek(int userId) throws DAOException, AppointmentException {
-        final Instant start = clock.instant();
+        final Instant start = clock.instant().truncatedTo(ChronoUnit.DAYS);
         final int dayOfTheWeek = start.atZone(zoneId).getDayOfWeek().getValue();
-        return getAppointmentsByUserBetween(userId, start, start.plus(7 - dayOfTheWeek, ChronoUnit.DAYS));
+        return getAppointmentsByUserBetween(userId, start, start.plus((7 - dayOfTheWeek) + 1, ChronoUnit.DAYS));
     }
 
     /**
@@ -58,11 +58,11 @@ public class AppointmentService {
      * @throws AppointmentException if there are issues with the appointment time.
      */
     public List<AppointmentDTO> getUpcomingAppointmentsByUserMonth(int userId) throws DAOException, AppointmentException {
-        final Instant start = clock.instant();
+        final Instant start = clock.instant().truncatedTo(ChronoUnit.DAYS);
         final ZonedDateTime zonedStart = start.atZone(zoneId);
         final int dayOfTheMonth = zonedStart.getDayOfMonth();
         final int lengthOfMonth = Month.from(zonedStart).length(zonedStart.toLocalDate().isLeapYear());
-        return getAppointmentsByUserBetween(userId, start, start.plus(lengthOfMonth - dayOfTheMonth, ChronoUnit.DAYS));
+        return getAppointmentsByUserBetween(userId, start, start.plus((lengthOfMonth - dayOfTheMonth) + 1, ChronoUnit.DAYS));
     }
 
     /**
