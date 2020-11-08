@@ -26,6 +26,7 @@ public class AppointmentTime {
                            LocalDate locationEndDate,
                            String locationEndTime,
                            String locationZoneId) throws AppointmentException {
+        validateDate(locationStartDate, locationEndDate);
         validateTimeFormat(locationStartTime, locationEndTime);
         this.locationStart = toLocationTime(locationStartDate, locationStartTime, locationZoneId);
         this.locationEnd = toLocationTime(locationEndDate, locationEndTime, locationZoneId);
@@ -33,7 +34,7 @@ public class AppointmentTime {
         this.userEnd = locationEnd.withZoneSameInstant(ZoneId.systemDefault());
         this.utcStart = locationStart.withZoneSameInstant(utcZoneId).toInstant();
         this.utcEnd = locationEnd.withZoneSameInstant(utcZoneId).toInstant();
-        validateTime(userStart, userEnd);
+        validateDateTime(userStart, userEnd);
     }
 
     public AppointmentTime(Instant utcStart,
@@ -45,7 +46,7 @@ public class AppointmentTime {
         this.userEnd = utcEnd.atZone(ZoneId.systemDefault());
         this.locationStart = utcStart.atZone(ZoneId.of(locationZoneId));
         this.locationEnd = utcEnd.atZone(ZoneId.of(locationZoneId));
-        validateTime(userStart, userEnd);
+        validateDateTime(userStart, userEnd);
     }
 
     public ZonedDateTime getLocationStart() {
@@ -88,6 +89,15 @@ public class AppointmentTime {
         return utcEnd;
     }
 
+    private static void validateDate(LocalDate startDate, LocalDate endDate) throws AppointmentException {
+        if (startDate == null) {
+            throw new AppointmentException("Appointment start date is required");
+        }
+        if (endDate == null) {
+            throw new AppointmentException("Appointment end date is required");
+        }
+    }
+
     private static void validateTimeFormat(String startTime, String endTime) throws AppointmentException {
         final Pattern pattern = Pattern.compile(TIME_PATTERN);
         final boolean validStart = pattern.matcher(startTime).matches();
@@ -100,7 +110,7 @@ public class AppointmentTime {
         }
     }
 
-    private static void validateTime(ZonedDateTime userStart, ZonedDateTime userEnd) throws AppointmentException {
+    private static void validateDateTime(ZonedDateTime userStart, ZonedDateTime userEnd) throws AppointmentException {
         if (userEnd.isBefore(userStart)) {
             throw new AppointmentException("Appointment end is before start");
         }

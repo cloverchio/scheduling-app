@@ -22,7 +22,7 @@ public final class MysqlConnection {
             Class.forName(mysqlConfig.getDriver());
             connection = DriverManager.getConnection(jdbcURL, mysqlConfig.getUser(), mysqlConfig.getPass());
         } catch (ClassNotFoundException | SQLException e) {
-            throw new DAOConfigException("there was an issue connecting to the db", e);
+            throw new DAOConfigException("There was an issue connecting to the db", e);
         }
     }
 
@@ -31,7 +31,7 @@ public final class MysqlConnection {
             try {
                 connection.close();
             } catch (SQLException e) {
-                throw new DAOConfigException("there was an issue closing the db connection", e);
+                throw new DAOConfigException("There was an issue closing the db connection", e);
             }
         }
     }

@@ -27,7 +27,7 @@ public class LoggingConfig {
                 .getResourceAsStream("logging.properties")) {
             loggingProperties.load(inputStream);
         } catch (IOException e) {
-            throw new LoggingConfigException("there was an issue loading logging properties", e);
+            throw new LoggingConfigException("There was an issue loading logging properties", e);
         }
     }
 

@@ -34,7 +34,8 @@ public class AppointmentService {
     }
 
     /**
-     * Gets a list of appointments that will occur within the week for a given user.
+     * Gets a list of appointments that will occur within the remaining portion
+     * of the week for a given user
      *
      * @param userId in which to retrieve weekly appointments for.
      * @return list of appointments within the week.
@@ -48,7 +49,8 @@ public class AppointmentService {
     }
 
     /**
-     * Gets a list of appointments that occur with the month for a given user.
+     * Gets a list of appointments that occur within the remaining portion
+     * of the month for a given user.
      *
      * @param userId in which to retrieve monthly appointments for.
      * @return list of appointments within the month.
@@ -112,7 +114,7 @@ public class AppointmentService {
     /**
      * Gets a list of all appointments.
      *
-     * @return a list of all (past and present) appointments
+     * @return a list of all (past and present) appointments.
      * @throws DAOException if there are issues retrieving appointments from the db.
      */
     public List<AppointmentDTO> getAllAppointments() throws DAOException {

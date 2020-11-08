@@ -37,12 +37,30 @@ public abstract class FormController<V extends TextInputControl> extends Control
         outputLabel.setText(outputText);
     }
 
+    /**
+     * Provides a reusable way to prompt a confirmation before content is saved.
+     *
+     * @param inputForm         the structure containing the input field mapping and validation.
+     * @param confirmationAlert the alert to be prompted.
+     * @param formSupplier      the service operation to be performed as a supplier.
+     * @param <T>               the return type expected from the service operation.
+     * @return optional value of what is expected from the service operation.
+     */
     protected <T> Optional<T> formSubmitConfirmationHandler(InputForm<V> inputForm,
                                                             Alert confirmationAlert,
                                                             CheckedSupplier<T> formSupplier) {
-        return confirmationHandler(confirmationAlert, formSupplier, confirmationSupplier -> formSubmitHandler(inputForm, formSupplier));
+        return confirmationHandler(confirmationAlert, formSupplier, confirmationSupplier ->
+                formSubmitHandler(inputForm, formSupplier));
     }
 
+    /**
+     * Provides a reusable way to validate input/text fields before the content is saved.
+     *
+     * @param inputForm    the structure containing the input field mapping and validation.
+     * @param formSupplier the service operation to be performed as a supplier.
+     * @param <T>          the return type expected from the service operation.
+     * @return optional value of what is expected from the service operation.
+     */
     protected <T> Optional<T> formSubmitHandler(InputForm<V> inputForm, CheckedSupplier<T> formSupplier) {
         final Map<String, V> invalidFields = inputForm.getInvalidFields();
         if (!inputForm.getInvalidFields().isEmpty()) {
@@ -54,5 +72,11 @@ public abstract class FormController<V extends TextInputControl> extends Control
         }
     }
 
+    /**
+     * Used to ensure that form based controllers
+     * define the appropriate structure used for validation.
+     *
+     * @return a {@link InputForm} used for field mapping and validation.
+     */
     protected abstract InputForm<V> createInputForm();
 }

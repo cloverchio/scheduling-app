@@ -74,7 +74,7 @@ public class CustomerDAO {
             }
             return Optional.empty();
         } catch (SQLException e) {
-            throw new DAOException("there was an issue retrieving a customer", e);
+            throw new DAOException("There was an issue retrieving a customer", e);
         }
     }
 
@@ -87,7 +87,7 @@ public class CustomerDAO {
             }
             return customers;
         } catch (SQLException e) {
-            throw new DAOException("there was an issue retrieving customers", e);
+            throw new DAOException("There was an issue retrieving customers", e);
         }
     }
 
@@ -105,7 +105,7 @@ public class CustomerDAO {
                 customer.setId(generatedKeys.getInt(1));
             }
         } catch (SQLException e) {
-            throw new DAOException("there was an issue saving a customer", e);
+            throw new DAOException("There was an issue saving a customer", e);
         }
     }
 
@@ -119,7 +119,7 @@ public class CustomerDAO {
             statement.setInt(6, customer.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new DAOException("there was an issue updating a customer", e);
+            throw new DAOException("There was an issue updating a customer", e);
         }
     }
 
@@ -128,7 +128,7 @@ public class CustomerDAO {
             statement.setInt(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new DAOException("there was an issue removing a customer", e);
+            throw new DAOException("There was an issue removing a customer", e);
         }
     }
 
@@ -142,7 +142,7 @@ public class CustomerDAO {
             customer.setMetadata(MetadataDAO.toMetadata(resultSet));
             return customer;
         } catch (SQLException e) {
-            throw new DAOException("there was an issue creating customer data", e);
+            throw new DAOException("There was an issue creating customer data", e);
         }
     }
 }

@@ -17,7 +17,7 @@ public final class MetadataDAO {
                     .withUpdatedBy(resultSet.getString("lastUpdateBy"))
                     .build();
         } catch (SQLException e) {
-            throw new DAOException("there was an issue creating metadata", e);
+            throw new DAOException("There was an issue creating metadata", e);
         }
     }
 

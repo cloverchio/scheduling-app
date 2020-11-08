@@ -40,7 +40,7 @@ public class UserDAO {
             }
             return Optional.empty();
         } catch (SQLException e) {
-            throw new DAOException("there was an issue retrieving a user", e);
+            throw new DAOException("There was an issue retrieving a user", e);
         }
     }
 
@@ -54,7 +54,7 @@ public class UserDAO {
             user.setMetadata(MetadataDAO.toMetadata(resultSet));
             return user;
         } catch (SQLException e) {
-            throw new DAOException("there was an issue creating user data", e);
+            throw new DAOException("There was an issue creating user data", e);
         }
     }
 }

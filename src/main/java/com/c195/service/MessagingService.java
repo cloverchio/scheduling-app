@@ -3,14 +3,13 @@ package com.c195.service;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
- * The message content is not utf-8 encoded when loaded directly from the resource bundle
+ * The locale message content is not utf-8 encoded when loaded directly from the resource bundle,
  * causing special characters to not be rendered correctly. This addresses that by encoding
- * all of the messages up front and caching the encoded versions in memory.
+ * all of the locale messages up front and loading the newly encoded versions into memory.
  */
 public class MessagingService {
 

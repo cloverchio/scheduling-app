@@ -33,7 +33,7 @@ public class Controller implements Initializable {
     private static final String TITLE = "C195 Scheduling App";
 
     private Clock clock;
-    private ServiceResolver serviceResolver;
+    private static ServiceResolver serviceResolver;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -42,7 +42,8 @@ public class Controller implements Initializable {
 
     /**
      * Provides a service resolver instance populated with a database connection
-     * and clock. Used to more conveniently access different service instances.
+     * and clock. Used to more conveniently access the different service classes
+     * without having to initialize all of their dependencies.
      *
      * @return an instance of {@link ServiceResolver}
      */
@@ -74,8 +75,8 @@ public class Controller implements Initializable {
      * @return optional value of what is expected from the service operation.
      */
     protected static <T> Optional<T> confirmationHandler(Alert confirmationAlert,
-                                                  CheckedSupplier<T> confirmationSupplier,
-                                                  Function<CheckedSupplier<T>, Optional<T>> handler) {
+                                                         CheckedSupplier<T> confirmationSupplier,
+                                                         Function<CheckedSupplier<T>, Optional<T>> handler) {
         return confirmationAlert.showAndWait()
                 .filter(buttonType -> buttonType == ButtonType.OK)
                 .flatMap(buttonResponse -> handler.apply(confirmationSupplier));
@@ -83,9 +84,12 @@ public class Controller implements Initializable {
 
     /**
      * Since we will most likely want to prompt the same alert for any database/query specific issues
-     * that will occur across most of the app, this *should* allow for a convenient way to do so.
-     * Checks off the lambda usage requirements for the project as all callers of this function
-     * can provide the service action using the functional interface.
+     * that can occur throughout the app, this *should* allow for a more convenient
+     * and reusable way to do so.
+     * <p>
+     * Checks off the lambda usage requirements for the project as the callers of this function
+     * will provide the service layer functionality as a supplier
+     * (which uses a functional interface).
      *
      * @param checkedSupplier the service operation to be performed as a supplier.
      * @param <T>             the return type expected from the service operation.
@@ -96,14 +100,13 @@ public class Controller implements Initializable {
             return Optional.ofNullable(checkedSupplier.getWithIO());
         } catch (DAOException e) {
             databaseAlert().showAndWait();
-            e.printStackTrace();
         }
         return Optional.empty();
     }
 
     /**
-     * Wraps the view transitioning functionality. Which is expected to remain the same across
-     * all sections of the app. With the exception of maybe the main entry point {@link com.c195.App}.
+     * Wraps the view transitioning functionality, which is expected to be consistent across
+     * all sections of the app.
      *
      * @param actionEvent event that corresponds with the transition.
      * @param clazz       controller class.
@@ -114,7 +117,6 @@ public class Controller implements Initializable {
             viewHandler(actionEvent, clazz, viewPath);
         } catch (IOException e) {
             unexpectedAlert().showAndWait();
-            e.printStackTrace();
         }
     }
 
@@ -175,7 +177,6 @@ public class Controller implements Initializable {
             return Optional.ofNullable(MysqlConnection.getInstance(MysqlConfig.getInstance()));
         } catch (DAOConfigException e) {
             databaseAlert().showAndWait();
-            e.printStackTrace();
         }
         return Optional.empty();
     }

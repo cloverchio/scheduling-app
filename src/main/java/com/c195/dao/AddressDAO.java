@@ -55,7 +55,7 @@ public class AddressDAO {
             }
             return Optional.empty();
         } catch (SQLException e) {
-            throw new DAOException("there was an issue retrieving an address", e);
+            throw new DAOException("There was an issue retrieving an address", e);
         }
     }
 
@@ -75,7 +75,7 @@ public class AddressDAO {
                 address.setId(generatedKeys.getInt(1));
             }
         } catch (SQLException e) {
-            throw new DAOException("there was an issue saving an address", e);
+            throw new DAOException("There was an issue saving an address", e);
         }
     }
 
@@ -91,7 +91,7 @@ public class AddressDAO {
             statement.setInt(8, address.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new DAOException("there was an issue updating an address", e);
+            throw new DAOException("There was an issue updating an address", e);
         }
     }
 
@@ -107,7 +107,7 @@ public class AddressDAO {
             address.setMetadata(MetadataDAO.toMetadata(resultSet));
             return address;
         } catch (SQLException e) {
-            throw new DAOException("there was an issue creating address data", e);
+            throw new DAOException("There was an issue creating address data", e);
         }
     }
 }

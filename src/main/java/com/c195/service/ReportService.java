@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Just going to perform these aggregations in memory since the dataset will likely be small.
+ * Performing these aggregations in memory since the dataset will likely be small.
  */
 public class ReportService {
 

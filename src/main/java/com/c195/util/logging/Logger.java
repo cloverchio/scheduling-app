@@ -29,7 +29,7 @@ public class Logger {
         try {
             return new Logger(clazz, LoggingConfig.getInstance(), Clock.systemUTC());
         } catch (LoggingConfigException e) {
-            throw new LoggingException("there was an issue generating logging", e);
+            throw new LoggingException("There was an issue generating logging", e);
         }
     }
 

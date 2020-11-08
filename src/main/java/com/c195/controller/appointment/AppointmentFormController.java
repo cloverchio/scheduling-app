@@ -103,7 +103,6 @@ public class AppointmentFormController extends FormController<TextInputControl> 
                     .orElse(Collections.emptyList());
         } catch (AppointmentException e) {
             setRedOutput(e.getMessage());
-            e.printStackTrace();
         }
         return Collections.emptyList();
     }
@@ -171,7 +170,6 @@ public class AppointmentFormController extends FormController<TextInputControl> 
             return Optional.of(AppointmentType.fromName(typeComboBox.getValue()));
         } catch (AppointmentException e) {
             setRedOutput(e.getMessage());
-            e.printStackTrace();
         }
         return Optional.empty();
     }
@@ -181,7 +179,6 @@ public class AppointmentFormController extends FormController<TextInputControl> 
             return Optional.of(createAppointmentTime());
         } catch (AppointmentException e) {
             setRedOutput(e.getMessage());
-            e.printStackTrace();
         }
         return Optional.empty();
     }
@@ -201,7 +198,6 @@ public class AppointmentFormController extends FormController<TextInputControl> 
             return serviceRequestHandler(() -> serviceResolver().getCustomerService().getCustomerById(customerId));
         } catch (CustomerException | NumberFormatException e) {
             setRedOutput(e.getMessage());
-            e.printStackTrace();
         }
         return Optional.empty();
     }

@@ -44,7 +44,7 @@ public class CustomerService {
      *
      * @param id in which to retrieve the customer for.
      * @return the customer corresponding to the given id.
-     * @throws DAOException if there are issues retrieving the customer from the db.
+     * @throws DAOException      if there are issues retrieving the customer from the db.
      * @throws CustomerException if the customer cannot be found
      */
     public CustomerDTO getCustomerById(int id) throws DAOException, CustomerException {
@@ -104,7 +104,7 @@ public class CustomerService {
      * Deletes the customer.
      * <p>
      * Performs a cascading delete within the query itself so there's
-     * no need to invoke the address service beforehand.
+     * no need to perform address deletion beforehand.
      *
      * @param customerId corresponding to the customer to be deleted.
      * @throws DAOException if there are issues deleting the customer from the db.
@@ -114,9 +114,9 @@ public class CustomerService {
     }
 
     /**
-     * Performing the same existence check that {@link AddressService} is doing for its dependencies.
-     * Also to save the sanctity of my service classes (not allowing database classes outside of them) the
-     * original AddressDTO unfortunately needs to be passed here as well.
+     * Performing the same existence check that the {@link AddressService} is doing for its dependencies.
+     * Unfortunately inorder to save the sanctity of my service classes by not allowing the database models
+     * to be used outside of them, the original AddressDTO needs to be passed here as well.
      *
      * @param customer    customer information in which to save.
      * @param addressDTO  address information associated with the customer.

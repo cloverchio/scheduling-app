@@ -40,7 +40,7 @@ public class CountryDAO {
             }
             return Optional.empty();
         } catch (SQLException e) {
-            throw new DAOException("there was an issue retrieving a country", e);
+            throw new DAOException("There was an issue retrieving a country", e);
         }
     }
 
@@ -56,7 +56,7 @@ public class CountryDAO {
                 country.setId(generatedKeys.getInt(1));
             }
         } catch (SQLException e) {
-            throw new DAOException("there was an issue saving a country", e);
+            throw new DAOException("There was an issue saving a country", e);
         }
     }
 
@@ -68,7 +68,7 @@ public class CountryDAO {
             country.setMetadata(MetadataDAO.toMetadata(resultSet));
             return country;
         } catch (SQLException e) {
-            throw new DAOException("there was an issue creating country data", e);
+            throw new DAOException("There was an issue creating country data", e);
         }
     }
 }

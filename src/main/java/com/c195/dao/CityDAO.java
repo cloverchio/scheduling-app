@@ -42,7 +42,7 @@ public class CityDAO {
             }
             return Optional.empty();
         } catch (SQLException e) {
-            throw new DAOException("there was an issue retrieving a city", e);
+            throw new DAOException("There was an issue retrieving a city", e);
         }
     }
 
@@ -59,7 +59,7 @@ public class CityDAO {
                 city.setId(generatedKeys.getInt(1));
             }
         } catch (SQLException e) {
-            throw new DAOException("there was an issue saving a city", e);
+            throw new DAOException("There was an issue saving a city", e);
         }
     }
 
@@ -72,7 +72,7 @@ public class CityDAO {
             city.setMetadata(MetadataDAO.toMetadata(resultSet));
             return city;
         } catch (SQLException e) {
-            throw new DAOException("there was an issue creating city data", e);
+            throw new DAOException("There was an issue creating city data", e);
         }
     }
 }

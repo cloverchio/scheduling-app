@@ -104,7 +104,7 @@ public class AppointmentDAO {
             }
             return appointments;
         } catch (SQLException e) {
-            throw new DAOException("there was an issue retrieving appointments", e);
+            throw new DAOException("There was an issue retrieving appointments", e);
         }
     }
 
@@ -120,7 +120,7 @@ public class AppointmentDAO {
             }
             return appointments;
         } catch (SQLException e) {
-            throw new DAOException("there was an issue retrieving appointments", e);
+            throw new DAOException("There was an issue retrieving appointments", e);
         }
     }
 
@@ -135,7 +135,7 @@ public class AppointmentDAO {
             }
             return appointments;
         } catch (SQLException e) {
-            throw new DAOException("there was an issue retrieving appointments", e);
+            throw new DAOException("There was an issue retrieving appointments", e);
         }
     }
 
@@ -160,7 +160,7 @@ public class AppointmentDAO {
                 appointment.setId(generatedKeys.getInt(1));
             }
         } catch (SQLException e) {
-            throw new DAOException("there was an issue saving an appointment", e);
+            throw new DAOException("There was an issue saving an appointment", e);
         }
     }
 
@@ -181,7 +181,7 @@ public class AppointmentDAO {
             statement.setInt(13, appointment.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new DAOException("there was an issue updating an appointment", e);
+            throw new DAOException("There was an issue updating an appointment", e);
         }
     }
 
@@ -190,7 +190,7 @@ public class AppointmentDAO {
             statement.setInt(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new DAOException("there was an issue removing an appointment", e);
+            throw new DAOException("There was an issue removing an appointment", e);
         }
     }
 
@@ -211,7 +211,7 @@ public class AppointmentDAO {
             appointment.setMetadata(MetadataDAO.toMetadata(resultSet));
             return appointment;
         } catch (SQLException e) {
-            throw new DAOException("there was an issue creating user data", e);
+            throw new DAOException("There was an issue creating user data", e);
         }
     }
 }
