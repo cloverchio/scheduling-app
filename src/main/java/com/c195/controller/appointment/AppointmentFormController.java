@@ -99,7 +99,7 @@ public class AppointmentFormController extends FormController<TextInputControl> 
 
     protected List<AppointmentDTO> getOverlappingAppointments(int userId, Instant start, Instant end) {
         try {
-            return serviceRequestHandler(() -> appointmentService.getAppointmentsByUserBetween(userId, start, end))
+            return serviceRequestHandler(() -> appointmentService.getOverlappingAppointmentsByUser(userId, start, end))
                     .orElse(Collections.emptyList());
         } catch (AppointmentException e) {
             setRedOutput(e.getMessage());
@@ -137,8 +137,8 @@ public class AppointmentFormController extends FormController<TextInputControl> 
         typeComboBox.getSelectionModel().select(type.getName());
         locationComboBox.getSelectionModel().select(location.getName());
         customerIdField.setText(String.valueOf(customer.getId()));
-        setStartDateTime(time.getUserStart());
-        setEndDateTime(time.getUserEnd());
+        setStartDateTime(time.getLocationStart());
+        setEndDateTime(time.getLocationEnd());
     }
 
     @Override

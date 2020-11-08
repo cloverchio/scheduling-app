@@ -46,10 +46,10 @@ public class AppointmentReportTree extends ReportTree {
                 appointmentDTO.getLocation().getName() +
                 "\n" +
                 "Start: " +
-                appointmentDTO.getTime().getUserStartISO() +
+                appointmentDTO.getTime().getLocationStartISO() +
                 "\n" +
                 "End: " +
-                appointmentDTO.getTime().getUserEndISO() +
+                appointmentDTO.getTime().getLocationEndISO() +
                 "\n";
     }
 }

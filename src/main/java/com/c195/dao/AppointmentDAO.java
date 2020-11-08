@@ -39,6 +39,24 @@ public class AppointmentDAO {
             "WHERE ap.userId = ? " +
             "AND ap.start BETWEEN ? AND ?";
 
+    private static final String APPOINTMENTS_OVERLAP_BY_USER_SQL = "" +
+            "SELECT * " +
+            "FROM appointment ap " +
+            "JOIN customer cu " +
+            "ON ap.customerId = cu.customerId " +
+            "JOIN address a " +
+            "ON cu.addressId = a.addressId " +
+            "JOIN city ci " +
+            "ON a.cityId = ci.cityId " +
+            "JOIN country co " +
+            "on ci.countryId = co.countryId " +
+            "JOIN user us " +
+            "ON ap.userId = us.userId " +
+            "WHERE ap.userId = ? " +
+            "AND (ap.start BETWEEN ? AND ? " +
+            "OR ap.end BETWEEN ? AND ? " +
+            "OR ? BETWEEN ap.start AND ap.end)";
+
     private static final String APPOINTMENTS_BY_USER_AFTER_SQL = "" +
             "SELECT * " +
             "FROM appointment ap " +
@@ -113,6 +131,27 @@ public class AppointmentDAO {
             statement.setInt(1, userId);
             statement.setTimestamp(2, Timestamp.from(start));
             statement.setTimestamp(3, Timestamp.from(end));
+            final List<Appointment> appointments = new ArrayList<>();
+            final ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                appointments.add(toAppointment(resultSet));
+            }
+            return appointments;
+        } catch (SQLException e) {
+            throw new DAOException("There was an issue retrieving appointments", e);
+        }
+    }
+
+    public List<Appointment> getOverlappingAppointmentsByUser(int userId, Instant start, Instant end) throws DAOException {
+        try (final PreparedStatement statement = connection.prepareStatement(APPOINTMENTS_OVERLAP_BY_USER_SQL)) {
+            final Timestamp startTime = Timestamp.from(start);
+            final Timestamp endTime = Timestamp.from(end);
+            statement.setInt(1, userId);
+            statement.setTimestamp(2, startTime);
+            statement.setTimestamp(3, endTime);
+            statement.setTimestamp(4, startTime);
+            statement.setTimestamp(5, endTime);
+            statement.setTimestamp(6, startTime);
             final List<Appointment> appointments = new ArrayList<>();
             final ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {

@@ -104,8 +104,27 @@ public class AppointmentService {
      * @throws DAOException         if there are issues retrieving appointments from the db.
      * @throws AppointmentException if there are issues with the appointment time.
      */
-    public List<AppointmentDTO> getAppointmentsByUserBetween(int userId, Instant start, Instant end) throws DAOException, AppointmentException {
+    public List<AppointmentDTO> getAppointmentsByUserBetween(int userId, Instant start, Instant end)
+            throws DAOException, AppointmentException {
         return appointmentDAO.getAppointmentsByUserBetween(userId, start, end)
+                .stream()
+                .map(AppointmentService::toAppointmentDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gets a list of appointments that overlap with the given interval.
+     *
+     * @param userId in which to retrieve appointments for.
+     * @param start  the start of the interval.
+     * @param end    the end of the interval.
+     * @return a list of appointments that overlap with the interval
+     * @throws DAOException         if there are issues retrieving appointments from the db.
+     * @throws AppointmentException if there are issues with the appointment time.
+     */
+    public List<AppointmentDTO> getOverlappingAppointmentsByUser(int userId, Instant start, Instant end)
+            throws DAOException, AppointmentException {
+        return appointmentDAO.getOverlappingAppointmentsByUser(userId, start, end)
                 .stream()
                 .map(AppointmentService::toAppointmentDTO)
                 .collect(Collectors.toList());

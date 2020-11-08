@@ -17,7 +17,7 @@ public final class MysqlConnection {
 
     private static void connect(MysqlConfig mysqlConfig) throws DAOConfigException {
         final String jdbcURL =
-                String.format("%s:%s/%s", mysqlConfig.getURL(), mysqlConfig.getPort(), mysqlConfig.getName());
+                String.format("%s:%s/%s?autoReconnect=true", mysqlConfig.getURL(), mysqlConfig.getPort(), mysqlConfig.getName());
         try {
             Class.forName(mysqlConfig.getDriver());
             connection = DriverManager.getConnection(jdbcURL, mysqlConfig.getUser(), mysqlConfig.getPass());

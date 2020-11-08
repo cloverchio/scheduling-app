@@ -77,7 +77,7 @@ public class ReportService {
     }
 
     private static String toMonth(AppointmentTime appointmentTime) {
-        return appointmentTime.getUserStart()
+        return appointmentTime.getLocationStart()
                 .getMonth()
                 .name();
     }
