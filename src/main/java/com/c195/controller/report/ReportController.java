@@ -52,12 +52,19 @@ public class ReportController extends Controller implements Initializable {
         this.reportService = serviceResolver().getReportService();
 
         reportTypeComboBox.setItems(getReportTypes());
-        reportTypeComboBox.setOnAction(actionEvent -> setReportTreeByTypeSelection());
+        reportTypeComboBox.getSelectionModel().selectFirst();
+
+        updateReportTreeByTypeSelection();
+        setReportTreeByTypeSelection();
     }
 
     @FXML
     public void cancel(ActionEvent actionEvent) {
         eventViewHandler(actionEvent, getClass(), "../../view/main.fxml");
+    }
+
+    private void updateReportTreeByTypeSelection() {
+        reportTypeComboBox.setOnAction(actionEvent -> setReportTreeByTypeSelection());
     }
 
     private void setReportTreeByTypeSelection() {

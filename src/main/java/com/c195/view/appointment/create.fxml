@@ -26,9 +26,9 @@
    <DatePicker fx:id="startDatePicker" layoutX="130.0" layoutY="226.0" prefHeight="26.0" prefWidth="171.0" />
    <Label layoutX="45.0" layoutY="274.0" prefHeight="26.0" prefWidth="80.0" text="End Date" />
    <DatePicker fx:id="endDatePicker" layoutX="130.0" layoutY="274.0" prefHeight="26.0" prefWidth="171.0" />
-   <Label fx:id="startTimeLabel" layoutX="335.0" layoutY="225.0" prefHeight="26.0" prefWidth="88.0" text="Start Time" />
+   <Label layoutX="335.0" layoutY="225.0" prefHeight="26.0" prefWidth="88.0" text="Start Time" />
    <TextField fx:id="startTimeField" layoutX="430.0" layoutY="225.0" prefHeight="26.0" prefWidth="115.0" />
-   <Label fx:id="endTimeLabel" layoutX="335.0" layoutY="265.0" prefHeight="26.0" prefWidth="88.0" text="End" />
+   <Label layoutX="335.0" layoutY="265.0" prefHeight="26.0" prefWidth="88.0" text="End Time" />
    <TextField fx:id="endTimeField" layoutX="430.0" layoutY="265.0" prefHeight="26.0" prefWidth="115.0" />
     <Label fx:id="descriptionLabel" layoutX="45.0" layoutY="385.0" prefHeight="26.0" prefWidth="80.0" text="Description" />
     <TextArea fx:id="descriptionArea" layoutX="130.0" layoutY="330.0" prefHeight="135.0" prefWidth="412.0" />

@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 
 public class AppointmentFormController extends FormController<TextInputControl> {
 
+    private static final Tooltip timeToolTip = new Tooltip("Uses 24-hour time format (00:00 - 24:00)");
+
     @FXML
     private Label titleLabel;
 
@@ -78,6 +80,10 @@ public class AppointmentFormController extends FormController<TextInputControl> 
 
         typeComboBox.setItems(getAppointmentTypes());
         locationComboBox.setItems(getAppointmentLocations());
+
+        startTimeField.setTooltip(timeToolTip);
+        endTimeField.setTooltip(timeToolTip);
+
         inputForm = createInputForm();
     }
 
