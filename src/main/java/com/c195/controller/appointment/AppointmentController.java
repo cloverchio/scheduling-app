@@ -116,8 +116,8 @@ public class AppointmentController extends Controller implements Initializable {
         locationColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getLocation().getName()));
         customerNameColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getCustomerDTO().getName()));
         typeColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getType().getName()));
-        startColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTime().getLocationStartISO()));
-        endColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTime().getLocationEndISO()));
+        startColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTime().getUserStartISO()));
+        endColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTime().getUserEndISO()));
     }
 
     private void updateAppointmentsByViewSelection() {

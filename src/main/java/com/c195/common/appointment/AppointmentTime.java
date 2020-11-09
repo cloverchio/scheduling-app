@@ -12,7 +12,7 @@ public class AppointmentTime {
     private static final String TIME_PATTERN = "([01]?[0-9]|2[0-3]):[0-5][0-9]";
 
     private static final ZoneId utcZoneId = ZoneId.of("UTC");
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
     private final ZonedDateTime locationStart;
     private final ZonedDateTime locationEnd;
@@ -34,7 +34,7 @@ public class AppointmentTime {
         this.userEnd = locationEnd.withZoneSameInstant(ZoneId.systemDefault());
         this.utcStart = locationStart.withZoneSameInstant(utcZoneId).toInstant();
         this.utcEnd = locationEnd.withZoneSameInstant(utcZoneId).toInstant();
-        validateDateTime(userStart, userEnd);
+        validateDateTime(locationStart, locationEnd);
     }
 
     public AppointmentTime(Instant utcStart,
@@ -42,10 +42,10 @@ public class AppointmentTime {
                            String locationZoneId) throws AppointmentException {
         this.utcStart = utcStart;
         this.utcEnd = utcEnd;
-        this.userStart = utcStart.atZone(ZoneId.systemDefault());
-        this.userEnd = utcEnd.atZone(ZoneId.systemDefault());
         this.locationStart = utcStart.atZone(ZoneId.of(locationZoneId));
         this.locationEnd = utcEnd.atZone(ZoneId.of(locationZoneId));
+        this.userStart = utcStart.atZone(ZoneId.systemDefault());
+        this.userEnd = utcEnd.atZone(ZoneId.systemDefault());
     }
 
     public ZonedDateTime getLocationStart() {
@@ -109,14 +109,14 @@ public class AppointmentTime {
         }
     }
 
-    private static void validateDateTime(ZonedDateTime userStart, ZonedDateTime userEnd) throws AppointmentException {
-        if (userEnd.isBefore(userStart)) {
+    private static void validateDateTime(ZonedDateTime locationStart, ZonedDateTime locationEnd) throws AppointmentException {
+        if (locationEnd.isBefore(locationStart)) {
             throw new AppointmentException("Appointment end is before start");
         }
-        if (userStart.isAfter(userEnd)) {
+        if (locationStart.isAfter(locationEnd)) {
             throw new AppointmentException("Appointment start is after end");
         }
-        if (userStart.getHour() < 9 || userEnd.getHour() > 17) {
+        if (locationStart.getHour() < 9 || locationEnd.getHour() > 17) {
             throw new AppointmentException("Appointment is outside of business hours (9-5)");
         }
     }
